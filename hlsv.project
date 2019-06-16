@@ -20,13 +20,13 @@ workspace "HLSV"
 
 	-- Output directories
 	filter { "configurations:DebStatic" }
-		targetdir "bin/Debug/Static"
+		targetdir "build/bin/Debug/Static"
 	filter { "configurations:DebShared" }
-		targetdir "bin/Debug/Shared"
+		targetdir "build/bin/Debug/Shared"
 	filter { "configurations:RelStatic" }
-		targetdir "bin/Release/Static"
+		targetdir "build/bin/Release/Static"
 	filter { "configurations:RelShared" }
-		targetdir "bin/Release/Shared"
+		targetdir "build/bin/Release/Shared"
 	filter {}
 
 	-- Debug/Release settings
@@ -45,7 +45,7 @@ workspace "HLSV"
 	-- Compiler/Platform settings
 	filter { "system:windows" }
 		systemversion "latest"
-		disablewarnings { "4099", "4275" }
+		disablewarnings { "4099", "4251", "4275" }
 		defines { "_CRT_SECURE_NO_WARNINGS" }
 	filter { "toolset:gcc or clang" }
 		buildoptions { "-fpermissive" }
@@ -67,14 +67,13 @@ project "hlsv"
 		kind "SharedLib"
 	filter {}
 
-	-- Debug/Release settings
-	filter { "configurations:Deb*" }
-		targetsuffix "-d"
-	filter {}
-
 	-- Project files
 	files {
-		
+		"include/hlsv/**.hpp", -- Public API C++ Headers
+		"include/hlsv/**.h",   -- Public API C Headers
+		"hlsv/**.hpp",         -- Private Headers
+		"hlsv/**.inl",         -- Template Implementations
+		"hlsv/**.cpp"          -- Source
 	}
 
 
@@ -95,5 +94,7 @@ project "hlsvc"
 
 	-- Project files
 	files {
-		
+		"hlsvc/**.hpp", -- Private Headers
+		"hlsvc/**.inl", -- Template Implementations
+		"hlsvc/**.cpp"  -- Source
 	}
