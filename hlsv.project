@@ -1,0 +1,99 @@
+-- The HLSV project and all associated files and assets, including this file, are licensed under the MIT license, the
+--    text of which can be found in the LICENSE file at the root of this project, and is available online at
+--    (https://opensource.org/licenses/MIT). In the event of redistribution of this code, this header, or the text of
+--    the license itself, must not be removed from the source files or assets in which they appear.
+-- Copyright (c) 2019 Sean Moss [moss.seank@gmail.com]
+
+-- This is the premake solution generation script for the HLSV project. It is written in Lua.
+
+
+-- Project workspace
+workspace "HLSV"
+	-- Shared settings
+	language "C++"
+	cppdialect "C++14"
+	location "build"
+	configurations { "DebStatic", "DebShared", "RelStatic", "RelShared" }
+	platforms { "x64" }
+	architecture "x86_64"
+	flags { "MultiProcessorCompile" }
+
+	-- Output directories
+	filter { "configurations:DebStatic" }
+		targetdir "bin/Debug/Static"
+	filter { "configurations:DebShared" }
+		targetdir "bin/Debug/Shared"
+	filter { "configurations:RelStatic" }
+		targetdir "bin/Release/Static"
+	filter { "configurations:RelShared" }
+		targetdir "bin/Release/Shared"
+	filter {}
+
+	-- Debug/Release settings
+	filter { "configurations:Deb*" }
+		runtime "Debug"
+		defines { "_HLSV_DEBUG" }
+		symbols "On"
+		optimize "Debug"
+	filter { "configurations:Rel*" }
+		runtime "Release"
+		defines { "_HLSV_NDEBUG" }
+		symbols "Off"
+		optimize "Speed"
+	filter {}
+
+	-- Compiler/Platform settings
+	filter { "system:windows" }
+		systemversion "latest"
+		disablewarnings { "4099", "4275" }
+		defines { "_CRT_SECURE_NO_WARNINGS" }
+	filter { "toolset:gcc or clang" }
+		buildoptions { "-fpermissive" }
+	filter {}
+
+
+-- Base compiler and reflection library
+project "hlsv"
+	-- Project settings
+	includedirs { "include" }
+	defines { "_HLSV_BUILD" }
+	targetname "hlsv"
+
+	-- Project output types
+	filter { "configurations:*Static" }
+		kind "StaticLib"
+		defines { "HLSV_STATIC" }
+	filter { "configurations:*Shared" }
+		kind "SharedLib"
+	filter {}
+
+	-- Debug/Release settings
+	filter { "configurations:Deb*" }
+		targetsuffix "-d"
+	filter {}
+
+	-- Project files
+	files {
+		
+	}
+
+
+-- Command-line compiler
+project "hlsvc"
+	-- Project settings
+	includedirs { "include" }
+	defines { }
+	targetname "hlsvc"
+	kind "ConsoleApp"
+	dependson { "hlsv" }
+	links { "hlsv" }
+
+	-- Required for static linking
+	filter { "configurations:*Static" }
+		defines { "HLSV_STATIC" }
+	filter {}
+
+	-- Project files
+	files {
+		
+	}
