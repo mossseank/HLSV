@@ -1,0 +1,14 @@
+language: cpp
+dist: xenial
+sudo: true
+compiler:
+  - clang
+  - gcc
+script:
+  - chmod +x generate_project.sh
+  - ./generate_project.sh
+  - cd ./build
+  - make -j4 DebStatic
+  - make -j4 DebShared
+  - make -j4 RelStatic
+  - make -j4 RelShared
