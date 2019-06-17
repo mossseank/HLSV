@@ -1,9 +1,7 @@
 language: cpp
 dist: xenial
 sudo: true
-compiler:
-  - clang
-  - gcc
+compiler: gcc
 script:
   - chmod +x generate_project.sh
   - ./generate_project.sh
