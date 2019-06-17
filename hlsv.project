@@ -48,7 +48,7 @@ workspace "HLSV"
 		disablewarnings { "4099", "4251", "4275" }
 		defines { "_CRT_SECURE_NO_WARNINGS" }
 	filter { "toolset:gcc or clang" }
-		buildoptions { "-fpermissive" }
+		buildoptions { "-fpermissive", "-fvisibility=hidden" }
 	filter {}
 
 
@@ -56,8 +56,10 @@ workspace "HLSV"
 project "hlsv"
 	-- Project settings
 	includedirs { "include" }
-	defines { "_HLSV_BUILD" }
+	defines { "_HLSV_BUILD", "ANTLR4CPP_STATIC" }
 	targetname "hlsv"
+	dependson { "Antlr4" }
+	links { "Antlr4" }
 
 	-- Project output types
 	filter { "configurations:*Static" }
@@ -73,7 +75,9 @@ project "hlsv"
 		"include/hlsv/**.h",   -- Public API C Headers
 		"hlsv/**.hpp",         -- Private Headers
 		"hlsv/**.inl",         -- Template Implementations
-		"hlsv/**.cpp"          -- Source
+		"hlsv/**.cpp",         -- Sources
+		"generated/**.h",      -- Generated Grammar Headers
+		"generated/**.cpp"     -- Generated Grammar Sources
 	}
 
 
@@ -111,5 +115,5 @@ project "hlsvc"
 	files {
 		"hlsvc/**.hpp", -- Private Headers
 		"hlsvc/**.inl", -- Template Implementations
-		"hlsvc/**.cpp"  -- Source
+		"hlsvc/**.cpp"  -- Sources
 	}

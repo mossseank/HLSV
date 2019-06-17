@@ -6,7 +6,7 @@
  * Copyright (c) 2019 Sean Moss [moss.seank@gmail.com]
  */
 
-// This file implements the support (non-API) code found in the public API and config.hpp files.
+// This file implements the support (non-API) code found in the public API (hlsv.hpp) and config.hpp files.
 
 #include "config.hpp"
 #include <cstdarg>

@@ -104,7 +104,14 @@ using int64  = std::int64_t;
 using string = std::string;
 
 /* String Formatting */
+// Creates an std::string instance using printf style formatting
 _EXPORT string strarg(const char* const fmt, ...);
+
+// The root type for programmatically compiling HLSV shaders
+class _EXPORT Compiler final
+{
+
+}; // class Compiler
 
 } // namespace hlsv
 
