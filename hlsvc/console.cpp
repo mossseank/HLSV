@@ -25,6 +25,8 @@ const bool Console::HAS_COLORS = ([]{
 	HANDLE con = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD mode;
 	GetConsoleMode(con, &mode);
+	SetConsoleMode(con, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+	GetConsoleMode(con, &mode);
 	return (mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 })();
 #else // Unix

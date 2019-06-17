@@ -9,13 +9,16 @@
 // This file implements the Compiler class.
 
 #include "config.hpp"
+#include <fstream>
+#include <sstream>
 
 
 namespace hlsv
 {
 
 // ====================================================================================================================
-Compiler::Compiler()
+Compiler::Compiler() :
+	_last_error{ CompilerError::ES_NONE, "" }
 {
 
 }
@@ -29,6 +32,20 @@ Compiler::~Compiler()
 // ====================================================================================================================
 bool Compiler::compile(const string& file)
 {
+	// Read in the contents of the file
+	std::ifstream infile{ file, std::ios::in };
+	if (!infile.is_open()) {
+		_last_error = CompilerError(CompilerError::ES_FILEIO, "Input file does not exist, or cannot be opened.");
+		return false;
+	}
+	const string source = ([](std::ifstream& f) {
+		std::stringstream ss;
+		ss << f.rdbuf();
+		return ss.str();
+	})(infile);
+
+	// All done and good to go (ensure the compiler error is cleared)
+	_last_error = CompilerError(CompilerError::ES_NONE, "");
 	return true;
 }
 

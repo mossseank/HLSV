@@ -23,7 +23,11 @@ int main(int argc, char** argv)
 	// Compile the input file
 	hlsv::Compiler comp{};
 	if (!comp.compile(argv[1])) {
-		Console::Error("Compilation failed.");
+		// Report the error
+		auto& err = comp.get_last_error();
+		if (err.source == hlsv::CompilerError::ES_FILEIO) {
+			Console::Error(err.message);
+		}
 		return -1;
 	}
 

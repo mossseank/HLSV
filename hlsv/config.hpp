@@ -25,21 +25,6 @@
 #	define _HLSV_FUNC (__func__)
 #endif // HLSV_COMPILER_MSVC
 
-/* Import/Export Macros */
-#if !defined(HLSV_STATIC)
-#	if defined(HLSV_COMPILER_MSVC)
-#		if defined(_HLSV_BUILD)
-#			define _EXPORT __declspec(dllexport)
-#		else
-#			define _EXPORT __declspec(dllimport)
-#		endif // defined(_HLSV_BUILD)
-#	else
-#		define _EXPORT __attribute__((__visibility__("default")))
-#	endif // defined(HLSV_COMPILER_MSVC)
-#else
-#	define _EXPORT
-#endif // !defined(HLSV_STATIC)
-
 /* Type Meta-Control */
 // Disables the copy constructor and assignment operator for the type
 #define _DECLARE_NOCOPY(className)						\
