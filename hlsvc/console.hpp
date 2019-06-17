@@ -6,26 +6,21 @@
  * Copyright (c) 2019 Sean Moss [moss.seank@gmail.com]
  */
 
-// This file is the entry point for hlsvc, the reference command line HLSV compiler tool.
+// This file declares a type for interating with the console while supporting colors.
 
-#include <hlsv/hlsv.hpp>
-#include "console.hpp"
+#pragma once
+
+#include <string>
 
 
-int main(int argc, char** argv)
+// Color-supporting console interface (stdout)
+class Console final
 {
-	// Clip the command, check the number of args present
-	if (argc < 2) {
-		Console::Error("Input file not specified.");
-		return -1;
-	}
+private:
+	static const bool HAS_COLORS;
 
-	// Compile the input file
-	hlsv::Compiler comp{};
-	if (!comp.compile(argv[1])) {
-		Console::Error("Compilation failed.");
-		return -1;
-	}
-
-	return 0;
-}
+public:
+	static void Info(const std::string& msg);
+	static void Warn(const std::string& msg);
+	static void Error(const std::string& msg);
+}; // class Console
