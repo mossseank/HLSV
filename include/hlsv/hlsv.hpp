@@ -110,7 +110,18 @@ _EXPORT string strarg(const char* const fmt, ...);
 // The root type for programmatically compiling HLSV shaders
 class _EXPORT Compiler final
 {
+public:
+	// Remove copy and move functionality
+	Compiler(const Compiler&) = delete;
+	Compiler& operator = (const Compiler&) = delete;
+	Compiler(const Compiler&&) = delete;
+	Compiler& operator = (const Compiler&&) = delete;
 
+	Compiler();
+	~Compiler();
+
+	// Compiles the HLSV file with the given options, returning the success as a boolean
+	bool compile(const string& file);
 }; // class Compiler
 
 } // namespace hlsv
