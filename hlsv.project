@@ -77,6 +77,21 @@ project "hlsv"
 	}
 
 
+-- ANTLR source, compiled into the base library as static lib
+project "Antlr4"
+	-- Project settings
+	includedirs { "antlr" }
+	defines { "ANTLR4CPP_STATIC" }
+	targetname "antlr4-runtime"
+	kind "StaticLib"
+
+	-- Project files
+	files {
+		"antlr/**.h",
+		"antlr/**.cpp"
+	}
+
+
 -- Command-line compiler
 project "hlsvc"
 	-- Project settings
