@@ -10,25 +10,38 @@
 
 #include <hlsv/hlsv.hpp>
 #include "console.hpp"
+#include "args.hpp"
 
 
 int main(int argc, char** argv)
 {
-	// Clip the command, check the number of args present
-	if (argc < 2) {
-		Console::Error("Input file not specified.");
+	using namespace hlsv;
+
+	// Parse the arguments, print help and exit if requested
+	Args args;
+	if (!Args::Parse(argc, argv, args)) {
+		Console::Error(args.error);
 		return -1;
 	}
+	if (args.help) {
+		Args::PrintHelp();
+		return 0;
+	}
 
-	// Compile the input file
-	hlsv::Compiler comp{};
-	if (!comp.compile(argv[1])) {
-		// Report the error
-		auto& err = comp.get_last_error();
-		if (err.source == hlsv::CompilerError::ES_FILEIO) {
-			Console::Error(err.message);
+	// Compile the input files
+	Compiler comp{};
+	for (const auto& ifile : args.input_files) {
+		Console::Infof("Compiling file %s.", ifile.c_str());
+		Console::UseIndent(true);
+		if (!comp.compile(ifile)) {
+			// Report the error
+			auto& err = comp.get_last_error();
+			if (err.source == CompilerError::ES_FILEIO) {
+				Console::Error(err.message);
+			}
+			continue;
 		}
-		return -1;
+		Console::UseIndent(false);
 	}
 
 	return 0;

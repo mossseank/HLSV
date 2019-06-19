@@ -10,11 +10,14 @@
 
 #include "console.hpp"
 #include <iostream>
+#include <cstdarg>
 
 
 static const std::string YELLOW_TAG = "\x1B[33m";
 static const std::string RED_TAG = "\x1B[31m";
 static const std::string RESET_TAG = "\x1B[0m";
+
+#define BUF_LEN (512)
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -32,7 +35,19 @@ const bool Console::HAS_COLORS = ([]{
 #else // Unix
 const bool Console::HAS_COLORS = true; // Unix supports color escape sequences always
 #endif // _WIN32
+bool Console::UseIndent_ = false;
 
+
+// ====================================================================================================================
+std::string Console::StrArg(const char* const fmt, ...)
+{
+	char buf[BUF_LEN];
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(buf, BUF_LEN, fmt, args);
+	va_end(args);
+	return { buf };
+}
 
 // ====================================================================================================================
 void Console::Info(const std::string& msg)
@@ -44,16 +59,16 @@ void Console::Info(const std::string& msg)
 void Console::Warn(const std::string& msg)
 {
 	if (HAS_COLORS)
-		std::cout << YELLOW_TAG << "Warn: " << msg << RESET_TAG << std::endl;
+		std::cout << YELLOW_TAG << (UseIndent_ ? "  Warn: " : "Warn: ") << msg << RESET_TAG << std::endl;
 	else
-		std::cout << "Warn: " << msg << std::endl;
+		std::cout << (UseIndent_ ? "  Warn: " : "Warn: ") << msg << std::endl;
 }
 
 // ====================================================================================================================
 void Console::Error(const std::string& msg)
 {
 	if (HAS_COLORS)
-		std::cout << RED_TAG << "Error: " << msg << RESET_TAG << std::endl;
+		std::cout << RED_TAG << (UseIndent_ ? "  Error: " : "Error: ") << msg << RESET_TAG << std::endl;
 	else
-		std::cout << "Error: " << msg << std::endl;
+		std::cout << (UseIndent_ ? "  Error: " : "Error: ") << msg << std::endl;
 }

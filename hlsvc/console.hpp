@@ -18,9 +18,27 @@ class Console final
 {
 private:
 	static const bool HAS_COLORS;
+	static bool UseIndent_;
 
 public:
+	static std::string StrArg(const char* const fmt, ...);
+
+	inline static void UseIndent(bool ui) { UseIndent_ = ui; }
+
 	static void Info(const std::string& msg);
 	static void Warn(const std::string& msg);
 	static void Error(const std::string& msg);
+
+	template <typename... Args>
+	inline static void Infof(const char* const fmt, Args... args) {
+		Info(StrArg(fmt, args...));
+	}
+	template <typename... Args>
+	inline static void Warnf(const char* const fmt, Args... args) {
+		Warn(StrArg(fmt, args...));
+	}
+	template <typename... Args>
+	inline static void Errorf(const char* const fmt, Args... args) {
+		Error(StrArg(fmt, args...));
+	}
 }; // class Console
