@@ -9,8 +9,15 @@
 // This file implements the Compiler class.
 
 #include "config.hpp"
+#include "error_listener.hpp"
+#include "antlr/ANTLRInputStream.h"
+#include "antlr/CommonTokenStream.h"
+#include "../generated/HLSVLexer.h"
+#include "../generated/HLSV.h"
 #include <fstream>
 #include <sstream>
+
+#define SET_ERR(src,...) last_error_ = CompilerError(CompilerError::src, ##__VA_ARGS__);
 
 
 namespace hlsv
@@ -18,7 +25,7 @@ namespace hlsv
 
 // ====================================================================================================================
 Compiler::Compiler() :
-	_last_error{ CompilerError::ES_NONE, "" }
+	last_error_{ CompilerError::ES_NONE, "" }
 {
 
 }
@@ -35,7 +42,7 @@ bool Compiler::compile(const string& file)
 	// Read in the contents of the file
 	std::ifstream infile{ file, std::ios::in };
 	if (!infile.is_open()) {
-		_last_error = CompilerError(CompilerError::ES_FILEIO, "Input file does not exist, or cannot be opened.");
+		SET_ERR(ES_FILEIO, "Input file does not exist, or cannot be opened.");
 		return false;
 	}
 	const string source = ([](std::ifstream& f) {
@@ -44,8 +51,21 @@ bool Compiler::compile(const string& file)
 		return ss.str();
 	})(infile);
 
+	// Create the base ANTLR input objects
+	antlr4::ANTLRInputStream inputStream{ source };
+	grammar::HLSVLexer lexer{ &inputStream };
+	antlr4::CommonTokenStream tokens{ &lexer };
+	grammar::HLSV parser{ &tokens };
+
+	// Register the custom listener
+	ErrorListener listener{};
+	lexer.removeErrorListeners();
+	parser.removeErrorListeners();
+	lexer.addErrorListener(&listener);
+	parser.addErrorListener(&listener);
+
 	// All done and good to go (ensure the compiler error is cleared)
-	_last_error = CompilerError(CompilerError::ES_NONE, "");
+	SET_ERR(ES_NONE, "");
 	return true;
 }
 
