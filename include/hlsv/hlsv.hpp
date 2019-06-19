@@ -85,6 +85,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 
 namespace hlsv
@@ -115,16 +116,23 @@ public:
 	enum error_source
 	{
 		ES_NONE = 0, // Represents no error, or an invalid CompilerError instance
-		ES_FILEIO = 1 // Represents an error during file writing or reading
+		ES_FILEIO, // Represents an error during file writing or reading
+		ES_PARSER // Represents an error during the parsing process
 	};
 
 public:
 	error_source source; // The source of the error
 	string message; // The message explaining the nature of the error
+	uint32 line; // The line that the error occured on, if the error is from the source code
+	uint32 character; // The character position of the error, if the error is from the source code
+	std::vector<string> rule_stack; // The grammar rule stack that generated the error, if the error is from the source code
 
-	CompilerError(error_source src, const string& msg) :
+	CompilerError(error_source src, const string& msg, uint32 l = 0, uint32 c = 0, const std::vector<string> & rs = {}) :
 		source{ src },
-		message{ msg }
+		message{ msg },
+		line{ l },
+		character{ c },
+		rule_stack{ rs }
 	{ }
 }; // class CompilerError
 

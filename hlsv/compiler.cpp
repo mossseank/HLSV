@@ -64,6 +64,13 @@ bool Compiler::compile(const string& file)
 	lexer.addErrorListener(&listener);
 	parser.addErrorListener(&listener);
 
+	// Perform the lexing and parsing, report any error
+	auto fileCtx = parser.file();
+	if (listener.has_error()) {
+		last_error_ = listener.last_error;
+		return false;
+	}
+
 	// All done and good to go (ensure the compiler error is cleared)
 	SET_ERR(ES_NONE, "");
 	return true;

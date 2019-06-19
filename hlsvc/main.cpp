@@ -39,6 +39,9 @@ int main(int argc, char** argv)
 			if (err.source == CompilerError::ES_FILEIO) {
 				Console::Error(err.message);
 			}
+			else if (err.source == CompilerError::ES_PARSER) {
+				Console::Errorf("'%s'[%u:%u] - %s", ifile.c_str(), err.line, err.character, err.message.c_str());
+			}
 			continue;
 		}
 		Console::UseIndent(false);

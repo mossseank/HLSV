@@ -5,10 +5,15 @@
 
 parser grammar HLSV;
 options {
-	tokenVocab=HLSVLexer;
+    tokenVocab=HLSVLexer;
 }
 
 // Top-level file unit
 file
-    : .*? EOF
+    : shaderVersionStatement EOF
+    ;
+
+// Shader version/type statement
+shaderVersionStatement
+    : 'shader' VERSION_LITERAL ('graphics' | 'compute') ';'
     ;

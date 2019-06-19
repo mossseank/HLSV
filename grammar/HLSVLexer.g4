@@ -5,13 +5,32 @@
 
 lexer grammar HLSVLexer;
 
+// Keywords
+KW_COMPUTE      : 'compute' ;
+KW_GRAPHICS     : 'graphics' ;
+KW_SHADER       : 'shader' ;
+
+// Literals
+VERSION_LITERAL
+    : DigitChar DigitChar DigitChar
+    ;
+
+// Punctuators
+SEMI_COLON : ';' ;
+
 // Whitespace and comments (ignore)
 WS
-	: [ \t\r\n\u000C]+ -> channel(HIDDEN)
-	;
+    : [ \t\r\n\u000C]+ -> channel(HIDDEN)
+    ;
 COMMENT
-	: '/*' .*? '*/' -> channel(HIDDEN)
-	;
+    : '/*' .*? '*/' -> channel(HIDDEN)
+    ;
 LINECOMMENT
-	: '//' ~[\r\n]* '\r'? '\n' -> channel(HIDDEN)
-	;
+    : '//' ~[\r\n]* '\r'? '\n' -> channel(HIDDEN)
+    ;
+
+// Character Types
+fragment AlphaChar      : [a-zA-Z] ;
+fragment DigitChar      : [0-9] ;
+fragment AlnumChar      : AlphaChar | DigitChar ;
+fragment HexDigitChar   : [a-fA-F0-9] ;

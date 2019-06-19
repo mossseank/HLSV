@@ -9,6 +9,7 @@
 // This file declares the type that listens for errors emitted by the lexer and parser types
 
 #include "error_listener.hpp"
+#include "../generated/HLSV.h"
 
 
 namespace hlsv
@@ -26,6 +27,31 @@ void ErrorListener::syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* o
 	const std::string& msg, std::exception_ptr e)
 {
 	using namespace antlr4;
+
+	// Get some error info
+	const RecognitionException* rex{ nullptr };
+	RuleContext* ctx{ nullptr };
+	std::string badText = offendingSymbol ? offendingSymbol->getText() : "";
+	if (e) {
+		try { std::rethrow_exception(e); }
+		catch (const RecognitionException& ex) {
+			ctx = ex.getCtx();
+			if (badText.length() == 0 && ex.getOffendingToken())
+				badText = ex.getOffendingToken()->getText();
+		}
+	}
+	auto ridx = ctx ? (int64)ctx->getRuleIndex() : (int64)-1;
+
+	// TODO: Expand this as we uncover more errors
+	std::string errMsg = "";
+	errMsg = strarg("(Rule '%s') (Bad text: '%s') - %s", (ridx == -1) ? "none" : recognizer->getRuleNames()[ridx].c_str(),
+		badText.c_str(), msg.c_str());
+
+	// Get the invocation stack, and generate the error
+	auto stack = (recognizer && dynamic_cast<grammar::HLSV*>(recognizer)) ? dynamic_cast<grammar::HLSV*>(recognizer)->getRuleInvocationStack() :
+		std::vector<std::string>{};
+	std::reverse(stack.begin(), stack.end());
+	last_error = CompilerError(CompilerError::ES_PARSER, errMsg, (uint32)line, (uint32)charPositionInLine, stack);
 }
 
 } // namespace hlsv
