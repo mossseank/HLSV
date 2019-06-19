@@ -7,6 +7,8 @@
 
 # This is the Unix script for generating the build solutions for the HLSV project.
 
+IsMac=0
+IsLinux=0
 if [ "$(uname)" = "Darwin" ]; then
 	IsMac=1
 elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
@@ -23,7 +25,7 @@ else
 fi
 
 if [ $IsMac -eq 1 ]; then
-	./tools/premake5_m --file=./hlsv.project gmake2
+	./premake/premake5_m --file=./hlsv.project gmake2
 elif [ $IsLinux -eq 1 ]; then
-	./tools/premake5_l --file=./hlsv.project gmake2
+	./premake/premake5_l --file=./hlsv.project gmake2
 fi

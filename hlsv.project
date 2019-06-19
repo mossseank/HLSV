@@ -48,18 +48,16 @@ workspace "HLSV"
 		disablewarnings { "4099", "4251", "4275" }
 		defines { "_CRT_SECURE_NO_WARNINGS" }
 	filter { "toolset:gcc or clang" }
-		buildoptions { "-fpermissive", "-fvisibility=hidden" }
+		buildoptions { "-fpermissive", "-fvisibility=hidden", "-fPIC" }
 	filter {}
 
 
 -- Base compiler and reflection library
 project "hlsv"
 	-- Project settings
-	includedirs { "include" }
+	includedirs { "include", "include/antlr" }
 	defines { "_HLSV_BUILD", "ANTLR4CPP_STATIC" }
 	targetname "hlsv"
-	dependson { "Antlr4" }
-	links { "Antlr4" }
 
 	-- Project output types
 	filter { "configurations:*Static" }
@@ -67,6 +65,22 @@ project "hlsv"
 		defines { "HLSV_STATIC" }
 	filter { "configurations:*Shared" }
 		kind "SharedLib"
+	filter {}
+
+	-- Library paths
+	filter { "system:windows" }
+		libdirs { "./libs/vs2019" }
+	filter { "system:linux" }
+		libdirs { "./libs/linux" }
+	filter { "system:macosx" }
+		libdirs { "./libs/osx" }
+	filter {}
+
+	-- Libraries
+	filter { "system:windows", "configurations:Deb*" }
+		links { "antlr4-runtime-static-d" }
+	filter { "system:not windows or configurations:Rel*" }
+		links { "antlr4-runtime-static" }
 	filter {}
 
 	-- Project files
@@ -78,21 +92,6 @@ project "hlsv"
 		"hlsv/**.cpp",         -- Sources
 		"generated/**.h",      -- Generated Grammar Headers
 		"generated/**.cpp"     -- Generated Grammar Sources
-	}
-
-
--- ANTLR source, compiled into the base library as static lib
-project "Antlr4"
-	-- Project settings
-	includedirs { "antlr" }
-	defines { "ANTLR4CPP_STATIC" }
-	targetname "antlr4-runtime"
-	kind "StaticLib"
-
-	-- Project files
-	files {
-		"antlr/**.h",
-		"antlr/**.cpp"
 	}
 
 

@@ -2,11 +2,20 @@ language: cpp
 dist: xenial
 sudo: true
 compiler: gcc
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
 script:
-  - chmod +x generate_project.sh
-  - ./generate_project.sh
+  - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
+  - g++ --version
+  - cd ./grammar && chmod +x build.sh && ./build.sh
+  - cd ../premake && chmod +x premake5_l
+  - cd .. && chmod +x generate_project.sh && ./generate_project.sh
   - cd ./build
-  - make -j4 DebStatic
-  - make -j4 DebShared
-  - make -j4 RelStatic
-  - make -j4 RelShared
+  - make -j2 config=debstatic_x64 all
+  - make -j2 config=debshared_x64 all
+  - make -j2 config=relstatic_x64 all
+  - make -j2 config=relshared_x64 all
