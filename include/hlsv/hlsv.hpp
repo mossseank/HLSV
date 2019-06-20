@@ -134,6 +134,9 @@ public:
 		character{ c },
 		rule_stack{ rs }
 	{ }
+
+	// Gets a string representation of the rule stack for the error
+	string get_rule_stack_str() const;
 }; // class CompilerError
 
 // The root type for programmatically compiling HLSV shaders

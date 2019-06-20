@@ -11,6 +11,7 @@
 #include <hlsv/hlsv.hpp>
 #include "console.hpp"
 #include "args.hpp"
+#include <sstream>
 
 
 int main(int argc, char** argv)
@@ -40,7 +41,10 @@ int main(int argc, char** argv)
 				Console::Error(err.message);
 			}
 			else if (err.source == CompilerError::ES_PARSER) {
-				Console::Errorf("'%s'[%u:%u] - %s", ifile.c_str(), err.line, err.character, err.message.c_str());
+				Console::Errorf("[%u:%u] - %s", err.line, err.character, err.message.c_str());
+				if (err.rule_stack.size() > 0) {
+					Console::Errorf("Rule Stack: %s", err.get_rule_stack_str().c_str());
+				}
 			}
 			continue;
 		}

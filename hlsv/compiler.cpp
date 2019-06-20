@@ -10,6 +10,7 @@
 
 #include "config.hpp"
 #include "error_listener.hpp"
+#include "visitor.hpp"
 #include "antlr/ANTLRInputStream.h"
 #include "antlr/CommonTokenStream.h"
 #include "../generated/HLSVLexer.h"
@@ -22,6 +23,22 @@
 
 namespace hlsv
 {
+
+// ====================================================================================================================
+string CompilerError::get_rule_stack_str() const
+{
+	if (rule_stack.size() == 0)
+		return "";
+
+	std::stringstream ss{};
+	const auto END = rule_stack.end();
+	for (auto it = rule_stack.begin(); it != END; ++it) {
+		ss << (*it);
+		if ((it + 1) != END)
+			ss << ", ";
+	}
+	return ss.str();
+}
 
 // ====================================================================================================================
 Compiler::Compiler() :
@@ -68,6 +85,18 @@ bool Compiler::compile(const string& file)
 	auto fileCtx = parser.file();
 	if (listener.has_error()) {
 		last_error_ = listener.last_error;
+		return false;
+	}
+
+	// Visit the tree (this is the generator step)
+	Visitor visitor{};
+	try
+	{
+		auto any = visitor.visit(fileCtx);
+	}
+	catch (const VisitError& ve)
+	{
+		last_error_ = ve.error;
 		return false;
 	}
 

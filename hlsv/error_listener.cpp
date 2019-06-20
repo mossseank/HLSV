@@ -11,6 +11,8 @@
 #include "error_listener.hpp"
 #include "../generated/HLSV.h"
 
+#define MSG_STR(stxt) (msg.find(stxt)!=string::npos)
+
 
 namespace hlsv
 {
@@ -42,10 +44,21 @@ void ErrorListener::syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* o
 	}
 	auto ridx = ctx ? (int64)ctx->getRuleIndex() : (int64)-1;
 
-	// TODO: Expand this as we uncover more errors
+	// !!!! TODO: Expand this as we uncover more errors !!!!
 	std::string errMsg = "";
-	errMsg = strarg("(Rule '%s') (Bad text: '%s') - %s", (ridx == -1) ? "none" : recognizer->getRuleNames()[ridx].c_str(),
-		badText.c_str(), msg.c_str());
+
+	// Shader version statements
+	if (MSG_STR("{'compute',"))
+		errMsg = "Invalid shader type in shader version statement.";
+	else if (MSG_STR("missing VERSION_LITERAL"))
+		errMsg = "Invalid version in shader version statement.";
+	else if (ridx == grammar::HLSV::RuleShaderVersionStatement)
+		errMsg = "Invalid shader version statement.";
+	// Unknown error
+	else {
+		errMsg = strarg("(Rule '%s') (Bad text: '%s') - %s", (ridx == -1) ? "none" : recognizer->getRuleNames()[ridx].c_str(),
+			badText.c_str(), msg.c_str());
+	}
 
 	// Get the invocation stack, and generate the error
 	auto stack = (recognizer && dynamic_cast<grammar::HLSV*>(recognizer)) ? dynamic_cast<grammar::HLSV*>(recognizer)->getRuleInvocationStack() :
