@@ -46,6 +46,7 @@ workspace "HLSV"
 	filter { "system:windows" }
 		systemversion "latest"
 		disablewarnings { "4099", "4251", "4275" }
+		staticruntime "off"
 		defines { "_CRT_SECURE_NO_WARNINGS" }
 	filter { "toolset:gcc or clang" }
 		buildoptions { "-fpermissive", "-fvisibility=hidden", "-fPIC" }
@@ -73,7 +74,7 @@ project "hlsv"
 	filter { "system:linux" }
 		libdirs { "./libs/linux" }
 	filter { "system:macosx" }
-		libdirs { "./libs/osx" }
+		libdirs { "./libs/macosx" }
 	filter {}
 
 	-- Libraries
@@ -81,6 +82,18 @@ project "hlsv"
 		links { "antlr4-runtime-static-d" }
 	filter { "system:not windows or configurations:Rel*" }
 		links { "antlr4-runtime-static" }
+	filter { "system:not windows", "configurations:*Static" }
+		-- This is required because premake refuses to follow static dependencies, so the link to the antlr runtime
+		--    is COMPLETELY ignored by gcc and clang. This is a manual linking of static hlsv with the runtime.
+		--    Adding this feature has been discussed for over 3 years now, and has yet to be included.
+		postbuildcommands {
+			"cd %{cfg.buildtarget.directory} && "..
+			"mkdir tmp && cd tmp && "..
+			"mv ../libhlsv.a . && ar -x libhlsv.a && "..
+			"cp ../../../../../libs/%{cfg.system}/libantlr4-runtime-static.a . && ar -x libantlr4-runtime-static.a && "..
+			"ar -rcs ../libhlsv.a *.o && "..
+			"cd .. && rm -rf tmp/"
+		}
 	filter {}
 
 	-- Project files
