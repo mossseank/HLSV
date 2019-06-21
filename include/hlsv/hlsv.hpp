@@ -140,11 +140,15 @@ public:
 	string get_rule_stack_str() const;
 }; // class CompilerError
 
+// Forward declare the reflectioninfo type
+class ReflectionInfo;
+
 // The root type for programmatically compiling HLSV shaders
 class _EXPORT Compiler final
 {
 private:
 	CompilerError last_error_;
+	ReflectionInfo* reflect_;
 
 public:
 	// Remove copy and move functionality
@@ -160,6 +164,8 @@ public:
 	inline const CompilerError& get_last_error() const { return last_error_; }
 	// Gets if the compiler instance has a current error
 	inline bool has_error() const { return last_error_.source != CompilerError::ES_NONE; }
+	// Gets the reflection info for the last call to compile(), will only be populated if the compilation was successful
+	inline const ReflectionInfo& get_reflection_info() const { return *reflect_; }
 
 	// Compiles the HLSV file with the given options, returning the success as a boolean
 	// If this function returns false, then the last error will be set for the compiler instance

@@ -17,14 +17,16 @@
 #endif // HLSV_COMPILER_MSVC
 
 #define VISIT_FUNC(vtype) antlrcpp::Any Visitor::visit##vtype(grammar::HLSV::vtype##Context* ctx)
+#define REFL (*reflect_)
 
 
 namespace hlsv
 {
 
 // ====================================================================================================================
-Visitor::Visitor(antlr4::CommonTokenStream* ts) :
-	tokens_{ ts }
+Visitor::Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl) :
+	tokens_{ ts },
+	reflect_{ refl }
 {
 
 }
@@ -53,6 +55,9 @@ VISIT_FUNC(ShaderVersionStatement)
 		ERROR(ctx, strarg("Current tool version (%u) cannot compile requested shader version (%u).", HLSV_VERSION, ver));
 	if (ctx->KW_COMPUTE())
 		ERROR(ctx, strarg("Compute shaders are not supported by hlsvc version %u.", HLSV_VERSION));
+
+	// Create and populate the initial reflection info
+	*reflect_ = new ReflectionInfo{ ReflectionInfo::TYPE_GRAPHICS, HLSV_VERSION, ver };
 
 	// No return
 	return nullptr;

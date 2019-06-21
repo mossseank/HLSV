@@ -9,6 +9,7 @@
 // This file is the entry point for hlsvc, the reference command line HLSV compiler tool.
 
 #include <hlsv/hlsv.hpp>
+#include <hlsv/hlsv_reflect.hpp>
 #include "console.hpp"
 #include "args.hpp"
 #include <sstream>
@@ -49,7 +50,12 @@ int main(int argc, char** argv)
 			else if (err.source == CompilerError::ES_COMPILER) {
 				Console::Errorf("[%u:%u] - %s", err.line, err.character, err.message.c_str());
 			}
-			continue;
+		}
+		else {
+			const auto& refl = comp.get_reflection_info();
+
+			Console::Infof("Successfully compiled %s shader (version %u).",
+				(refl.is_graphics() ? "graphics" : "compute"), refl.shader_version);
 		}
 		Console::UseIndent(false);
 	}

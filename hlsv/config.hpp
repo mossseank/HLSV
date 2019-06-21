@@ -11,7 +11,8 @@
 
 #pragma once
 
-#include "hlsv/hlsv.hpp"
+#include <hlsv/hlsv.hpp>
+#include <hlsv/hlsv_reflect.hpp>
 
 
 /* Stringification */

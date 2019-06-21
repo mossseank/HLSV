@@ -42,9 +42,10 @@ class Visitor final :
 {
 private:
 	antlr4::CommonTokenStream* tokens_;
+	ReflectionInfo** reflect_;
 
 public:
-	Visitor(antlr4::CommonTokenStream* ts);
+	Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl);
 	~Visitor();
 
 	inline void ERROR(antlr4::RuleContext* ctx, const string& msg) {

@@ -42,7 +42,8 @@ string CompilerError::get_rule_stack_str() const
 
 // ====================================================================================================================
 Compiler::Compiler() :
-	last_error_{ CompilerError::ES_NONE, "" }
+	last_error_{ CompilerError::ES_NONE, "" },
+	reflect_{ nullptr }
 {
 
 }
@@ -50,7 +51,10 @@ Compiler::Compiler() :
 // ====================================================================================================================
 Compiler::~Compiler()
 {
-
+	if (reflect_) {
+		delete reflect_;
+		reflect_ = nullptr;
+	}
 }
 
 // ====================================================================================================================
@@ -89,14 +93,24 @@ bool Compiler::compile(const string& file)
 	}
 
 	// Visit the tree (this is the generator step)
-	Visitor visitor{ &tokens };
+	Visitor visitor{ &tokens, &reflect_ };
 	try
 	{
+		// Clear the potential previous reflection info before populating it again
+		if (reflect_) {
+			delete reflect_;
+			reflect_ = nullptr;
+		}
 		auto any = visitor.visit(fileCtx);
 	}
 	catch (const VisitError& ve)
 	{
 		last_error_ = ve.error;
+		// Clear the reflection info on error
+		if (reflect_) {
+			delete reflect_;
+			reflect_ = nullptr;
+		}
 		return false;
 	}
 
