@@ -150,6 +150,12 @@ bool Compiler::compile(const string& file, const CompilerOptions& options)
 		}
 	}
 
+	// Write the glsl files
+	if (!writeGLSL(&visitor.get_generator())) {
+		cleanGLSL();
+		return false;
+	}
+
 	// All done and good to go (ensure the compiler error is cleared)
 	SET_ERR(ES_NONE, "");
 	return true;
@@ -176,15 +182,51 @@ bool Compiler::preparePaths(const string& file)
 		SET_ERR(ES_FILEIO, "Invalid path for input file.");
 		return false;
 	}
+	const string ext = in_file.extension();
+	const string base = paths_.input_path.substr(0, paths_.input_path.length() - ext.length());
 
 	// Reflection file
+	paths_.reflection_path = (path{ base + "refl" }).make_absolute().str();
+
+	// GLSL files
+	paths_.vert_path = (path{ base + "vert" }).make_absolute().str();
+	paths_.frag_path = (path{ base + "frag" }).make_absolute().str();
+
+	return true;
+}
+
+// ====================================================================================================================
+bool Compiler::writeGLSL(void* gen)
+{
+	GLSLGenerator* glsl = static_cast<GLSLGenerator*>(gen);
+
+	// Write vertex
 	{
-		string ext = in_file.extension();
-		path refl_file{ paths_.input_path.substr(0, paths_.input_path.length() - ext.length()) + "refl" };
-		paths_.reflection_path = refl_file.make_absolute().str();
+		std::ofstream file{ paths_.vert_path };
+		if (!file.is_open() || !file.good()) {
+			SET_ERR(ES_FILEIO, "Unable to write intermediate glsl file.");
+			return false;
+		}
+		file << glsl->vert_str() << std::endl;
+	}
+
+	// Write fragment
+	{
+		std::ofstream file{ paths_.frag_path };
+		if (!file.is_open() || !file.good()) {
+			SET_ERR(ES_FILEIO, "Unable to write intermediate glsl file.");
+			return false;
+		}
+		file << glsl->frag_str() << std::endl;
 	}
 
 	return true;
+}
+
+// ====================================================================================================================
+void Compiler::cleanGLSL()
+{
+
 }
 
 } // namespace hlsv

@@ -166,6 +166,8 @@ private:
 		string input_filename;
 		string input_path;
 		string reflection_path;
+		string vert_path;
+		string frag_path;
 	} paths_; // Contains the absolute paths for the various compilation files
 
 public:
@@ -191,6 +193,8 @@ public:
 
 private:
 	bool preparePaths(const string& file);
+	bool writeGLSL(void* gen); // void* is a strange choice, but is needed to prevent the private api from leaking into the public one
+	void cleanGLSL();
 }; // class Compiler
 
 } // namespace hlsv

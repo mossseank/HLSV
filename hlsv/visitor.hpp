@@ -11,6 +11,7 @@
 #pragma once
 
 #include "config.hpp"
+#include "gen/glsl_generator.hpp"
 #include "../generated/HLSVBaseVisitor.h"
 #include "antlr/CommonTokenStream.h"
 
@@ -44,6 +45,7 @@ private:
 	antlr4::CommonTokenStream* tokens_;
 	ReflectionInfo** reflect_;
 	const CompilerOptions* options_;
+	GLSLGenerator gen_;
 
 public:
 	Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl, const CompilerOptions* opt);
@@ -56,6 +58,8 @@ public:
 	inline void ERROR(antlr4::Token* tk, const string& msg) {
 		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine());
 	}
+
+	inline GLSLGenerator& get_generator() { return gen_; }
 
 	VISIT(File)
 	VISIT(ShaderVersionStatement)
