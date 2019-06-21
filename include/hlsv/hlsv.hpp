@@ -161,6 +161,12 @@ class _EXPORT Compiler final
 private:
 	CompilerError last_error_;
 	ReflectionInfo* reflect_;
+	struct
+	{
+		string input_filename;
+		string input_path;
+		string reflection_path;
+	} paths_; // Contains the absolute paths for the various compilation files
 
 public:
 	// Remove copy and move functionality
@@ -182,6 +188,9 @@ public:
 	// Compiles the HLSV file with the given options, returning the success as a boolean
 	// If this function returns false, then the last error will be set for the compiler instance
 	bool compile(const string& file, const CompilerOptions& options);
+
+private:
+	bool preparePaths(const string& file);
 }; // class Compiler
 
 } // namespace hlsv

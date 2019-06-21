@@ -12,6 +12,7 @@
 #include "error_listener.hpp"
 #include "visitor.hpp"
 #include "reflect/io.hpp"
+#include "fs/path.h"
 #include "antlr/ANTLRInputStream.h"
 #include "antlr/CommonTokenStream.h"
 #include "../generated/HLSVLexer.h"
@@ -63,7 +64,8 @@ CompilerOptions::~CompilerOptions()
 // ====================================================================================================================
 Compiler::Compiler() :
 	last_error_{ CompilerError::ES_NONE, "" },
-	reflect_{ nullptr }
+	reflect_{ nullptr },
+	paths_{}
 {
 
 }
@@ -80,8 +82,12 @@ Compiler::~Compiler()
 // ====================================================================================================================
 bool Compiler::compile(const string& file, const CompilerOptions& options)
 {
+	// Prepare the paths
+	if (!preparePaths(file))
+		return false;
+		
 	// Read in the contents of the file
-	std::ifstream infile{ file, std::ios::in };
+	std::ifstream infile{ paths_.input_path, std::ios::in };
 	if (!infile.is_open()) {
 		SET_ERR(ES_FILEIO, "Input file does not exist, or cannot be opened.");
 		return false;
@@ -138,7 +144,7 @@ bool Compiler::compile(const string& file, const CompilerOptions& options)
 	if (options.generate_reflection_file) {
 		auto writer = options.use_binary_reflection ? ReflWriter::WriteBinary : ReflWriter::WriteText;
 		string err{};
-		if (!writer("reflection.refl", *reflect_, err)) {
+		if (!writer(paths_.reflection_path, *reflect_, err)) {
 			SET_ERR(ES_FILEIO, strarg("Unable to write reflection file, reason: %s.", err.c_str()));
 			return false;
 		}
@@ -146,6 +152,38 @@ bool Compiler::compile(const string& file, const CompilerOptions& options)
 
 	// All done and good to go (ensure the compiler error is cleared)
 	SET_ERR(ES_NONE, "");
+	return true;
+}
+
+// ====================================================================================================================
+bool Compiler::preparePaths(const string& file)
+{
+	using namespace filesystem;
+	paths_ = {};
+
+	// Input file
+	path in_file{};
+	try {
+		in_file = (path{ file }).make_absolute();
+		if (!in_file.is_file() || !in_file.exists()) {
+			SET_ERR(ES_FILEIO, "Input file does not exist.");
+			return false;
+		}
+		paths_.input_filename = in_file.filename();
+		paths_.input_path = in_file.str();
+	}
+	catch (const std::runtime_error&) {
+		SET_ERR(ES_FILEIO, "Invalid path for input file.");
+		return false;
+	}
+
+	// Reflection file
+	{
+		string ext = in_file.extension();
+		path refl_file{ paths_.input_path.substr(0, paths_.input_path.length() - ext.length()) + "refl" };
+		paths_.reflection_path = refl_file.make_absolute().str();
+	}
+
 	return true;
 }
 

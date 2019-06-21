@@ -100,7 +100,8 @@ project "hlsv"
 	files {
 		"include/hlsv/**.hpp", -- Public API C++ Headers
 		"include/hlsv/**.h",   -- Public API C Headers
-		"hlsv/**.hpp",         -- Private Headers
+		"hlsv/**.hpp",         -- Private C++ Headers
+		"hlsv/**.h",           -- Private C Headers
 		"hlsv/**.inl",         -- Template Implementations
 		"hlsv/**.cpp",         -- Sources
 		"generated/**.h",      -- Generated Grammar Headers
