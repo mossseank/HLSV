@@ -149,6 +149,7 @@ class _EXPORT CompilerOptions final
 public:
 	bool generate_reflection_file; // If the reflection info file should be generated
 	bool use_binary_reflection;    // If the reflection info file should be in binary instead of text
+	bool keep_intermediate;	       // If the intermediate GLSL files should be kept (not deleted)
 
 public:
 	CompilerOptions();

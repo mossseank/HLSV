@@ -50,7 +50,8 @@ string CompilerError::get_rule_stack_str() const
 // ====================================================================================================================
 CompilerOptions::CompilerOptions() :
 	generate_reflection_file{ false },
-	use_binary_reflection{ false }
+	use_binary_reflection{ false },
+	keep_intermediate{ false }
 {
 
 }
@@ -156,6 +157,10 @@ bool Compiler::compile(const string& file, const CompilerOptions& options)
 		return false;
 	}
 
+	// Clean up the glsl files if they dont need to be kept
+	if (!options.keep_intermediate)
+		cleanGLSL();
+
 	// All done and good to go (ensure the compiler error is cleared)
 	SET_ERR(ES_NONE, "");
 	return true;
@@ -226,7 +231,16 @@ bool Compiler::writeGLSL(void* gen)
 // ====================================================================================================================
 void Compiler::cleanGLSL()
 {
+	using namespace filesystem;
 
+	path glsl{ paths_.vert_path };
+	if (glsl.is_file() && glsl.exists()) {
+		glsl.remove_file();
+	}
+	glsl = { paths_.frag_path };
+	if (glsl.is_file() && glsl.exists()) {
+		glsl.remove_file();
+	}
 }
 
 } // namespace hlsv

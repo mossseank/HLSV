@@ -50,6 +50,9 @@ bool Args::Parse(int argc, char** argv, Args& args)
 				args.options.use_binary_reflection = true;
 				args.options.generate_reflection_file = true;
 			}
+			else if (flag == "i" || flag == "glsl") {
+				args.options.keep_intermediate = true;
+			}
 			else {
 				Console::Warnf("Unknown flag: %s.", arg.c_str());
 			}
@@ -89,5 +92,6 @@ void Args::PrintHelp()
 		"  > -r;--reflect                        Generate a text file that contains shader reflection info.\n"
 		"  > -b;--binary                         Use a binary format for the reflection file instead of text. This\n"
 		"                                           flag will implicity activate the '--reflect' flag.\n"
+		"  > -i;--glsl                           Generates the intermediate cross-compiled GLSL files.\n"
 	);
 }
