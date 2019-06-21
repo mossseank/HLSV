@@ -41,6 +41,20 @@ string CompilerError::get_rule_stack_str() const
 }
 
 // ====================================================================================================================
+CompilerOptions::CompilerOptions() :
+	generate_reflection_file{ false },
+	use_binary_reflection{ false }
+{
+
+}
+
+// ====================================================================================================================
+CompilerOptions::~CompilerOptions()
+{
+
+}
+
+// ====================================================================================================================
 Compiler::Compiler() :
 	last_error_{ CompilerError::ES_NONE, "" },
 	reflect_{ nullptr }
@@ -58,7 +72,7 @@ Compiler::~Compiler()
 }
 
 // ====================================================================================================================
-bool Compiler::compile(const string& file)
+bool Compiler::compile(const string& file, const CompilerOptions& options)
 {
 	// Read in the contents of the file
 	std::ifstream infile{ file, std::ios::in };
@@ -93,7 +107,7 @@ bool Compiler::compile(const string& file)
 	}
 
 	// Visit the tree (this is the generator step)
-	Visitor visitor{ &tokens, &reflect_ };
+	Visitor visitor{ &tokens, &reflect_, &options };
 	try
 	{
 		// Clear the potential previous reflection info before populating it again

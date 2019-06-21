@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 	for (const auto& ifile : args.input_files) {
 		Console::Infof("Compiling file %s.", ifile.c_str());
 		Console::UseIndent(true);
-		if (!comp.compile(ifile)) {
+		if (!comp.compile(ifile, args.options)) {
 			// Report the error
 			auto& err = comp.get_last_error();
 			if (err.source == CompilerError::ES_FILEIO) {

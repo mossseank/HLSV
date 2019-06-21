@@ -16,7 +16,8 @@
 Args::Args() :
 	error{ "" },
 	input_files{},
-	help{ false }
+	help{ false },
+	options{ }
 {
 
 }
@@ -41,6 +42,13 @@ bool Args::Parse(int argc, char** argv, Args& args)
 			if (flag == "h" || flag == "help" || flag == "?") {
 				args.help = true;
 				return true; // Cut out early since this flag forces the program to only display the help text
+			}
+			else if (flag == "r" || flag == "reflect") {
+				args.options.generate_reflection_file = true;
+			}
+			else if (flag == "b" || flag == "binary") {
+				args.options.use_binary_reflection = true;
+				args.options.generate_reflection_file = true;
 			}
 			else {
 				Console::Warnf("Unknown flag: %s.", arg.c_str());
@@ -78,5 +86,8 @@ void Args::PrintHelp()
 		"\n"
 		"Flags/Options:\n"
 		"  > -h;-?;--help                        Prints this help message, then exits.\n"
+		"  > -r;--reflect                        Generate a text file that contains shader reflection info.\n"
+		"  > -b;--binary                         Use a binary format for the reflection file instead of text. This\n"
+		"                                           flag will implicity activate the '--reflect' flag.\n"
 	);
 }

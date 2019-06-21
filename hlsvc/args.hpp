@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <hlsv/hlsv.hpp>
 #include <string>
 #include <vector>
 
@@ -23,6 +24,7 @@ public:
 	str error; // The error encountered while parsing the arguments (if Parse() returns false)
 	strvec input_files; // The HLSV source files to compile (will have at least one if no error occurs)
 	bool help;
+	hlsv::CompilerOptions options;
 
 public:
 	Args();

@@ -43,9 +43,10 @@ class Visitor final :
 private:
 	antlr4::CommonTokenStream* tokens_;
 	ReflectionInfo** reflect_;
+	const CompilerOptions* options_;
 
 public:
-	Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl);
+	Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl, const CompilerOptions* opt);
 	~Visitor();
 
 	inline void ERROR(antlr4::RuleContext* ctx, const string& msg) {

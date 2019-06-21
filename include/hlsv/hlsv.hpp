@@ -143,6 +143,18 @@ public:
 // Forward declare the reflectioninfo type
 class ReflectionInfo;
 
+// Passes compilation options to the compile to control the compilation process
+class _EXPORT CompilerOptions final
+{
+public:
+	bool generate_reflection_file; // If the reflection info file should be generated
+	bool use_binary_reflection;    // If the reflection info file should be in binary instead of text
+
+public:
+	CompilerOptions();
+	~CompilerOptions();
+}; // class CompilerOptions
+
 // The root type for programmatically compiling HLSV shaders
 class _EXPORT Compiler final
 {
@@ -169,7 +181,7 @@ public:
 
 	// Compiles the HLSV file with the given options, returning the success as a boolean
 	// If this function returns false, then the last error will be set for the compiler instance
-	bool compile(const string& file);
+	bool compile(const string& file, const CompilerOptions& options);
 }; // class Compiler
 
 } // namespace hlsv

@@ -24,9 +24,10 @@ namespace hlsv
 {
 
 // ====================================================================================================================
-Visitor::Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl) :
+Visitor::Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl, const CompilerOptions* opt) :
 	tokens_{ ts },
-	reflect_{ refl }
+	reflect_{ refl },
+	options_{ opt }
 {
 
 }
