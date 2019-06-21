@@ -11,12 +11,18 @@
 #include "config.hpp"
 #include "error_listener.hpp"
 #include "visitor.hpp"
+#include "reflect/io.hpp"
 #include "antlr/ANTLRInputStream.h"
 #include "antlr/CommonTokenStream.h"
 #include "../generated/HLSVLexer.h"
 #include "../generated/HLSV.h"
 #include <fstream>
 #include <sstream>
+
+#ifdef HLSV_COMPILER_MSVC
+	// It never sees reflect_ change, so it complains about dereferencing a null pointer that isnt actually null
+#	pragma warning( disable : 6011 )
+#endif // HLSV_COMPILER_MSVC
 
 #define SET_ERR(src,...) last_error_ = CompilerError(CompilerError::src, ##__VA_ARGS__);
 
@@ -126,6 +132,16 @@ bool Compiler::compile(const string& file, const CompilerOptions& options)
 			reflect_ = nullptr;
 		}
 		return false;
+	}
+
+	// Generate the reflection info file
+	if (options.generate_reflection_file) {
+		auto writer = options.use_binary_reflection ? ReflWriter::WriteBinary : ReflWriter::WriteText;
+		string err{};
+		if (!writer("reflection.refl", *reflect_, err)) {
+			SET_ERR(ES_FILEIO, strarg("Unable to write reflection file, reason: %s.", err.c_str()));
+			return false;
+		}
 	}
 
 	// All done and good to go (ensure the compiler error is cleared)
