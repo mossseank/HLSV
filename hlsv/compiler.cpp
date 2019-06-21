@@ -89,7 +89,7 @@ bool Compiler::compile(const string& file)
 	}
 
 	// Visit the tree (this is the generator step)
-	Visitor visitor{};
+	Visitor visitor{ &tokens };
 	try
 	{
 		auto any = visitor.visit(fileCtx);

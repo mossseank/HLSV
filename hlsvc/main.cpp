@@ -46,6 +46,9 @@ int main(int argc, char** argv)
 					Console::Errorf("Rule Stack: %s", err.get_rule_stack_str().c_str());
 				}
 			}
+			else if (err.source == CompilerError::ES_COMPILER) {
+				Console::Errorf("[%u:%u] - %s", err.line, err.character, err.message.c_str());
+			}
 			continue;
 		}
 		Console::UseIndent(false);

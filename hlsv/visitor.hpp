@@ -12,6 +12,9 @@
 
 #include "config.hpp"
 #include "../generated/HLSVBaseVisitor.h"
+#include "antlr/CommonTokenStream.h"
+
+#define VISIT(vtype) antlrcpp::Any visit##vtype(grammar::HLSV::vtype##Context* ctx) override;
 
 
 namespace hlsv
@@ -37,7 +40,26 @@ public:
 class Visitor final :
 	public grammar::HLSVBaseVisitor
 {
+private:
+	antlr4::CommonTokenStream* tokens_;
 
+public:
+	Visitor(antlr4::CommonTokenStream* ts);
+	~Visitor();
+
+	inline void ERROR(antlr4::RuleContext* ctx, const string& msg) {
+		auto tk = tokens_->get(ctx->getSourceInterval().a);
+		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine());
+	}
+	inline void ERROR(antlr4::Token* tk, const string& msg) {
+		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine());
+	}
+
+	VISIT(File)
+	VISIT(ShaderVersionStatement)
 }; // class Visitor
 
 } // namespace hlsv
+
+
+#undef VISIT

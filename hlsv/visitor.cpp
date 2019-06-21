@@ -9,9 +9,53 @@
 // This file implements visitor.hpp.
 
 #include "visitor.hpp"
+#include <cstdlib>
+
+#ifdef HLSV_COMPILER_MSVC
+	// Lots of warnings about ignoring the return value of visit...() functions
+#	pragma warning( disable : 26444 )
+#endif // HLSV_COMPILER_MSVC
+
+#define VISIT_FUNC(vtype) antlrcpp::Any Visitor::visit##vtype(grammar::HLSV::vtype##Context* ctx)
 
 
 namespace hlsv
 {
+
+// ====================================================================================================================
+Visitor::Visitor(antlr4::CommonTokenStream* ts) :
+	tokens_{ ts }
+{
+
+}
+
+// ====================================================================================================================
+Visitor::~Visitor()
+{
+
+}
+
+// ====================================================================================================================
+VISIT_FUNC(File)
+{
+	// Visit the version statement first
+	visit(ctx->shaderVersionStatement());
+
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(ShaderVersionStatement)
+{
+	// Extract the version and check it
+	uint32 ver = std::atoi(ctx->VERSION_LITERAL()->getText().c_str());
+	if (ver > HLSV_VERSION)
+		ERROR(ctx, strarg("Current tool version (%u) cannot compile requested shader version (%u).", HLSV_VERSION, ver));
+	if (ctx->KW_COMPUTE())
+		ERROR(ctx, strarg("Compute shaders are not supported by hlsvc version %u.", HLSV_VERSION));
+
+	// No return
+	return nullptr;
+}
 
 } // namespace hlsv

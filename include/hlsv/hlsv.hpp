@@ -61,8 +61,8 @@
 #endif // defined(_MSC_VER)
 
 /* Library Version */
-#define HLSV_VERSION_MAJOR 0
-#define HLSV_VERSION_MINOR 1
+#define HLSV_VERSION_MAJOR 1
+#define HLSV_VERSION_MINOR 0
 #define HLSV_VERSION_PATCH 0
 // This is a 3-digit version in the form MajorMinorPatch, similar to how GLSL defines its versions
 #define HLSV_VERSION ((HLSV_VERSION_MAJOR*100)+(HLSV_VERSION_MINOR*10)+HLSV_VERSION_PATCH)
@@ -117,7 +117,8 @@ public:
 	{
 		ES_NONE = 0, // Represents no error, or an invalid CompilerError instance
 		ES_FILEIO, // Represents an error during file writing or reading
-		ES_PARSER // Represents an error during the parsing process
+		ES_PARSER, // Represents an error during the parsing process
+		ES_COMPILER // Represents an error during the compilation stage, converting the HLSV to GLSL
 	};
 
 public:
