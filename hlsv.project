@@ -71,6 +71,7 @@ project "hlsv"
 	-- Library paths
 	filter { "system:windows" }
 		libdirs { "./libs/vs2019" }
+		linkoptions { "-IGNORE:4099" } -- antlr runtime does not have a pdb
 	filter { "system:linux" }
 		libdirs { "./libs/linux" }
 	filter { "system:macosx" }

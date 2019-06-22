@@ -59,7 +59,7 @@ VISIT_FUNC(ShaderVersionStatement)
 		ERROR(ctx, strarg("Compute shaders are not supported by hlsvc version %u.", HLSV_VERSION));
 
 	// Create and populate the initial reflection info
-	*reflect_ = new ReflectionInfo{ ReflectionInfo::TYPE_GRAPHICS, HLSV_VERSION, ver };
+	*reflect_ = new ReflectionInfo{ ShaderType::Graphics, HLSV_VERSION, ver };
 
 	// No return
 	return nullptr;

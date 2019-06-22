@@ -15,10 +15,11 @@ namespace hlsv
 {
 
 // ====================================================================================================================
-ReflectionInfo::ReflectionInfo(enum ShaderType type, uint32 tv, uint32 sv) :
+ReflectionInfo::ReflectionInfo(ShaderType type, uint32 tv, uint32 sv) :
 	tool_version{ tv },
 	shader_version{ sv },
-	shader_type{ type }
+	shader_type{ type },
+	stages{ ShaderStages::None }
 {
 
 }
