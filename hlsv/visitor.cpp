@@ -112,13 +112,34 @@ VISIT_FUNC(ShaderVersionStatement)
 VISIT_FUNC(VertexAttributeStatement)
 {
 	// Extract the components
-	auto index = parse_size_literal(ctx->Index);
 	auto vdec = ctx->variableDeclaration();
 
 	// Get the variable
 	auto vrbl = parse_variable(vdec, VarScope::Attribute);
-	if (vrbl.type.count > 16)
-		ERROR(vdec->Size, "Vertex attribute arrays cannot have more than 16 elements.");
+	if (!vrbl.type.is_value_type())
+		ERROR(vdec->Type, "Vertex attributes must be a value type.");
+	if (vrbl.type.count > 8)
+		ERROR(vdec->Size, "Vertex attribute arrays cannot have more than 8 elements.");
+
+	// Binding location information (TODO: use a programmatic limit)
+	auto index = parse_size_literal(ctx->Index);
+	if (index >= 16)
+		ERROR(ctx->Index, strarg("Cannot bind attribute to slot %u, only %u slots available.", index, 16u));
+	auto scount = TypeHelper::GetTypeSlotSize(vrbl.type);
+	if ((index + scount) > 16)
+		ERROR(ctx->Index, strarg("Attribute (size %u) too big for slot %u, only %u slots available.", index + scount, index, 16u));
+
+	// Perform checks on the attribute
+	for (const auto& attr : REFL->attributes) {
+		bool overlap = (index == attr.location) ||
+			(index < attr.location && (index + scount) > attr.location) ||
+			(index > attr.location && (attr.location + (uint32)attr.slot_count) > index);
+		if (overlap)
+			ERROR(ctx, strarg("Attribute '%s' overlaps with existing attribute '%s'.", vrbl.name.c_str(), attr.name.c_str()));
+	}
+
+	// Attribute is good to go
+	REFL->attributes.push_back({ vrbl.name, vrbl.type, (uint8)index, scount });
 
 	return nullptr;
 }

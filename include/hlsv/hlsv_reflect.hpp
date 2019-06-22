@@ -11,6 +11,7 @@
 #pragma once
 
 #include "hlsv.hpp"
+#include <vector>
 
 /* Import/Export Macros */
 #if !defined(HLSV_STATIC)
@@ -103,6 +104,14 @@ public:
 		Image2DArray = 210, // An array of 2-dimensional non-sampled storage images (image2DArray)
 	};
 
+private:
+	static const PrimType VECTOR_TYPE_START = Bool;
+	static const PrimType VECTOR_TYPE_END = Float4;
+	static const PrimType MATRIX_TYPE_START = Mat2;
+	static const PrimType MATRIX_TYPE_END = Mat4;
+	static const PrimType HANDLE_TYPE_START = Tex1D;
+	static const PrimType HANDLE_TYPE_END = Image2DArray;
+
 public:
 	PrimType type; // The base primitive type
 	bool is_array; // If the type is an array
@@ -120,6 +129,35 @@ public:
 	{ }
 
 	inline bool is_error() const { return type == Error; } // Gets if the type represents a type error
+	inline bool is_value_type() const { return IsValueType(type); }
+	inline bool is_scalar_type() const { return IsScalarType(type); }
+	inline bool is_vector_type() const { return IsVectorType(type); }
+	inline bool is_matrix_type() const { return IsMatrixType(type); }
+	inline bool is_handle_type() const { return IsHandleType(type); }
+	inline uint8 get_component_count() const { return GetComponentCount(type); }
+	inline string type_str() const { return GetTypeStr(type); }
+	
+	inline static bool IsValueType(enum PrimType t) {
+		return (t >= VECTOR_TYPE_START && t <= VECTOR_TYPE_END) || (t >= MATRIX_TYPE_START && t <= MATRIX_TYPE_END);
+	}
+	inline static bool IsScalarType(enum PrimType t) {
+		return (t >= VECTOR_TYPE_START && t <= VECTOR_TYPE_END) && ((t % 4) == 1);
+	}
+	inline static bool IsVectorType(enum PrimType t) {
+		return (t >= VECTOR_TYPE_START && t <= VECTOR_TYPE_END) && ((t % 4) != 1);
+	}
+	inline static bool IsMatrixType(enum PrimType t) {
+		return (t >= MATRIX_TYPE_START && t <= MATRIX_TYPE_END);
+	}
+	inline static bool IsHandleType(enum PrimType t) {
+		return (t >= HANDLE_TYPE_START && t <= HANDLE_TYPE_END);
+	}
+	inline static uint8 GetComponentCount(enum PrimType t) {
+		if (IsHandleType(t)) return 1u;
+		if (IsMatrixType(t)) return (t == Mat2) ? 4u : (t == Mat3) ? 9u : 16u;
+		return (((t - 1) % 4) + 1);
+	}
+	static string GetTypeStr(enum PrimType t);
 }; // struct HLSVType
 
 /* HLSVType Operators */
@@ -132,6 +170,19 @@ inline bool operator != (HLSVType l, HLSVType r) {
 inline bool operator == (HLSVType l, enum HLSVType::PrimType r) { return l.type == r; }
 inline bool operator != (HLSVType l, enum HLSVType::PrimType r) { return l.type != r; }
 
+// Contains information about a vertex attribute in a shader
+struct _EXPORT Attribute final
+{
+	string name;      // The attribute name
+	HLSVType type;    // The attribute type information
+	uint8 location;   // The binding location of the attribute
+	uint8 slot_count; // The number of binding slots taken by the attribute
+
+	Attribute(const string& name, HLSVType type, uint8 l, uint8 sc) :
+		name{ name }, type{ type }, location{ l }, slot_count{ sc }
+	{ }
+}; // struct Attribute
+
 // The core reflection type that contains all reflection information about an HSLV shader
 class _EXPORT ReflectionInfo final
 {
@@ -140,6 +191,7 @@ public:
 	uint32 shader_version;  // The minimum feature version specified by the shader
 	ShaderType shader_type; // The type of the shader
 	ShaderStages stages;    // The stages that are present in the shader
+	std::vector<Attribute> attributes; // The vertex attributes for the shader
 
 public:
 	ReflectionInfo(ShaderType type, uint32 tv, uint32 sv);

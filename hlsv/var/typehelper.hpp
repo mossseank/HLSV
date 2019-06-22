@@ -21,6 +21,12 @@ class TypeHelper final
 {
 public:
 	static HLSVType::PrimType ParseTypeStr(const string& str);
+	static string TypeStr(HLSVType::PrimType type);
+
+	static uint8 GetPrimitiveSlotCount(HLSVType::PrimType type);
+	inline static uint8 GetTypeSlotSize(HLSVType type) {
+		return GetPrimitiveSlotCount(type.type) * type.count;
+	}
 };
 
 } // namespace hlsv

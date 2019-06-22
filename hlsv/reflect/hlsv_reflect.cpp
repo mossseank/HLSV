@@ -8,18 +8,27 @@
 
 // This file implements the main ReflectionInfo type from hlsv_reflect.hpp
 
-#include "..//config.hpp"
+#include "../config.hpp"
+#include "../var/typehelper.hpp"
 
 
 namespace hlsv
 {
 
 // ====================================================================================================================
+/* static */
+string HLSVType::GetTypeStr(enum PrimType t) 
+{ 
+	return TypeHelper::TypeStr(t);
+}
+
+// ====================================================================================================================
 ReflectionInfo::ReflectionInfo(ShaderType type, uint32 tv, uint32 sv) :
 	tool_version{ tv },
 	shader_version{ sv },
 	shader_type{ type },
-	stages{ ShaderStages::None }
+	stages{ ShaderStages::None },
+	attributes{ }
 {
 
 }
