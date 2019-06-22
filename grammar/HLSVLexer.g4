@@ -6,6 +6,7 @@
 lexer grammar HLSVLexer;
 
 // Keywords
+KW_ATTRIBUTE    : 'attr' ;
 KW_COMPUTE      : 'compute' ;
 KW_GRAPHICS     : 'graphics' ;
 KW_SHADER       : 'shader' ;
@@ -15,8 +16,24 @@ VERSION_LITERAL
     : DigitChar DigitChar DigitChar
     ;
 
+// Numeric literals
+SIZE_LITERAL // Special type of decimal, non-negative integer
+    : DecimalLiteral
+    ;
+fragment DecimalLiteral : DigitChar+ ;
+
+// Identifiers, valid for variable and type names, also includes the built-in variables
+IDENTIFIER
+    : (AlphaChar|'_') (AlnumChar|'_')*
+    | '$' AlphaChar+
+    ;
+
 // Punctuators
-SEMI_COLON : ';' ;
+LBRACKET    : '[' ;
+RBRACKET    : ']' ;
+LPAREN      : '(' ;
+RPAREN      : ')' ;
+SEMI_COLON  : ';' ;
 
 // Whitespace and comments (ignore)
 WS

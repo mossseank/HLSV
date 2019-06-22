@@ -61,8 +61,11 @@ public:
 
 	inline GLSLGenerator& get_generator() { return gen_; }
 
+	uint32 parse_size_literal(antlr4::Token* tk, uint32 limit = UINT32_MAX);
+
 	VISIT(File)
 	VISIT(ShaderVersionStatement)
+	VISIT(VertexAttributeStatement)
 }; // class Visitor
 
 } // namespace hlsv

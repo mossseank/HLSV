@@ -40,10 +40,25 @@ Visitor::~Visitor()
 }
 
 // ====================================================================================================================
+uint32 Visitor::parse_size_literal(antlr4::Token* tk, uint32 limit)
+{
+	auto txt = tk->getText();
+	uint64 val = std::strtoull(txt.c_str(), nullptr, 10);
+	if (val >= limit) // Catches both out or range errors are parse errors
+		ERROR(tk, strarg("Invalid or out of range integer value ('%s').", txt.c_str()));
+	return (uint32)val;
+}
+
+// ====================================================================================================================
 VISIT_FUNC(File)
 {
 	// Visit the version statement first
 	visit(ctx->shaderVersionStatement());
+
+	// Visit all of the top-level statements
+	for (auto tls : ctx->topLevelStatement()) {
+		visit(tls);
+	}
 
 	return nullptr;
 }
@@ -62,6 +77,16 @@ VISIT_FUNC(ShaderVersionStatement)
 	*reflect_ = new ReflectionInfo{ ShaderType::Graphics, HLSV_VERSION, ver };
 
 	// No return
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(VertexAttributeStatement)
+{
+	// Extract the components
+	auto index = parse_size_literal(ctx->Index);
+	auto vdec = ctx->variableDeclaration();
+
 	return nullptr;
 }
 

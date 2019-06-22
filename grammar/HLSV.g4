@@ -10,10 +10,25 @@ options {
 
 // Top-level file unit
 file
-    : shaderVersionStatement EOF
+    : shaderVersionStatement topLevelStatement* EOF
     ;
 
 // Shader version/type statement
 shaderVersionStatement
     : 'shader' VERSION_LITERAL ('graphics' | 'compute') ';'
+    ;
+
+// All top-level statements that can appear in the root scope of the source
+topLevelStatement
+    : vertexAttributeStatement
+    ;
+
+// Vertex attribute statement
+vertexAttributeStatement
+    : 'attr' '(' Index=SIZE_LITERAL ')' variableDeclaration ';'
+    ;
+
+// Variable declaration
+variableDeclaration
+    : Type=IDENTIFIER Name=IDENTIFIER ('[' Size=SIZE_LITERAL ']')?
     ;
