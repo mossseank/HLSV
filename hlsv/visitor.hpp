@@ -12,6 +12,7 @@
 
 #include "config.hpp"
 #include "gen/glsl_generator.hpp"
+#include "var/variable.hpp"
 #include "../generated/HLSVBaseVisitor.h"
 #include "antlr/CommonTokenStream.h"
 
@@ -62,6 +63,7 @@ public:
 	inline GLSLGenerator& get_generator() { return gen_; }
 
 	uint32 parse_size_literal(antlr4::Token* tk, uint32 limit = UINT32_MAX);
+	Variable parse_variable(grammar::HLSV::VariableDeclarationContext* ctx, VarScope scope);
 
 	VISIT(File)
 	VISIT(ShaderVersionStatement)

@@ -63,43 +63,44 @@ public:
 	// A listing of the primitive types
 	enum PrimType : uint8
 	{
-		Void = 0, // The special "nothing" type, only valid as a function return type
-		
+		Void = 0, // The special "nothing" type, only valid as a function return type (void)
+		Error = 255, // A value used internally to represent a type error, this value will not appear in valid shaders
+
 		/// Scalar/Vector Value Types
-		Bool  = 1, // A scalar boolean value
-		Bool2 = 2, // A 2-component boolean vector
-		Bool3 = 3, // A 3-component boolean vector
-		Bool4 = 4, // A 4-component boolean vector
-		Int  = 5, // A scalar 32-bit signed integer value
-		Int2 = 6, // A 2-component 32-bit signed integer vector
-		Int3 = 7, // A 3-component 32-bit signed integer vector
-		Int4 = 8, // A 4-component 32-bit signed integer vector
-		UInt  = 9,  // A scalar 32-bit unsigned integer value 
-		UInt2 = 10, // A 2-component 32-bit unsigned integer vector
-		UInt3 = 11, // A 3-component 32-bit unsigned integer vector
-		UInt4 = 12, // A 4-component 32-bit unsigned integer vector
-		Float  = 13, // A scalar 32-bit floating point value
-		Float2 = 14, // A 2-component 32-bit floating point vector
-		Float3 = 15, // A 3-component 32-bit floating point vector
-		Float4 = 16, // A 4-component 32-bit floating point vector
+		Bool  = 1, // A scalar boolean value (bool)
+		Bool2 = 2, // A 2-component boolean vector (bvec2)
+		Bool3 = 3, // A 3-component boolean vector (bvec3)
+		Bool4 = 4, // A 4-component boolean vector (bvec4)
+		Int  = 5, // A scalar 32-bit signed integer value (int)
+		Int2 = 6, // A 2-component 32-bit signed integer vector (ivec2)
+		Int3 = 7, // A 3-component 32-bit signed integer vector (ivec3)
+		Int4 = 8, // A 4-component 32-bit signed integer vector (ivec4)
+		UInt  = 9,  // A scalar 32-bit unsigned integer value (uint)
+		UInt2 = 10, // A 2-component 32-bit unsigned integer vector (uvec2)
+		UInt3 = 11, // A 3-component 32-bit unsigned integer vector (uvec3)
+		UInt4 = 12, // A 4-component 32-bit unsigned integer vector (uvec4)
+		Float  = 13, // A scalar 32-bit floating point value (float)
+		Float2 = 14, // A 2-component 32-bit floating point vector (vec2)
+		Float3 = 15, // A 3-component 32-bit floating point vector (vec3)
+		Float4 = 16, // A 4-component 32-bit floating point vector (vec4)
 
 		/// Matrix Value Types
-		Mat2 = 150, // A square 2x2 matrix of 32-bit floating point values
-		Mat3 = 151, // A square 3x3 matrix of 32-bit floating point values
-		Mat4 = 152, // A square 4x4 matrix of 32-bit floating point values
+		Mat2 = 150, // A square 2x2 matrix of 32-bit floating point values (mat2)
+		Mat3 = 151, // A square 3x3 matrix of 32-bit floating point values (mat3)
+		Mat4 = 152, // A square 4x4 matrix of 32-bit floating point values (mat4)
 
 		/// Handle Types
-		Tex1D      = 200, // A 1-dimensional combined image/sampler
-		Tex2D      = 201, // A 2-dimensional combined image/sampler
-		Tex3D      = 202, // A 3-dimensional combined image/sampler
-		TexCube    = 203, // A cube-map combined image/sampler
-		Tex1DArray = 204, // An array of 1-dimensional combined image/samplers
-		Tex2DArray = 205, // An array of 2-dimensional combined image/samplers
-		Image1D      = 206, // A 1-dimensional non-sampled storage image
-		Image2D      = 207, // A 2-dimensional non-sampled storage image
-		Image3D      = 208, // A 3-dimensional non-sampled storage image
-		Image1DArray = 209, // An array of 1-dimensional non-sampled storage images
-		Image2DArray = 210, // An array of 2-dimensional non-sampled storage images
+		Tex1D      = 200, // A 1-dimensional combined image/sampler (tex1D)
+		Tex2D      = 201, // A 2-dimensional combined image/sampler (tex2D)
+		Tex3D      = 202, // A 3-dimensional combined image/sampler (tex3D)
+		TexCube    = 203, // A cube-map combined image/sampler (texCube)
+		Tex1DArray = 204, // An array of 1-dimensional combined image/samplers (tex1DArray)
+		Tex2DArray = 205, // An array of 2-dimensional combined image/samplers (tex2DArray)
+		Image1D      = 206, // A 1-dimensional non-sampled storage image (image1D)
+		Image2D      = 207, // A 2-dimensional non-sampled storage image (image2D)
+		Image3D      = 208, // A 3-dimensional non-sampled storage image (image3D)
+		Image1DArray = 209, // An array of 1-dimensional non-sampled storage images (image1DArray)
+		Image2DArray = 210, // An array of 2-dimensional non-sampled storage images (image2DArray)
 	};
 
 public:
@@ -117,6 +118,8 @@ public:
 	HLSVType(enum PrimType type, uint8 array_size) :
 		type{ type }, is_array{ true }, count{ array_size }
 	{ }
+
+	inline bool is_error() const { return type == Error; } // Gets if the type represents a type error
 }; // struct HLSVType
 
 /* HLSVType Operators */

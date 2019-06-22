@@ -9,6 +9,7 @@
 // This file implements visitor.hpp.
 
 #include "visitor.hpp"
+#include "var/typehelper.hpp"
 #include <cstdlib>
 
 #ifdef HLSV_COMPILER_MSVC
@@ -50,6 +51,33 @@ uint32 Visitor::parse_size_literal(antlr4::Token* tk, uint32 limit)
 }
 
 // ====================================================================================================================
+Variable Visitor::parse_variable(grammar::HLSV::VariableDeclarationContext* ctx, VarScope scope)
+{
+	// Parse the type
+	auto btype = TypeHelper::ParseTypeStr(ctx->Type->getText());
+	if (btype == HLSVType::Error)
+		ERROR(ctx->Type, strarg("Invalid typename '%s'.", ctx->Type->getText().c_str()));
+
+	// Complete the full type
+	auto asize = ctx->Size ? parse_size_literal(ctx->Size) : 0u;
+	if (ctx->Size && asize == 0)
+		ERROR(ctx->Size, "Arrays cannot have a size of zero.");
+	HLSVType type = (asize == 0) ? HLSVType{ btype } : HLSVType{ btype, (uint8)asize };
+
+	// Parse the name
+	auto name = ctx->Name->getText();
+	if (name[0] == '$')
+		ERROR(ctx->Name, "User-declared variables cannot start with '$'.");
+	if (name.length() > 24)
+		ERROR(ctx->Name, "Variable names cannot be longer than 24 characters.");
+
+	// TODO: check that there are not any variables with the same name
+
+	// Return the partially-complete variable
+	return { name, type, scope };
+}
+
+// ====================================================================================================================
 VISIT_FUNC(File)
 {
 	// Visit the version statement first
@@ -86,6 +114,11 @@ VISIT_FUNC(VertexAttributeStatement)
 	// Extract the components
 	auto index = parse_size_literal(ctx->Index);
 	auto vdec = ctx->variableDeclaration();
+
+	// Get the variable
+	auto vrbl = parse_variable(vdec, VarScope::Attribute);
+	if (vrbl.type.count > 16)
+		ERROR(vdec->Size, "Vertex attribute arrays cannot have more than 16 elements.");
 
 	return nullptr;
 }
