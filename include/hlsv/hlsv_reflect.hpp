@@ -57,6 +57,11 @@ enum class ShaderStages : uint8
 	AllCompute = 0x01  // A bitset representing all compute shader stages
 }; // enum class ShaderStages
 
+/* ShaderStages Operators */
+inline ShaderStages operator | (ShaderStages l, ShaderStages r) { return (ShaderStages)((uint8)l | (uint8)r); }
+inline ShaderStages operator ^ (ShaderStages l, ShaderStages r) { return (ShaderStages)((uint8)l & ~(uint8)r); }
+inline bool operator & (ShaderStages l, ShaderStages r) { return (ShaderStages)((uint8)l & (uint8)r) == r; }
+
 // Represents a record about a specific primitive HLSV type
 struct _EXPORT HLSVType final
 {
