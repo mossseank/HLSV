@@ -22,6 +22,7 @@ namespace hlsv
 enum class VarScope : uint8
 {
 	Attribute, // Vertex attribute
+	Output,	   // Fragment output
 }; // enum class VarScope
 
 // Represents a named and scoped value object in a HLSV shader program
@@ -36,6 +37,7 @@ public:
 	Variable(const string& name, HLSVType type, VarScope scope);
 
 	inline bool is_attribute() const { return scope == VarScope::Attribute; }
+	inline bool is_output() const { return scope == VarScope::Output; }
 };
 
 } // namespace hlsv

@@ -188,6 +188,18 @@ struct _EXPORT Attribute final
 	{ }
 }; // struct Attribute
 
+// Contains information about a fragment output in a shader
+struct _EXPORT Output final
+{
+	string name;    // The output name
+	HLSVType type;  // The output type information
+	uint8 location; // The binding slot for the output
+
+	Output(const string& name, HLSVType type, uint8 l) :
+		name{ name }, type{ type }, location{ l }
+	{ }
+}; // struct Output
+
 // The core reflection type that contains all reflection information about an HSLV shader
 class _EXPORT ReflectionInfo final
 {
@@ -197,6 +209,7 @@ public:
 	ShaderType shader_type; // The type of the shader
 	ShaderStages stages;    // The stages that are present in the shader
 	std::vector<Attribute> attributes; // The vertex attributes for the shader
+	std::vector<Output> outputs;       // The fragment outputs for the shader
 
 public:
 	ReflectionInfo(ShaderType type, uint32 tv, uint32 sv);

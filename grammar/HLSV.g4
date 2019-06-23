@@ -21,11 +21,17 @@ shaderVersionStatement
 // All top-level statements that can appear in the root scope of the source
 topLevelStatement
     : vertexAttributeStatement
+    | fragmentOutputStatement
     ;
 
 // Vertex attribute statement
 vertexAttributeStatement
     : 'attr' '(' Index=SIZE_LITERAL ')' variableDeclaration ';'
+    ;
+
+// Fragment output statement
+fragmentOutputStatement
+    : 'frag' '(' Index=SIZE_LITERAL ')' variableDeclaration ';'
     ;
 
 // Variable declaration

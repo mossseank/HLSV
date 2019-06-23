@@ -28,7 +28,8 @@ ReflectionInfo::ReflectionInfo(ShaderType type, uint32 tv, uint32 sv) :
 	shader_version{ sv },
 	shader_type{ type },
 	stages{ ShaderStages::None },
-	attributes{ }
+	attributes{ },
+	outputs{ }
 {
 
 }

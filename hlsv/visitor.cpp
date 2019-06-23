@@ -150,4 +150,40 @@ VISIT_FUNC(VertexAttributeStatement)
 	return nullptr;
 }
 
+// ====================================================================================================================
+VISIT_FUNC(FragmentOutputStatement)
+{
+	// Check for resource limits (TODO: Use a programmatic limit)
+	if (REFL->outputs.size() == 4)
+		ERROR(ctx, "Shader cannot have more than 4 fragment outputs.");
+
+	// Extract the components
+	auto vdec = ctx->variableDeclaration();
+
+	// Get the variable
+	auto vrbl = parse_variable(vdec, VarScope::Output);
+	if (!vrbl.type.is_scalar_type() && !vrbl.type.is_vector_type())
+		ERROR(vdec->Type, strarg("Fragment output '%s' must be a scalar or vector type.", vrbl.name.c_str()));
+	if (vrbl.type.is_array)
+		ERROR(vdec->Size, strarg("Fragment output '%s' cannot be an array.", vrbl.name.c_str()));
+
+	// Binding location information (TODO: use a programmatic limit)
+	auto index = parse_size_literal(ctx->Index);
+	if (index >= 4)
+		ERROR(ctx->Index, strarg("Cannot bind output to slot %u, only %u slots available.", index, 4u));
+
+	// Perform checks on the output
+	for (const auto& output : REFL->outputs) {
+		if (output.location == index)
+			ERROR(ctx, strarg("Output '%s' overlaps with existing output '%s'.", vrbl.name.c_str(), output.name.c_str()));
+	}
+
+	// Output is good to go
+	Output output{ vrbl.name, vrbl.type, (uint8)index };
+	REFL->outputs.push_back(output);
+	variables_.add_global(vrbl);
+
+	return nullptr;
+}
+
 } // namespace hlsv
