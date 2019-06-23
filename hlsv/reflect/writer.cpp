@@ -77,6 +77,21 @@ bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, strin
 	}
 	else
 		file << "None" << std::endl << std::endl;
+
+	// Write fragment outputs
+	file << "Outputs" << std::endl
+		 << "-------" << std::endl;
+	if (refl.outputs.size() > 0)
+	{
+		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Location", 10) << std::endl;
+		for (const auto& out : refl.outputs) {
+			file << pad(out.name, 16) << ' ' << pad(out.type.type_str(), 12) << ' ' << padf("%u", 10, (uint32)out.location)
+				 << std::endl;
+		}
+		file << std::endl;
+	}
+	else
+		file << "None" << std::endl << std::endl;
 	
 	// Close and return
 	file.flush();
@@ -108,6 +123,14 @@ bool ReflWriter::WriteBinary(const string& path, const ReflectionInfo& refl, str
 		for (const auto& attr : refl.attributes) {
 			write_str(file, attr.name) << (uint8)attr.type.type << (uint8)attr.type.is_array << attr.type.count
 				<< attr.location << attr.slot_count;
+		}
+	}
+
+	// Write fragment outputs
+	file << (uint8)refl.outputs.size();
+	if (refl.outputs.size() > 0) {
+		for (const auto& out : refl.outputs) {
+			write_str(file, out.name) << (uint8)out.type.type << (uint8)out.location;
 		}
 	}
 

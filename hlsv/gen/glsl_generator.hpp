@@ -25,6 +25,7 @@ class GLSLGenerator final
 private:
 	sstream globals_; // Holds the uniforms and static values
 	sstream attribs_; // Holds the vertex attributes
+	sstream outputs_; // Holds the fragment outputs
 
 public:
 	GLSLGenerator();
@@ -34,10 +35,11 @@ public:
 		return globals_.str() + attribs_.str();
 	}
 	inline string frag_str() const {
-		return globals_.str();
+		return globals_.str() + outputs_.str();
 	}
 
 	void emit_attribute(const Attribute& attr);
+	void emit_output(const Output& output);
 }; // class GLSLGenerator
 
 } // namespace hlsv

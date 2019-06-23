@@ -10,6 +10,7 @@
 
 #include "../config.hpp"
 #include "../var/typehelper.hpp"
+#include <algorithm>
 
 
 namespace hlsv
@@ -38,6 +39,20 @@ ReflectionInfo::ReflectionInfo(ShaderType type, uint32 tv, uint32 sv) :
 ReflectionInfo::~ReflectionInfo()
 {
 
+}
+
+// ====================================================================================================================
+void ReflectionInfo::sort()
+{
+	// Vertex attributes
+	std::sort(attributes.begin(), attributes.end(), [](const Attribute& l, const Attribute& r) {
+		return l.location < r.location;
+	});
+
+	// Outputs
+	std::sort(outputs.begin(), outputs.end(), [](const Output& l, const Output& r) {
+		return l.location < r.location;
+	});
 }
 
 } // namespace hlsv

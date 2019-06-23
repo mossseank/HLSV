@@ -91,6 +91,9 @@ VISIT_FUNC(File)
 		visit(tls);
 	}
 
+	// Sort the reflection info
+	REFL->sort();
+
 	return nullptr;
 }
 
@@ -182,6 +185,7 @@ VISIT_FUNC(FragmentOutputStatement)
 	Output output{ vrbl.name, vrbl.type, (uint8)index };
 	REFL->outputs.push_back(output);
 	variables_.add_global(vrbl);
+	gen_.emit_output(output);
 
 	return nullptr;
 }
