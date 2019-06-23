@@ -12,7 +12,7 @@
 
 #include "config.hpp"
 #include "gen/glsl_generator.hpp"
-#include "var/variable.hpp"
+#include "var/manager.hpp"
 #include "../generated/HLSVBaseVisitor.h"
 #include "antlr/CommonTokenStream.h"
 
@@ -47,6 +47,7 @@ private:
 	ReflectionInfo** reflect_;
 	const CompilerOptions* options_;
 	GLSLGenerator gen_;
+	VariableManager variables_;
 
 public:
 	Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl, const CompilerOptions* opt);

@@ -29,7 +29,8 @@ Visitor::Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl, const Com
 	tokens_{ ts },
 	reflect_{ refl },
 	options_{ opt },
-	gen_{ }
+	gen_{ },
+	variables_{ }
 {
 
 }
@@ -71,7 +72,9 @@ Variable Visitor::parse_variable(grammar::HLSV::VariableDeclarationContext* ctx,
 	if (name.length() > 24)
 		ERROR(ctx->Name, "Variable names cannot be longer than 24 characters.");
 
-	// TODO: check that there are not any variables with the same name
+	// Check that there are not any variables with the same name
+	if (variables_.find_variable(name))
+		ERROR(ctx->Name, strarg("A variable with the name '%s' already exists.", name.c_str()));
 
 	// Return the partially-complete variable
 	return { name, type, scope };
@@ -141,6 +144,7 @@ VISIT_FUNC(VertexAttributeStatement)
 	// Attribute is good to go
 	Attribute attr{ vrbl.name, vrbl.type, (uint8)index, scount };
 	REFL->attributes.push_back(attr);
+	variables_.add_global(vrbl);
 	gen_.emit_attribute(attr);
 
 	return nullptr;
