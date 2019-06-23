@@ -19,6 +19,8 @@
 
 #define VISIT_FUNC(vtype) antlrcpp::Any Visitor::visit##vtype(grammar::HLSV::vtype##Context* ctx)
 #define REFL (*reflect_)
+#define OPT (options_)
+#define LIMITS (options_->limits)
 
 
 namespace hlsv
@@ -127,13 +129,15 @@ VISIT_FUNC(VertexAttributeStatement)
 	if (vrbl.type.count > 8)
 		ERROR(vdec->Size, "Vertex attribute arrays cannot have more than 8 elements.");
 
-	// Binding location information (TODO: use a programmatic limit)
+	// Binding location information
 	auto index = parse_size_literal(ctx->Index);
-	if (index >= 16)
-		ERROR(ctx->Index, strarg("Cannot bind attribute to slot %u, only %u slots available.", index, 16u));
+	if (index >= LIMITS.vertex_attribute_slots)
+		ERROR(ctx->Index, strarg("Cannot bind attribute to slot %u, only %u slots available.", index, LIMITS.vertex_attribute_slots));
 	auto scount = TypeHelper::GetTypeSlotSize(vrbl.type);
-	if ((index + scount) > 16)
-		ERROR(ctx->Index, strarg("Attribute (size %u) too big for slot %u, only %u slots available.", index + scount, index, 16u));
+	if ((index + scount) > LIMITS.vertex_attribute_slots) {
+		ERROR(ctx->Index, strarg("Attribute (size %u) too big for slot %u, only %u slots available.", scount, index,
+			LIMITS.vertex_attribute_slots));
+	}
 
 	// Perform checks on the attribute
 	for (const auto& attr : REFL->attributes) {
@@ -156,9 +160,9 @@ VISIT_FUNC(VertexAttributeStatement)
 // ====================================================================================================================
 VISIT_FUNC(FragmentOutputStatement)
 {
-	// Check for resource limits (TODO: Use a programmatic limit)
-	if (REFL->outputs.size() == 4)
-		ERROR(ctx, "Shader cannot have more than 4 fragment outputs.");
+	// Check for resource limits
+	if (REFL->outputs.size() == LIMITS.fragment_outputs)
+		ERROR(ctx, strarg("Shader cannot have more than %u fragment outputs.", LIMITS.fragment_outputs));
 
 	// Extract the components
 	auto vdec = ctx->variableDeclaration();
@@ -170,10 +174,10 @@ VISIT_FUNC(FragmentOutputStatement)
 	if (vrbl.type.is_array)
 		ERROR(vdec->Size, strarg("Fragment output '%s' cannot be an array.", vrbl.name.c_str()));
 
-	// Binding location information (TODO: use a programmatic limit)
+	// Binding location information
 	auto index = parse_size_literal(ctx->Index);
-	if (index >= 4)
-		ERROR(ctx->Index, strarg("Cannot bind output to slot %u, only %u slots available.", index, 4u));
+	if (index >= LIMITS.fragment_outputs)
+		ERROR(ctx->Index, strarg("Cannot bind output to slot %u, only %u slots available.", index, LIMITS.fragment_outputs));
 
 	// Perform checks on the output
 	for (const auto& output : REFL->outputs) {

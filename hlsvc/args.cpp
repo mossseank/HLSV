@@ -10,7 +10,38 @@
 
 #include "args.hpp"
 #include "console.hpp"
+#include <algorithm>
 
+
+// ====================================================================================================================
+static std::string parse_integer_arg(int argc, char** argv, int* idx, uint32_t* arg)
+{
+	if (*idx == (argc - 1))
+		return "no argument specified";
+
+	const std::string valstr = argv[*idx + 1];
+	if (valstr[0] == '-') {
+		if (valstr.length() > 1 && std::isdigit(valstr[1])) {
+			(*idx) += 1;
+			return "cannot specify negative integer";
+		}
+		else return "no argument specified";
+	}
+	else if (!std::isdigit(valstr[0])) return "no argument specified";
+	if (std::find_if(valstr.begin(), valstr.end(), [](char c) { return !std::isdigit(c); }) != valstr.end())
+		return "invalid integer";
+
+	errno = 0;
+	uint64_t val = std::strtoull(valstr.c_str(), nullptr, 10);
+	(*idx) += 1;
+	if (val >= UINT32_MAX || errno == ERANGE) {
+		errno = 0;
+		return "integer out of range";
+	}
+
+	*arg = (uint32_t)val;
+	return "";
+}
 
 // ====================================================================================================================
 Args::Args() :
@@ -53,6 +84,24 @@ bool Args::Parse(int argc, char** argv, Args& args)
 			else if (flag == "i" || flag == "glsl") {
 				args.options.keep_intermediate = true;
 			}
+			else if (flag.find("rl-") == 0) { // Resource limit flag
+				const std::string rl = flag.substr(3);
+				uint32_t rlval;
+				auto err = parse_integer_arg(argc, argv, &ai, &rlval);
+				if (err.size()) {
+					Console::Warnf("Ignoring invalid resource limit argument: %s", err.c_str());
+					continue;
+				}
+
+				if (rl == "attr")
+					args.options.limits.vertex_attribute_slots = rlval;
+				else if (rl == "frag")
+					args.options.limits.fragment_outputs = rlval;
+				else {
+					Console::Warnf("Unknown resource limit type '%s', ignoring.", rl.c_str());
+					continue;
+				}
+			}
 			else {
 				Console::Warnf("Unknown flag: %s.", arg.c_str());
 			}
@@ -91,7 +140,11 @@ void Args::PrintHelp()
 		"  > -h;-?;--help                        Prints this help message, then exits.\n"
 		"  > -r;--reflect                        Generate a text file that contains shader reflection info.\n"
 		"  > -b;--binary                         Use a binary format for the reflection file instead of text. This\n"
-		"                                           flag will implicity activate the '--reflect' flag.\n"
+		"                                          flag will implicity activate the '--reflect' flag.\n"
 		"  > -i;--glsl                           Generates the intermediate cross-compiled GLSL files.\n"
+		"  > --rl-<type> ARG                     Sets the resource limit for the <type>, ARG must be a integer.\n"
+		"                                          <type> must be one of:\n"
+		"                                            attr - The number of vertex attribute slots (default 16)\n"
+		"                                            frag - The number of fragment outputs (default 4)\n"
 	);
 }

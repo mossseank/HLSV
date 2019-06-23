@@ -51,7 +51,8 @@ string CompilerError::get_rule_stack_str() const
 CompilerOptions::CompilerOptions() :
 	generate_reflection_file{ false },
 	use_binary_reflection{ false },
-	keep_intermediate{ false }
+	keep_intermediate{ false },
+	limits{ DEFAULT_LIMITS }
 {
 
 }

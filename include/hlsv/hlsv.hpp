@@ -147,9 +147,21 @@ class ReflectionInfo;
 class _EXPORT CompilerOptions final
 {
 public:
+	// Contains resource limit information about a compile process
+	struct Limits
+	{
+		uint32 vertex_attribute_slots; // The max number of vertex attribute slots available (default 16)
+		uint32 fragment_outputs;       // The max number of fragment outputs available (default 4)
+	};
+	
+	// The default resource limits
+	static constexpr Limits DEFAULT_LIMITS = { 16, 4 };
+
+public:
 	bool generate_reflection_file; // If the reflection info file should be generated
 	bool use_binary_reflection;    // If the reflection info file should be in binary instead of text
 	bool keep_intermediate;	       // If the intermediate GLSL files should be kept (not deleted)
+	Limits limits;                 // The resource limits to apply to the shader
 
 public:
 	CompilerOptions();
