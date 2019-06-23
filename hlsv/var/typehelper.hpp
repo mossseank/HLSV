@@ -22,6 +22,7 @@ class TypeHelper final
 public:
 	static HLSVType::PrimType ParseTypeStr(const string& str);
 	static string TypeStr(HLSVType::PrimType type);
+	static string GetGLSLStr(HLSVType::PrimType type);
 
 	static uint8 GetPrimitiveSlotCount(HLSVType::PrimType type);
 	inline static uint8 GetTypeSlotSize(HLSVType type) {

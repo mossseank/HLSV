@@ -212,7 +212,7 @@ bool Compiler::writeGLSL(void* gen)
 			SET_ERR(ES_FILEIO, "Unable to write intermediate glsl file.");
 			return false;
 		}
-		file << glsl->vert_str() << std::endl;
+		file << glsl->vert_str();
 	}
 
 	// Write fragment
@@ -222,7 +222,7 @@ bool Compiler::writeGLSL(void* gen)
 			SET_ERR(ES_FILEIO, "Unable to write intermediate glsl file.");
 			return false;
 		}
-		file << glsl->frag_str() << std::endl;
+		file << glsl->frag_str();
 	}
 
 	return true;

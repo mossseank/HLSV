@@ -23,18 +23,21 @@ class GLSLGenerator final
 	using sstream = std::ostringstream;
 
 private:
-	sstream globals_; // Holds the uniforms, static values, and push constants
+	sstream globals_; // Holds the uniforms and static values
+	sstream attribs_; // Holds the vertex attributes
 
 public:
 	GLSLGenerator();
 	~GLSLGenerator();
 
 	inline string vert_str() const {
-		return globals_.str();
+		return globals_.str() + attribs_.str();
 	}
 	inline string frag_str() const {
 		return globals_.str();
 	}
+
+	void emit_attribute(const Attribute& attr);
 }; // class GLSLGenerator
 
 } // namespace hlsv

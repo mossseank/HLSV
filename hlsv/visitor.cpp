@@ -139,7 +139,9 @@ VISIT_FUNC(VertexAttributeStatement)
 	}
 
 	// Attribute is good to go
-	REFL->attributes.push_back({ vrbl.name, vrbl.type, (uint8)index, scount });
+	Attribute attr{ vrbl.name, vrbl.type, (uint8)index, scount };
+	REFL->attributes.push_back(attr);
+	gen_.emit_attribute(attr);
 
 	return nullptr;
 }

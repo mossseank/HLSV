@@ -9,9 +9,11 @@
 // This file implements glsl_generator.hpp
 
 #include "glsl_generator.hpp"
+#include "../var/typehelper.hpp"
 
 static const std::string VERSION_STR = "#version 450";
 static const std::string VERSION_CMT = "// Generated with hlsvc version ";
+static const std::string ATTRIB_CMT = "// Vertex attributes";
 
 
 namespace hlsv
@@ -19,16 +21,29 @@ namespace hlsv
 
 // ====================================================================================================================
 GLSLGenerator::GLSLGenerator() :
-	globals_{ }
+	globals_{ },
+	attribs_{ }
 {
 	globals_ << VERSION_STR << "\n";
 	globals_ << VERSION_CMT << HLSV_VERSION << "\n";
+	attribs_ << "\n" << ATTRIB_CMT << "\n";
 }
 
 // ====================================================================================================================
 GLSLGenerator::~GLSLGenerator()
 {
 
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_attribute(const Attribute& attr)
+{
+	attribs_ << "layout(location = " << (uint32)attr.location << ") in " << TypeHelper::GetGLSLStr(attr.type.type) << " "
+		     << attr.name;
+	if (attr.type.is_array) {
+		attribs_ << "[" << (uint32)attr.type.count << "]";
+	}
+	attribs_ << ";\n";
 }
 
 } // namespace hlsv
