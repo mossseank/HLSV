@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 		else {
 			const auto& refl = comp.get_reflection_info();
 
-			Console::Infof("Successfully compiled %s shader (version %u).",
+			Console::Successf("Successfully compiled %s shader (version %u).",
 				(refl.is_graphics() ? "graphics" : "compute"), refl.shader_version);
 		}
 		Console::UseIndent(false);

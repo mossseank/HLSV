@@ -15,6 +15,7 @@
 
 static const std::string YELLOW_TAG = "\x1B[33m";
 static const std::string RED_TAG = "\x1B[31m";
+static const std::string GREEN_TAG = "\x1B[32m";
 static const std::string RESET_TAG = "\x1B[0m";
 
 #define BUF_LEN (512)
@@ -71,4 +72,13 @@ void Console::Error(const std::string& msg)
 		std::cout << RED_TAG << (UseIndent_ ? "  Error: " : "Error: ") << msg << RESET_TAG << std::endl;
 	else
 		std::cout << (UseIndent_ ? "  Error: " : "Error: ") << msg << std::endl;
+}
+
+// ====================================================================================================================
+void Console::Success(const std::string& msg)
+{
+	if (HAS_COLORS)
+		std::cout << GREEN_TAG << (UseIndent_ ? "  " : "") << msg << RESET_TAG << std::endl;
+	else
+		std::cout << (UseIndent_ ? "  " : "") << msg << std::endl;
 }

@@ -28,6 +28,7 @@ public:
 	static void Info(const std::string& msg);
 	static void Warn(const std::string& msg);
 	static void Error(const std::string& msg);
+	static void Success(const std::string& msg); // Green text with no prefix
 
 	template <typename... Args>
 	inline static void Infof(const char* const fmt, Args... args) {
@@ -40,5 +41,9 @@ public:
 	template <typename... Args>
 	inline static void Errorf(const char* const fmt, Args... args) {
 		Error(StrArg(fmt, args...));
+	}
+	template <typename... Args>
+	inline static void Successf(const char* const fmt, Args... args) {
+		Success(StrArg(fmt, args...));
 	}
 }; // class Console
