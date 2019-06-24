@@ -9,6 +9,7 @@
 // This file implements manager.hpp
 
 #include "manager.hpp"
+#include <numeric>
 
 
 namespace hlsv
@@ -46,6 +47,14 @@ Variable* VariableManager::find_variable(const string& name)
 void VariableManager::add_global(const Variable& var)
 {
 	globals_.push_back(var);
+}
+
+// ====================================================================================================================
+uint32 VariableManager::get_local_slot_count()
+{
+	return std::accumulate(globals_.begin(), globals_.end(), 0u, [](uint32 acc, const Variable& v) {
+		return acc + (v.is_local() ? v.type.get_slot_size() : 0u);
+	});
 }
 
 } // namespace hlsv

@@ -141,6 +141,7 @@ public:
 	inline bool is_handle_type() const { return IsHandleType(type); }
 	inline uint8 get_component_count() const { return GetComponentCount(type); }
 	inline string type_str() const { return GetTypeStr(type); }
+	inline uint32 get_slot_size() const { return GetSlotSize(*this); }
 	
 	inline static bool IsValueType(enum PrimType t) {
 		return (t >= VECTOR_TYPE_START && t <= VECTOR_TYPE_END) || (t >= MATRIX_TYPE_START && t <= MATRIX_TYPE_END);
@@ -163,6 +164,7 @@ public:
 		return (((t - 1) % 4) + 1);
 	}
 	static string GetTypeStr(enum PrimType t);
+	static uint32 GetSlotSize(HLSVType type);
 }; // struct HLSVType
 
 /* HLSVType Operators */

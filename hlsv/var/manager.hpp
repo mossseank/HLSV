@@ -34,6 +34,8 @@ public:
 	Variable* find_global(const string& name);
 	Variable* find_variable(const string& name);
 	void add_global(const Variable& var); // Does not check if a variable with the name already exists
+
+	uint32 get_local_slot_count(); // The number of slots currently taken by locals
 }; // class VariableManager
 
 } // namespace hlsv

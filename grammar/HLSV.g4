@@ -22,6 +22,7 @@ shaderVersionStatement
 topLevelStatement
     : vertexAttributeStatement
     | fragmentOutputStatement
+    | localStatement
     ;
 
 // Vertex attribute statement

@@ -70,6 +70,7 @@ public:
 	VISIT(ShaderVersionStatement)
 	VISIT(VertexAttributeStatement)
 	VISIT(FragmentOutputStatement)
+	VISIT(LocalStatement)
 }; // class Visitor
 
 } // namespace hlsv

@@ -23,6 +23,7 @@ enum class VarScope : uint8
 {
 	Attribute, // Vertex attribute
 	Output,	   // Fragment output
+	Local,     // Inter-stage local
 }; // enum class VarScope
 
 // Represents a named and scoped value object in a HLSV shader program
@@ -32,12 +33,22 @@ public:
 	string name;
 	HLSVType type;
 	VarScope scope;
+	union // Used to track scope-specific information about the variable
+	{
+		struct
+		{
+			bool is_flat;
+		} local;
+	};
 
 public:
 	Variable(const string& name, HLSVType type, VarScope scope);
 
 	inline bool is_attribute() const { return scope == VarScope::Attribute; }
 	inline bool is_output() const { return scope == VarScope::Output; }
+	inline bool is_local() const { return scope == VarScope::Local; }
+
+	inline uint32 get_slot_count() const { return type.get_slot_size(); }
 };
 
 } // namespace hlsv

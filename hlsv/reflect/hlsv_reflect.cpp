@@ -24,6 +24,13 @@ string HLSVType::GetTypeStr(enum PrimType t)
 }
 
 // ====================================================================================================================
+/* static */
+uint32 HLSVType::GetSlotSize(HLSVType type)
+{
+	return TypeHelper::GetTypeSlotSize(type);
+}
+
+// ====================================================================================================================
 ReflectionInfo::ReflectionInfo(ShaderType type, uint32 tv, uint32 sv) :
 	tool_version{ tv },
 	shader_version{ sv },

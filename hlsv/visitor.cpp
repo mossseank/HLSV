@@ -160,10 +160,6 @@ VISIT_FUNC(VertexAttributeStatement)
 // ====================================================================================================================
 VISIT_FUNC(FragmentOutputStatement)
 {
-	// Check for resource limits
-	if (REFL->outputs.size() == LIMITS.fragment_outputs)
-		ERROR(ctx, strarg("Shader cannot have more than %u fragment outputs.", LIMITS.fragment_outputs));
-
 	// Extract the components
 	auto vdec = ctx->variableDeclaration();
 
@@ -190,6 +186,30 @@ VISIT_FUNC(FragmentOutputStatement)
 	REFL->outputs.push_back(output);
 	variables_.add_global(vrbl);
 	gen_.emit_output(output);
+
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(LocalStatement)
+{
+	// Extract the components
+	auto vdec = ctx->variableDeclaration();
+
+	// Get the variable
+	auto vrbl = parse_variable(vdec, VarScope::Local);
+	if (!vrbl.type.is_value_type())
+		ERROR(vdec->Type, strarg("Local '%s' must be a value type.", vrbl.name.c_str()));
+	vrbl.local.is_flat = !!ctx->KW_FLAT();
+
+	// Slot checking
+	if ((variables_.get_local_slot_count() + vrbl.get_slot_count()) > LIMITS.local_slots) {
+		ERROR(ctx, strarg("Local '%s' is too large (%u slots), only %u slots available.", vrbl.name.c_str(),
+			vrbl.get_slot_count(), LIMITS.local_slots));
+	}
+
+	// Local is good to go (location gets assigned later)
+	variables_.add_global(vrbl);
 
 	return nullptr;
 }
