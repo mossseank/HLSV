@@ -34,6 +34,11 @@ fragmentOutputStatement
     : 'frag' '(' Index=SIZE_LITERAL ')' variableDeclaration ';'
     ;
 
+// Local variable statement
+localStatement
+    : 'local' 'flat'? variableDeclaration ';'
+    ;
+
 // Variable declaration
 variableDeclaration
     : Type=IDENTIFIER Name=IDENTIFIER ('[' Size=SIZE_LITERAL ']')?

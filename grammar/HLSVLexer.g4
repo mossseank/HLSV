@@ -8,8 +8,10 @@ lexer grammar HLSVLexer;
 // Keywords
 KW_ATTRIBUTE    : 'attr' ;
 KW_COMPUTE      : 'compute' ;
+KW_FLAT         : 'flat' ;
 KW_FRAG         : 'frag' ;
 KW_GRAPHICS     : 'graphics' ;
+KW_LOCAL        : 'local' ;
 KW_SHADER       : 'shader' ;
 
 // Literals

@@ -150,12 +150,13 @@ public:
 	// Contains resource limit information about a compile process
 	struct Limits
 	{
-		uint32 vertex_attribute_slots; // The max number of vertex attribute slots available (default 16)
-		uint32 fragment_outputs;       // The max number of fragment outputs available (default 4)
+		uint32 vertex_attribute_slots; // The number of vertex attribute slots available (default 16)
+		uint32 fragment_outputs;       // The number of fragment outputs available (default 4)
+		uint32 local_slots;            // The number of binding slots available for locals (default 8)
 	};
 	
 	// The default resource limits
-	static constexpr Limits DEFAULT_LIMITS = { 16, 4 };
+	static constexpr Limits DEFAULT_LIMITS = { 16, 4, 8 };
 
 public:
 	bool generate_reflection_file; // If the reflection info file should be generated
