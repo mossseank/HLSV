@@ -19,10 +19,9 @@ Variable::Variable(const string& name, HLSVType type, VarScope scope) :
 	name{ name },
 	type{ type },
 	scope{ scope },
-	local{ false },
 	uniform{ 0, 0 }
 {
-
+	
 }
 
 } // namespace hlsv
