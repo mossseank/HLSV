@@ -48,7 +48,8 @@ ReflectionInfo::ReflectionInfo(ShaderType type, uint32 tv, uint32 sv) :
 	shader_type{ type },
 	stages{ ShaderStages::None },
 	attributes{ },
-	outputs{ }
+	outputs{ },
+	uniforms{ }
 {
 
 }
@@ -84,6 +85,15 @@ uint32 ReflectionInfo::get_highest_attr_slot() const
 		return l.location < r.location;
 	});
 	return hi->location + hi->slot_count - 1;
+}
+
+// ====================================================================================================================
+const Uniform* ReflectionInfo::get_uniform_at(uint32 set, uint32 binding) const
+{
+	auto it = std::find_if(uniforms.begin(), uniforms.end(), [set, binding](const Uniform& u) {
+		return u.set == set && u.binding == binding;
+	});
+	return (it != uniforms.end()) ? &(*it) : nullptr;
 }
 
 } // namespace hlsv

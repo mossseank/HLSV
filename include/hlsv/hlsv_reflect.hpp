@@ -208,6 +208,19 @@ struct _EXPORT Output final
 	{ }
 }; // struct Output
 
+// Contains information about a shader uniform
+struct _EXPORT Uniform final
+{
+	string name;
+	HLSVType type;
+	uint8 set;
+	uint8 binding;
+
+	Uniform(const string& name, HLSVType type, uint8 s, uint8 b) :
+		name{ name }, type{ type }, set{ s }, binding{ b }
+	{ }
+}; // struct Uniform
+
 // The core reflection type that contains all reflection information about an HSLV shader
 class _EXPORT ReflectionInfo final
 {
@@ -218,6 +231,7 @@ public:
 	ShaderStages stages;    // The stages that are present in the shader
 	std::vector<Attribute> attributes; // The vertex attributes for the shader
 	std::vector<Output> outputs;       // The fragment outputs for the shader
+	std::vector<Uniform> uniforms;     // The uniforms for the shader
 
 public:
 	ReflectionInfo(ShaderType type, uint32 tv, uint32 sv);
@@ -229,7 +243,10 @@ public:
 	inline bool is_graphics() const { return shader_type == ShaderType::Graphics; }
 	inline bool is_compute() const { return shader_type == ShaderType::Compute; }
 
+	// Gets the highest binding slot that is occupied by the vertex attributes of the shader
 	uint32 get_highest_attr_slot() const;
+	// Gets the uniform at the given set and binding, or nullptr if there is not one
+	const Uniform* get_uniform_at(uint32 set, uint32 binding) const;
 }; // class ReflectionInfo
 
 } // namespace hlsv

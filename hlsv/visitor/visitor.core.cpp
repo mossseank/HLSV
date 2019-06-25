@@ -60,6 +60,8 @@ Variable Visitor::parse_variable(grammar::HLSV::VariableDeclarationContext* ctx,
 	auto btype = TypeHelper::ParseTypeStr(ctx->Type->getText());
 	if (btype == HLSVType::Error)
 		ERROR(ctx->Type, strarg("Invalid typename '%s'.", ctx->Type->getText().c_str()));
+	if (btype == HLSVType::Void)
+		ERROR(ctx->Type, "Variables cannot be of type 'void'.");
 
 	// Complete the full type
 	auto asize = ctx->Size ? parse_size_literal(ctx->Size) : 0u;
@@ -130,7 +132,6 @@ VISIT_FUNC(ShaderVersionStatement)
 // ====================================================================================================================
 VISIT_FUNC(VertexAttributeStatement)
 {
-	// Extract the components
 	auto vdec = ctx->variableDeclaration();
 
 	// Get the variable
@@ -171,7 +172,6 @@ VISIT_FUNC(VertexAttributeStatement)
 // ====================================================================================================================
 VISIT_FUNC(FragmentOutputStatement)
 {
-	// Extract the components
 	auto vdec = ctx->variableDeclaration();
 
 	// Get the variable
@@ -204,7 +204,6 @@ VISIT_FUNC(FragmentOutputStatement)
 // ====================================================================================================================
 VISIT_FUNC(LocalStatement)
 {
-	// Extract the components
 	auto vdec = ctx->variableDeclaration();
 
 	// Get the variable
@@ -229,6 +228,30 @@ VISIT_FUNC(LocalStatement)
 // ====================================================================================================================
 VISIT_FUNC(UniformStatement)
 {
+	auto vdec = ctx->variableDeclaration();
+
+	// Extract the binding info and check
+	uint32 uset = ctx->Set ? parse_size_literal(ctx->Set) : 0u;
+	uint32 ubind = parse_size_literal(ctx->Binding);
+	if (uset >= LIMITS.uniform_sets)
+		ERROR(ctx->Set, strarg("Uniform cannot use set %u, only %u set(s) allowed.", uset, LIMITS.uniform_sets));
+	if (ubind >= LIMITS.uniform_bindings)
+		ERROR(ctx->Binding, strarg("Uniform cannot use binding %u, only %u bindings(s) allowed.", ubind, LIMITS.uniform_bindings));
+	auto pre = REFL->get_uniform_at(uset, ubind);
+	if (pre)
+		ERROR(ctx, strarg("Uniform location %u:%u is already occupied by uniform '%s'.", uset, ubind, pre->name.c_str()));
+
+	// Get the variable
+	auto vrbl = parse_variable(vdec, VarScope::Uniform);
+	if (!vrbl.type.is_handle_type())
+		ERROR(vdec->Type, "Uniforms outside of blocks must be a handle type.");
+	if (vrbl.type.is_array)
+		ERROR(vdec->Size, "Handle-type uniforms cannot be arrays.");
+	
+	// Good to go, add the uniform
+	variables_.add_global(vrbl);
+	REFL->uniforms.push_back({ vrbl.name, vrbl.type, (uint8)uset, (uint8)ubind });
+
 	return nullptr;
 }
 
