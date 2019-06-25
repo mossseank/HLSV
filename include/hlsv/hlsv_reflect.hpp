@@ -140,8 +140,10 @@ public:
 	inline bool is_matrix_type() const { return IsMatrixType(type); }
 	inline bool is_handle_type() const { return IsHandleType(type); }
 	inline uint8 get_component_count() const { return GetComponentCount(type); }
+	inline PrimType get_component_type() const { return GetComponentType(type); }
 	inline string get_type_str() const { return GetTypeStr(type); }
 	inline uint32 get_slot_size() const { return GetSlotSize(*this); }
+	inline bool is_integer_type() const { return IsIntegerType(type); }
 	
 	inline static bool IsValueType(enum PrimType t) {
 		return (t >= VECTOR_TYPE_START && t <= VECTOR_TYPE_END) || (t >= MATRIX_TYPE_START && t <= MATRIX_TYPE_END);
@@ -163,8 +165,12 @@ public:
 		if (IsMatrixType(t)) return (t == Mat2) ? 4u : (t == Mat3) ? 9u : 16u;
 		return (((t - 1) % 4) + 1);
 	}
+	static PrimType GetComponentType(enum PrimType type);
 	static string GetTypeStr(enum PrimType t);
 	static uint32 GetSlotSize(HLSVType type);
+	inline static bool IsIntegerType(enum PrimType t) {
+		return IsValueType(t) && (GetComponentType(t) != Float);
+	}
 }; // struct HLSVType
 
 /* HLSVType Operators */

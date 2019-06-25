@@ -36,8 +36,8 @@ GLSLGenerator::~GLSLGenerator()
 // ====================================================================================================================
 void GLSLGenerator::emit_attribute(const Attribute& attr)
 {
-	vert_vars_ << "layout(location = " << (uint32)attr.location << ") in " << TypeHelper::GetGLSLStr(attr.type.type) << ' '
-		       << attr.name;
+	vert_vars_ << "layout(location = " << (uint32)attr.location << ") in " << TypeHelper::GetGLSLStr(attr.type.type) 
+		       << ' ' << attr.name;
 	if (attr.type.is_array) {
 		vert_vars_ << '[' << (uint32)attr.type.count << ']';
 	}
@@ -54,7 +54,7 @@ void GLSLGenerator::emit_output(const Output& output)
 // ====================================================================================================================
 void GLSLGenerator::emit_local(const Variable& vrbl, uint32 loc)
 {
-	string locstr = strarg("layout(location = %u) ", loc);
+	string locstr = strarg("layout(location = %u) %s", loc, vrbl.local.is_flat ? "flat " : "");
 	string varstr = strarg(" %s %s%s;", TypeHelper::GetGLSLStr(vrbl.type.type).c_str(), vrbl.name.c_str(),
 		vrbl.type.is_array ? strarg("[%u]", vrbl.type.count).c_str() : "");
 

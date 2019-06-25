@@ -18,6 +18,17 @@ namespace hlsv
 
 // ====================================================================================================================
 /* static */
+HLSVType::PrimType HLSVType::GetComponentType(enum PrimType type)
+{
+	if (type == Void || type == Error || IsHandleType(type))
+		return type;
+	if (IsMatrixType(type))
+		return Float;
+	return (PrimType)((((type - 1) / 4) * 4) + 1); // This works because of the specific ordering of the value types
+}
+
+// ====================================================================================================================
+/* static */
 string HLSVType::GetTypeStr(enum PrimType t) 
 { 
 	return TypeHelper::TypeStr(t);

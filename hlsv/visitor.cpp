@@ -211,7 +211,7 @@ VISIT_FUNC(LocalStatement)
 	auto vrbl = parse_variable(vdec, VarScope::Local);
 	if (!vrbl.type.is_value_type())
 		ERROR(vdec->Type, strarg("Local '%s' must be a value type.", vrbl.name.c_str()));
-	vrbl.local.is_flat = !!ctx->KW_FLAT();
+	vrbl.local.is_flat = !!ctx->KW_FLAT() || vrbl.type.is_integer_type();
 
 	// Slot checking
 	uint32 rem = variables_.get_local_slot_count();
