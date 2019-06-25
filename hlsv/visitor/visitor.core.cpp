@@ -6,10 +6,10 @@
  * Copyright (c) 2019 Sean Moss [moss.seank@gmail.com]
  */
 
-// This file implements visitor.hpp.
+// This file implements the functions of the visitor class that are utility, as well as top level statements
 
 #include "visitor.hpp"
-#include "var/typehelper.hpp"
+#include "../var/typehelper.hpp"
 #include <cstdlib>
 
 #ifdef HLSV_COMPILER_MSVC

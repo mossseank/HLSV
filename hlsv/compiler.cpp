@@ -10,7 +10,7 @@
 
 #include "config.hpp"
 #include "error_listener.hpp"
-#include "visitor.hpp"
+#include "visitor/visitor.hpp"
 #include "reflect/io.hpp"
 #include "fs/path.h"
 #include "antlr/ANTLRInputStream.h"

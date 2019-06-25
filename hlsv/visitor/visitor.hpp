@@ -10,9 +10,9 @@
 
 #pragma once
 
-#include "config.hpp"
-#include "gen/glsl_generator.hpp"
-#include "var/manager.hpp"
+#include "../config.hpp"
+#include "../gen/glsl_generator.hpp"
+#include "../var/manager.hpp"
 #include "../generated/HLSVBaseVisitor.h"
 #include "antlr/CommonTokenStream.h"
 
