@@ -153,10 +153,12 @@ public:
 		uint32 vertex_attribute_slots; // The number of vertex attribute slots available (default 16)
 		uint32 fragment_outputs;       // The number of fragment outputs available (default 4)
 		uint32 local_slots;            // The number of binding slots available for locals (default 8)
+		uint32 uniform_sets;           // The number of uniform sets (default 4)
+		uint32 uniform_bindings;       // The number of uniform bindings per uniform sets (default 8)
 	};
 	
 	// The default resource limits
-	static constexpr Limits DEFAULT_LIMITS = { 16, 4, 8 };
+	static constexpr Limits DEFAULT_LIMITS = { 16, 4, 8, 4, 8 };
 
 public:
 	bool generate_reflection_file; // If the reflection info file should be generated

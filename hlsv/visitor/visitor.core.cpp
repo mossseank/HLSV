@@ -226,4 +226,10 @@ VISIT_FUNC(LocalStatement)
 	return nullptr;
 }
 
+// ====================================================================================================================
+VISIT_FUNC(UniformStatement)
+{
+	return nullptr;
+}
+
 } // namespace hlsv

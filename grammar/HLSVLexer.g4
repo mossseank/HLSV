@@ -6,13 +6,14 @@
 lexer grammar HLSVLexer;
 
 // Keywords
-KW_ATTRIBUTE    : 'attr' ;
+KW_ATTR         : 'attr' ;
 KW_COMPUTE      : 'compute' ;
 KW_FLAT         : 'flat' ;
 KW_FRAG         : 'frag' ;
 KW_GRAPHICS     : 'graphics' ;
 KW_LOCAL        : 'local' ;
 KW_SHADER       : 'shader' ;
+KW_UNIF         : 'unif' ;
 
 // Literals
 VERSION_LITERAL
@@ -37,6 +38,7 @@ RBRACKET    : ']' ;
 LPAREN      : '(' ;
 RPAREN      : ')' ;
 SEMI_COLON  : ';' ;
+COMMA       : ',' ;
 
 // Whitespace and comments (ignore)
 WS

@@ -99,6 +99,10 @@ bool Args::Parse(int argc, char** argv, Args& args)
 					args.options.limits.fragment_outputs = rlval;
 				else if (rl == "local")
 					args.options.limits.local_slots = rlval;
+				else if (rl == "uset")
+					args.options.limits.uniform_sets = rlval;
+				else if (rl == "ubind")
+					args.options.limits.uniform_bindings = rlval;
 				else {
 					Console::Warnf("Unknown resource limit type '%s', ignoring.", rl.c_str());
 					continue;
@@ -149,5 +153,7 @@ void Args::PrintHelp()
 		"                                            attr - The number of vertex attribute slots (default 16)\n"
 		"                                            frag - The number of fragment outputs (default 4)\n"
 		"                                            local - The number of binding slots for locals (default 8)\n"
+		"                                            uset - The number of uniform sets (default 4)\n"
+		"                                            ubind - The number of uniform bindings per set (default 8)\n"
 	);
 }

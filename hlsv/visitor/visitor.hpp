@@ -71,6 +71,7 @@ public:
 	VISIT(VertexAttributeStatement)
 	VISIT(FragmentOutputStatement)
 	VISIT(LocalStatement)
+	VISIT(UniformStatement)
 }; // class Visitor
 
 } // namespace hlsv

@@ -23,6 +23,7 @@ topLevelStatement
     : vertexAttributeStatement
     | fragmentOutputStatement
     | localStatement
+    | uniformStatement
     ;
 
 // Vertex attribute statement
@@ -38,6 +39,11 @@ fragmentOutputStatement
 // Local variable statement
 localStatement
     : 'local' 'flat'? variableDeclaration ';'
+    ;
+
+// Uniforms and uniform blocks
+uniformStatement
+    : 'unif' '(' (Set=SIZE_LITERAL ',')? Binding=SIZE_LITERAL ')' variableDeclaration ';'
     ;
 
 // Variable declaration
