@@ -69,7 +69,7 @@ bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, strin
 		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Array", 10) << ' '  << pad("Count", 10) << ' '
 			 << pad("Location", 10) << ' ' << pad("Slots", 10) << std::endl;
 		for (const auto& attr : refl.attributes) {
-			file << pad(attr.name, 16) << ' ' << pad(attr.type.type_str(), 12) << ' ' 
+			file << pad(attr.name, 16) << ' ' << pad(attr.type.get_type_str(), 12) << ' ' 
 				 << pad(attr.type.is_array ? "Yes" : "No", 10) << ' ' << padf("%u", 10, (uint32)attr.type.count) << ' '
 				 << padf("%u", 10, (uint32)attr.location) << ' ' << padf("%u", 10, (uint32)attr.slot_count) << std::endl;
 		}
@@ -85,7 +85,7 @@ bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, strin
 	{
 		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Location", 10) << std::endl;
 		for (const auto& out : refl.outputs) {
-			file << pad(out.name, 16) << ' ' << pad(out.type.type_str(), 12) << ' ' << padf("%u", 10, (uint32)out.location)
+			file << pad(out.name, 16) << ' ' << pad(out.type.get_type_str(), 12) << ' ' << padf("%u", 10, (uint32)out.location)
 				 << std::endl;
 		}
 		file << std::endl;

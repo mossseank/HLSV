@@ -62,4 +62,17 @@ void ReflectionInfo::sort()
 	});
 }
 
+// ====================================================================================================================
+uint32 ReflectionInfo::get_highest_attr_slot() const
+{
+	if (attributes.empty())
+		return 0;
+
+	// Cant just grab the end because this function cant assume that the vector will be sorted
+	auto hi = std::max_element(attributes.begin(), attributes.end(), [](const Attribute& l, const Attribute& r) {
+		return l.location < r.location;
+	});
+	return hi->location + hi->slot_count - 1;
+}
+
 } // namespace hlsv

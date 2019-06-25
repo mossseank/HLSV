@@ -93,6 +93,17 @@ VISIT_FUNC(File)
 		visit(tls);
 	}
 
+	// Emit the locals
+	{
+		uint32 base = std::max({ REFL->get_highest_attr_slot() + 1u, (uint32)REFL->outputs.size() });
+		for (const auto& loc : variables_.get_globals()) {
+			if (loc.is_local()) {
+				gen_.emit_local(loc, base);
+				base += loc.type.get_slot_size();
+			}
+		}
+	}
+
 	// Sort the reflection info
 	REFL->sort();
 
@@ -203,9 +214,10 @@ VISIT_FUNC(LocalStatement)
 	vrbl.local.is_flat = !!ctx->KW_FLAT();
 
 	// Slot checking
-	if ((variables_.get_local_slot_count() + vrbl.get_slot_count()) > LIMITS.local_slots) {
-		ERROR(ctx, strarg("Local '%s' is too large (%u slots), only %u slots available.", vrbl.name.c_str(),
-			vrbl.get_slot_count(), LIMITS.local_slots));
+	uint32 rem = variables_.get_local_slot_count();
+	if ((rem + vrbl.get_slot_count()) > LIMITS.local_slots) {
+		ERROR(ctx, strarg("Local '%s' is too large (%u slots), only %u slots still available.", vrbl.name.c_str(),
+			vrbl.get_slot_count(), LIMITS.local_slots - rem));
 	}
 
 	// Local is good to go (location gets assigned later)

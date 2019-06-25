@@ -140,7 +140,7 @@ public:
 	inline bool is_matrix_type() const { return IsMatrixType(type); }
 	inline bool is_handle_type() const { return IsHandleType(type); }
 	inline uint8 get_component_count() const { return GetComponentCount(type); }
-	inline string type_str() const { return GetTypeStr(type); }
+	inline string get_type_str() const { return GetTypeStr(type); }
 	inline uint32 get_slot_size() const { return GetSlotSize(*this); }
 	
 	inline static bool IsValueType(enum PrimType t) {
@@ -222,6 +222,8 @@ public:
 
 	inline bool is_graphics() const { return shader_type == ShaderType::Graphics; }
 	inline bool is_compute() const { return shader_type == ShaderType::Compute; }
+
+	uint32 get_highest_attr_slot() const;
 }; // class ReflectionInfo
 
 } // namespace hlsv

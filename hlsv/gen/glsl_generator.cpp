@@ -51,4 +51,15 @@ void GLSLGenerator::emit_output(const Output& output)
 		       << ' ' << output.name << ";\n";
 }
 
+// ====================================================================================================================
+void GLSLGenerator::emit_local(const Variable& vrbl, uint32 loc)
+{
+	string locstr = strarg("layout(location = %u) ", loc);
+	string varstr = strarg(" %s %s%s;", TypeHelper::GetGLSLStr(vrbl.type.type).c_str(), vrbl.name.c_str(),
+		vrbl.type.is_array ? strarg("[%u]", vrbl.type.count).c_str() : "");
+
+	vert_vars_ << locstr << "out" << varstr << '\n';
+	frag_vars_ << locstr << "in" << varstr << '\n';
+}
+
 } // namespace hlsv

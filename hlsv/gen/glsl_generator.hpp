@@ -11,6 +11,7 @@
 #pragma once
 
 #include "../config.hpp"
+#include "../var/variable.hpp"
 #include <sstream>
 
 
@@ -39,6 +40,7 @@ public:
 
 	void emit_attribute(const Attribute& attr);
 	void emit_output(const Output& output);
+	void emit_local(const Variable& vrbl, uint32 loc);
 }; // class GLSLGenerator
 
 } // namespace hlsv

@@ -25,7 +25,7 @@ class VariableManager final
 	using varvec = std::vector<Variable>;
 
 private:
-	varvec globals_; // The global variables (all that dont exist in any local scopes
+	varvec globals_; // The global variables (all that dont exist in any local scopes)
 
 public:
 	VariableManager();
@@ -34,6 +34,8 @@ public:
 	Variable* find_global(const string& name);
 	Variable* find_variable(const string& name);
 	void add_global(const Variable& var); // Does not check if a variable with the name already exists
+
+	inline const varvec& get_globals() const { return globals_; }
 
 	uint32 get_local_slot_count(); // The number of slots currently taken by locals
 }; // class VariableManager
