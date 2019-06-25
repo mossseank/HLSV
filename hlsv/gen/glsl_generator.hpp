@@ -41,6 +41,7 @@ public:
 	void emit_attribute(const Attribute& attr);
 	void emit_output(const Output& output);
 	void emit_local(const Variable& vrbl, uint32 loc);
+	void emit_handle_uniform(const Uniform& uni);
 }; // class GLSLGenerator
 
 } // namespace hlsv

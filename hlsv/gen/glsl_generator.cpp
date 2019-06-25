@@ -62,4 +62,19 @@ void GLSLGenerator::emit_local(const Variable& vrbl, uint32 loc)
 	frag_vars_ << locstr << "in" << varstr << '\n';
 }
 
+// ====================================================================================================================
+void GLSLGenerator::emit_handle_uniform(const Uniform& uni)
+{
+	string targstr =
+		uni.type.is_image_type() ? strarg(", %s", TypeHelper::GetImageFormatStr(uni.type.extra.image_format).c_str()) :
+		uni.type == HLSVType::SubpassInput ? strarg(", input_attachment_index = %u", (uint32)uni.type.extra.subpass_input_index) : "";
+	string locstr = strarg("layout(set = %u, binding = %u%s)", (uint32)uni.set, (uint32)uni.binding, targstr.c_str());
+	string varstr = strarg(" uniform %s %s;", TypeHelper::GetGLSLStr(uni.type.type).c_str(), uni.name.c_str());
+
+	if (uni.type != HLSVType::SubpassInput) { // Error to have subpass inputs specified in any stage except fragment
+		vert_vars_ << locstr << varstr << '\n';
+	}
+	frag_vars_ << locstr << varstr << '\n';
+}
+
 } // namespace hlsv

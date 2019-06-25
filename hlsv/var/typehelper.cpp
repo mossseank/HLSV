@@ -94,4 +94,15 @@ uint8 TypeHelper::GetPrimitiveSlotCount(HLSVType::PrimType type)
 	return (type == HLSVType::Mat2) ? 2u : (type == HLSVType::Mat3) ? 3u : 4u;
 }
 
+// ====================================================================================================================
+/* static */
+string TypeHelper::GetImageFormatStr(HLSVType::PrimType type)
+{
+	TYPE_TO_STR(Int, "r32i")   TYPE_TO_STR(Int2, "rg32i")   TYPE_TO_STR(Int4, "rgba32i")
+	TYPE_TO_STR(UInt, "r32ui") TYPE_TO_STR(UInt2, "rg32ui") TYPE_TO_STR(UInt4, "rgba32ui")
+	TYPE_TO_STR(Float, "r32f") TYPE_TO_STR(Float2, "rg32f") TYPE_TO_STR(Float4, "rgba32f")
+
+	return "ERROR";
+}
+
 } // namespace hlsv

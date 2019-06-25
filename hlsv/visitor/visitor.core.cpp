@@ -97,7 +97,7 @@ Variable Visitor::parse_variable(grammar::HLSV::VariableDeclarationContext* ctx,
 			uint32 spi = parse_size_literal(targ->Index);
 			if (vartype.type != HLSVType::SubpassInput)
 				ERROR(targ->Index, "Only subpass inputs can have index specifiers.");
-			vartype.extra.subpass_input_index = spi;
+			vartype.extra.subpass_input_index = (uint8)spi;
 		}
 	}
 	else { // No type argument, so we need to see if one was required
@@ -290,14 +290,17 @@ VISIT_FUNC(UniformStatement)
 	if (vrbl.type == HLSVType::SubpassInput) {
 		auto pre = REFL->get_subpass_input(vrbl.type.extra.subpass_input_index);
 		if (pre) {
-			ERROR(ctx, strarg("Subpass input index %u is already occupied by uniform '%s'.", vrbl.type.extra.subpass_input_index,
+			ERROR(ctx, strarg("Subpass input index %u is already occupied by uniform '%s'.", (uint32)vrbl.type.extra.subpass_input_index,
 				pre->name.c_str()));
 		}
 	}
 	
 	// Good to go, add the uniform
 	variables_.add_global(vrbl);
-	REFL->uniforms.push_back({ vrbl.name, vrbl.type, (uint8)uset, (uint8)ubind });
+	Uniform uni{ vrbl.name, vrbl.type, (uint8)uset, (uint8)ubind };
+	REFL->uniforms.push_back(uni);
+	if (vrbl.type.is_handle_type())
+		gen_.emit_handle_uniform(uni);
 
 	return nullptr;
 }

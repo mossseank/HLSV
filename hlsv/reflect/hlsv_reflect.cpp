@@ -72,6 +72,11 @@ void ReflectionInfo::sort()
 	std::sort(outputs.begin(), outputs.end(), [](const Output& l, const Output& r) {
 		return l.location < r.location;
 	});
+
+	// Uniforms (TODO: take offset into account)
+	std::sort(uniforms.begin(), uniforms.end(), [](const Uniform& l, const Uniform& r) {
+		return (l.set == r.set) ? l.binding < r.binding : l.set < r.set;
+	});
 }
 
 // ====================================================================================================================
@@ -100,7 +105,7 @@ const Uniform* ReflectionInfo::get_uniform_at(uint32 set, uint32 binding) const
 const Uniform* ReflectionInfo::get_subpass_input(uint32 index) const
 {
 	auto it = std::find_if(uniforms.begin(), uniforms.end(), [index](const Uniform& u) {
-		return u.type == HLSVType::SubpassInput && u.type.extra.subpass_input_index == index;
+		return u.type == HLSVType::SubpassInput && (uint32)u.type.extra.subpass_input_index == index;
 		});
 	return (it != uniforms.end()) ? &(*it) : nullptr;
 }

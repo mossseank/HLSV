@@ -66,10 +66,10 @@ bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, strin
 	file << "Attributes" << std::endl 
 		 << "----------" << std::endl;
 	if (refl.attributes.size() > 0) {
-		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Array", 10) << ' '  << pad("Count", 10) << ' '
+		file << pad("Name", 16) << ' ' << pad("Type", 16) << ' ' << pad("Array", 10) << ' '  << pad("Count", 10) << ' '
 			 << pad("Location", 10) << ' ' << pad("Slots", 10) << std::endl;
 		for (const auto& attr : refl.attributes) {
-			file << pad(attr.name, 16) << ' ' << pad(attr.type.get_type_str(), 12) << ' ' 
+			file << pad(attr.name, 16) << ' ' << pad(attr.type.get_type_str(), 16) << ' ' 
 				 << pad(attr.type.is_array ? "Yes" : "No", 10) << ' ' << padf("%u", 10, (uint32)attr.type.count) << ' '
 				 << padf("%u", 10, (uint32)attr.location) << ' ' << padf("%u", 10, (uint32)attr.slot_count) << std::endl;
 		}
@@ -81,12 +81,30 @@ bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, strin
 	// Write fragment outputs
 	file << "Outputs" << std::endl
 		 << "-------" << std::endl;
-	if (refl.outputs.size() > 0)
-	{
-		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Location", 10) << std::endl;
+	if (refl.outputs.size() > 0) {
+		file << pad("Name", 16) << ' ' << pad("Type", 16) << ' ' << pad("Location", 10) << std::endl;
 		for (const auto& out : refl.outputs) {
-			file << pad(out.name, 16) << ' ' << pad(out.type.get_type_str(), 12) << ' ' << padf("%u", 10, (uint32)out.location)
+			file << pad(out.name, 16) << ' ' << pad(out.type.get_type_str(), 16) << ' ' << padf("%u", 10, (uint32)out.location)
 				 << std::endl;
+		}
+		file << std::endl;
+	}
+	else
+		file << "None" << std::endl << std::endl;
+
+	// Uniforms
+	file << "Uniforms" << std::endl
+		 << "--------" << std::endl;
+	if (refl.uniforms.size() > 0) {
+		file << pad("Name", 16) << ' ' << pad("Type", 16) << ' ' << pad("Type Arg.", 12) << ' ' << pad("Array", 10) << ' '
+			 << pad("Set", 8) << ' ' << pad("Binding", 8) << std::endl; // TODO: The offset and block, once implemented
+		for (const auto& uni : refl.uniforms) {
+			file << pad(uni.name, 16) << ' ' << pad(uni.type.get_type_str(), 16) << ' ';
+			if (uni.type.is_image_type()) file << pad(HLSVType::GetTypeStr(uni.type.extra.image_format), 12);
+			else if (uni.type == HLSVType::SubpassInput) file << padf("%u", 12, (uint32)uni.type.extra.subpass_input_index);
+			else file << pad("", 12);
+			file << ' ' << pad(uni.type.is_array ? "Yes" : "No", 10) << ' ' << padf("%u", 8, (uint32)uni.set) << ' ' 
+				 << padf("%u", 8, (uint32)uni.binding) << std::endl;
 		}
 		file << std::endl;
 	}
@@ -121,7 +139,7 @@ bool ReflWriter::WriteBinary(const string& path, const ReflectionInfo& refl, str
 	file << (uint8)refl.attributes.size();
 	if (refl.attributes.size() > 0) {
 		for (const auto& attr : refl.attributes) {
-			write_str(file, attr.name) << (uint8)attr.type.type << (uint8)attr.type.is_array << attr.type.count
+			write_str(file, attr.name) << (uint8)attr.type.type << (uint8)(attr.type.is_array ? attr.type.count : 0)
 				<< attr.location << attr.slot_count;
 		}
 	}
@@ -131,6 +149,16 @@ bool ReflWriter::WriteBinary(const string& path, const ReflectionInfo& refl, str
 	if (refl.outputs.size() > 0) {
 		for (const auto& out : refl.outputs) {
 			write_str(file, out.name) << (uint8)out.type.type << (uint8)out.location;
+		}
+	}
+
+	// Write uniforms
+	file << (uint8)refl.uniforms.size();
+	if (refl.uniforms.size() > 0) {
+		// TODO: The offset and block, once implemented
+		for (const auto& uni : refl.uniforms) {
+			write_str(file, uni.name) << (uint8)uni.type.type << (uint8)uni.type.extra.image_format // Writes whatever extra information there is
+				<< (uint8)(uni.type.is_array ? uni.type.count : 0) << uni.set << uni.binding;
 		}
 	}
 

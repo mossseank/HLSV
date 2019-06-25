@@ -128,9 +128,10 @@ public:
 	uint8 count;   // The number of elements in the type, will be 1 for non-arrays, and the array size for array types
 	union
 	{
-		uint32 subpass_input_index; // The index of the subpass input resource
+		uint8 subpass_input_index; // The index of the subpass input resource
 		PrimType image_format;      // The texel format of the storage image
 	} extra;       // Contains extra information about the type, the members will be valid only for certain types
+	               // IMPORTANT: THIS VALUE SHOULD NOT BE LARGER THAN A BYTE, OR ELSE BINARY REFLECTION WILL BREAK
 
 public:
 	HLSVType() :
