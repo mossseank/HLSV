@@ -35,6 +35,7 @@ HLSVType::PrimType TypeHelper::ParseTypeStr(const string& str)
 	STR_TO_TYPE("tex1DArray", Tex1DArray) STR_TO_TYPE("tex2DArray", Tex2DArray)
 	STR_TO_TYPE("image1D", Image1D) STR_TO_TYPE("image2D", Image2D) STR_TO_TYPE("image3D", Image3D)
 	STR_TO_TYPE("image1DArray", Image1DArray) STR_TO_TYPE("image2DArray", Image2DArray)
+	STR_TO_TYPE("subpassInput", SubpassInput)
 	
 	return HLSVType::PrimType::Error;
 }
@@ -56,6 +57,7 @@ string TypeHelper::TypeStr(HLSVType::PrimType type)
 	ENUM_TO_STR(Tex1DArray) ENUM_TO_STR(Tex2DArray)
 	ENUM_TO_STR(Image1D) ENUM_TO_STR(Image2D) ENUM_TO_STR(Image3D)
 	ENUM_TO_STR(Image1DArray) ENUM_TO_STR(Image2DArray)
+	ENUM_TO_STR(SubpassInput)
 	
 	return "ERROR";
 }
@@ -77,6 +79,7 @@ string TypeHelper::GetGLSLStr(HLSVType::PrimType type)
 	TYPE_TO_STR(Tex1DArray, "sampler1DArray") TYPE_TO_STR(Tex2DArray, "sampler2DArray")
 	TYPE_TO_STR(Image1D, "image1D") TYPE_TO_STR(Image2D, "image2D") TYPE_TO_STR(Image3D, "image3D")
 	TYPE_TO_STR(Image1DArray, "image1DArray") TYPE_TO_STR(Image2DArray, "image2DArray")
+	TYPE_TO_STR(SubpassInput, "subpassInput")
 	
 	return "ERROR";
 }

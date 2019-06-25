@@ -67,7 +67,45 @@ Variable Visitor::parse_variable(grammar::HLSV::VariableDeclarationContext* ctx,
 	auto asize = ctx->Size ? parse_size_literal(ctx->Size) : 0u;
 	if (ctx->Size && asize == 0)
 		ERROR(ctx->Size, "Arrays cannot have a size of zero.");
-	HLSVType type = (asize == 0) ? HLSVType{ btype } : HLSVType{ btype, (uint8)asize };
+	HLSVType vartype = (asize == 0) ? HLSVType{ btype } : HLSVType{ btype, (uint8)asize };
+
+	// Parse the type argument (if any), and perform match checking
+	auto targ = ctx->typeArgument();
+	if (targ) {
+		auto argstr = targ->Format ? targ->Format->getText() : targ->Index->getText();
+		if (vartype.is_value_type())
+			ERROR(targ, "Value types cannot have type arguments.");
+		if (vartype.is_texture_type())
+			ERROR(targ, "Sampled texture types cannot have type arguments.");
+
+		if (targ->Format) { // Format = Sampled Image
+			auto ifmt = TypeHelper::ParseTypeStr(targ->Format->getText());
+			if (ifmt == HLSVType::Error)
+				ERROR(targ->Format, strarg("Invalid format specifier '%s'.", targ->Format->getText().c_str()));
+			if (!HLSVType::IsScalarType(ifmt) && !HLSVType::IsVectorType(ifmt))
+				ERROR(targ->Format, "Image format type arguments must be a scalar or vector type.");
+			if (HLSVType::GetComponentType(ifmt) == HLSVType::Bool)
+				ERROR(targ->Format, "Image format type arguments cannot have a boolean component type.");
+			if (HLSVType::GetComponentCount(ifmt) == 3)
+				ERROR(targ->Format, "Image formats cannot be 3-component vectors.");
+
+			if (!vartype.is_image_type())
+				ERROR(targ->Format, "Only storage image types can have image format specifiers.");
+			vartype.extra.image_format = ifmt;
+		}
+		else { // Index = Subpass Input
+			uint32 spi = parse_size_literal(targ->Index);
+			if (vartype.type != HLSVType::SubpassInput)
+				ERROR(targ->Index, "Only subpass inputs can have index specifiers.");
+			vartype.extra.subpass_input_index = spi;
+		}
+	}
+	else { // No type argument, so we need to see if one was required
+		if (vartype.is_image_type())
+			ERROR(ctx, "Storage images are required to have a format specifier.");
+		if (vartype.type == HLSVType::SubpassInput)
+			ERROR(ctx, "Subpass inputs are required to have an index specifier.");
+	}
 
 	// Parse the name
 	auto name = ctx->Name->getText();
@@ -81,7 +119,7 @@ Variable Visitor::parse_variable(grammar::HLSV::VariableDeclarationContext* ctx,
 		ERROR(ctx->Name, strarg("A variable with the name '%s' already exists.", name.c_str()));
 
 	// Return the partially-complete variable
-	return { name, type, scope };
+	return { name, vartype, scope };
 }
 
 // ====================================================================================================================
@@ -247,6 +285,15 @@ VISIT_FUNC(UniformStatement)
 		ERROR(vdec->Type, "Uniforms outside of blocks must be a handle type.");
 	if (vrbl.type.is_array)
 		ERROR(vdec->Size, "Handle-type uniforms cannot be arrays.");
+
+	// Uniform-specific subpass input index checking
+	if (vrbl.type == HLSVType::SubpassInput) {
+		auto pre = REFL->get_subpass_input(vrbl.type.extra.subpass_input_index);
+		if (pre) {
+			ERROR(ctx, strarg("Subpass input index %u is already occupied by uniform '%s'.", vrbl.type.extra.subpass_input_index,
+				pre->name.c_str()));
+		}
+	}
 	
 	// Good to go, add the uniform
 	variables_.add_global(vrbl);

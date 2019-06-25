@@ -40,6 +40,10 @@ RPAREN      : ')' ;
 SEMI_COLON  : ';' ;
 COMMA       : ',' ;
 
+// Operators
+OP_LT       : '<' ;
+OP_GT       : '>' ;
+
 // Whitespace and comments (ignore)
 WS
     : [ \t\r\n\u000C]+ -> channel(HIDDEN)

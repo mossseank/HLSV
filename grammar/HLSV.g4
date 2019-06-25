@@ -48,5 +48,8 @@ uniformStatement
 
 // Variable declaration
 variableDeclaration
-    : Type=IDENTIFIER Name=IDENTIFIER ('[' Size=SIZE_LITERAL ']')?
+    : Type=IDENTIFIER typeArgument? Name=IDENTIFIER ('[' Size=SIZE_LITERAL ']')?
+    ;
+typeArgument
+    : '<' (Format=IDENTIFIER | Index=SIZE_LITERAL) '>'
     ;

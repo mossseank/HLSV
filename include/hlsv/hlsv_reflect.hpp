@@ -107,6 +107,7 @@ public:
 		Image3D      = 208, // A 3-dimensional non-sampled storage image (image3D)
 		Image1DArray = 209, // An array of 1-dimensional non-sampled storage images (image1DArray)
 		Image2DArray = 210, // An array of 2-dimensional non-sampled storage images (image2DArray)
+		SubpassInput = 211, // A texture resource that is being used as a subpass input within a renderpass
 	};
 
 private:
@@ -115,22 +116,31 @@ private:
 	static const PrimType MATRIX_TYPE_START = Mat2;
 	static const PrimType MATRIX_TYPE_END = Mat4;
 	static const PrimType HANDLE_TYPE_START = Tex1D;
-	static const PrimType HANDLE_TYPE_END = Image2DArray;
+	static const PrimType HANDLE_TYPE_END = SubpassInput;
+	static const PrimType TEXTURE_TYPE_START = Tex1D;
+	static const PrimType TEXTURE_TYPE_END = Tex2DArray;
+	static const PrimType IMAGE_TYPE_START = Image1D;
+	static const PrimType IMAGE_TYPE_END = Image2DArray;
 
 public:
 	PrimType type; // The base primitive type
 	bool is_array; // If the type is an array
 	uint8 count;   // The number of elements in the type, will be 1 for non-arrays, and the array size for array types
+	union
+	{
+		uint32 subpass_input_index; // The index of the subpass input resource
+		PrimType image_format;      // The texel format of the storage image
+	} extra;       // Contains extra information about the type, the members will be valid only for certain types
 
 public:
 	HLSVType() :
-		type{ Void }, is_array{ false }, count{ 1 }
+		type{ Void }, is_array{ false }, count{ 1 }, extra{ 0 }
 	{ }
 	HLSVType(enum PrimType type) :
-		type{ type }, is_array{ false }, count{ 1 }
+		type{ type }, is_array{ false }, count{ 1 }, extra{ 0 }
 	{ }
 	HLSVType(enum PrimType type, uint8 array_size) :
-		type{ type }, is_array{ true }, count{ array_size }
+		type{ type }, is_array{ true }, count{ array_size }, extra{ 0 }
 	{ }
 
 	inline bool is_error() const { return type == Error; } // Gets if the type represents a type error
@@ -139,6 +149,8 @@ public:
 	inline bool is_vector_type() const { return IsVectorType(type); }
 	inline bool is_matrix_type() const { return IsMatrixType(type); }
 	inline bool is_handle_type() const { return IsHandleType(type); }
+	inline bool is_texture_type() const { return IsTextureType(type); }
+	inline bool is_image_type() const { return IsImageType(type); }
 	inline uint8 get_component_count() const { return GetComponentCount(type); }
 	inline PrimType get_component_type() const { return GetComponentType(type); }
 	inline string get_type_str() const { return GetTypeStr(type); }
@@ -159,6 +171,12 @@ public:
 	}
 	inline static bool IsHandleType(enum PrimType t) {
 		return (t >= HANDLE_TYPE_START && t <= HANDLE_TYPE_END);
+	}
+	inline static bool IsTextureType(enum PrimType t) {
+		return (t >= TEXTURE_TYPE_START && t <= TEXTURE_TYPE_END);
+	}
+	inline static bool IsImageType(enum PrimType t) {
+		return (t >= IMAGE_TYPE_START && t <= IMAGE_TYPE_END);
 	}
 	inline static uint8 GetComponentCount(enum PrimType t) {
 		if (IsHandleType(t)) return 1u;
@@ -247,6 +265,8 @@ public:
 	uint32 get_highest_attr_slot() const;
 	// Gets the uniform at the given set and binding, or nullptr if there is not one
 	const Uniform* get_uniform_at(uint32 set, uint32 binding) const;
+	// Gets the subpass input for the given index, or nullptr if there is not one
+	const Uniform* get_subpass_input(uint32 index) const;
 }; // class ReflectionInfo
 
 } // namespace hlsv

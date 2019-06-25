@@ -96,4 +96,13 @@ const Uniform* ReflectionInfo::get_uniform_at(uint32 set, uint32 binding) const
 	return (it != uniforms.end()) ? &(*it) : nullptr;
 }
 
+// ====================================================================================================================
+const Uniform* ReflectionInfo::get_subpass_input(uint32 index) const
+{
+	auto it = std::find_if(uniforms.begin(), uniforms.end(), [index](const Uniform& u) {
+		return u.type == HLSVType::SubpassInput && u.type.extra.subpass_input_index == index;
+		});
+	return (it != uniforms.end()) ? &(*it) : nullptr;
+}
+
 } // namespace hlsv
