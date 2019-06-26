@@ -40,11 +40,6 @@ public:
 		{
 			bool is_flat;
 		} local;
-		struct
-		{
-			uint8 set;
-			uint8 binding;
-		} uniform;
 	};
 
 public:

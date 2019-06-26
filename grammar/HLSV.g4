@@ -43,7 +43,11 @@ localStatement
 
 // Uniforms and uniform blocks
 uniformStatement
-    : 'unif' '(' (Set=SIZE_LITERAL ',')? Binding=SIZE_LITERAL ')' variableDeclaration ';'
+    : 'unif' '(' (Set=SIZE_LITERAL ',')? Binding=SIZE_LITERAL ')' 
+        (
+            variableDeclaration | 
+            ('block' variableBlock BlockName=IDENTIFIER?)
+        ) ';'
     ;
 
 // Variable declaration
@@ -52,4 +56,7 @@ variableDeclaration
     ;
 typeArgument
     : '<' (Format=IDENTIFIER | Index=SIZE_LITERAL) '>'
+    ;
+variableBlock
+    : '{' (Declarations+=variableDeclaration ';')* '}'
     ;

@@ -266,8 +266,6 @@ VISIT_FUNC(LocalStatement)
 // ====================================================================================================================
 VISIT_FUNC(UniformStatement)
 {
-	auto vdec = ctx->variableDeclaration();
-
 	// Extract the binding info and check
 	uint32 uset = ctx->Set ? parse_size_literal(ctx->Set) : 0u;
 	uint32 ubind = parse_size_literal(ctx->Binding);
@@ -279,28 +277,56 @@ VISIT_FUNC(UniformStatement)
 	if (pre)
 		ERROR(ctx, strarg("Uniform location %u:%u is already occupied by uniform '%s'.", uset, ubind, pre->name.c_str()));
 
-	// Get the variable
-	auto vrbl = parse_variable(vdec, VarScope::Uniform);
-	if (!vrbl.type.is_handle_type())
-		ERROR(vdec->Type, "Uniforms outside of blocks must be a handle type.");
-	if (vrbl.type.is_array)
-		ERROR(vdec->Size, "Handle-type uniforms cannot be arrays.");
+	// Split work based on block or not
+	if (ctx->KW_BLOCK()) {
+		auto vb = ctx->variableBlock();
+		if (vb->Declarations.size() == 0)
+			ERROR(ctx, "Empty uniform blocks are not allowed.");
+		gen_.emit_uniform_block_header(uset, ubind);
 
-	// Uniform-specific subpass input index checking
-	if (vrbl.type == HLSVType::SubpassInput) {
-		auto pre = REFL->get_subpass_input(vrbl.type.extra.subpass_input_index);
-		if (pre) {
-			ERROR(ctx, strarg("Subpass input index %u is already occupied by uniform '%s'.", (uint32)vrbl.type.extra.subpass_input_index,
-				pre->name.c_str()));
+		// Create a new uniform for each variable in the block
+		for (auto vdec : vb->Declarations) {
+			// Build the variable
+			auto vrbl = parse_variable(vdec, VarScope::Uniform);
+			if (!vrbl.type.is_value_type())
+				ERROR(vdec->Type, "Uniforms inside of blocks must be a value type.");
+
+			// TODO: proper setup of offsets, sizes, and blocks
+
+			// Add the uniform
+			variables_.add_global(vrbl);
+			Uniform uni{ vrbl.name, vrbl.type, (uint8)uset, (uint8)ubind, 0, 0, 0 };
+			REFL->uniforms.push_back(uni);
+			gen_.emit_value_uniform(uni);
 		}
+
+		gen_.emit_uniform_block_close();
 	}
-	
-	// Good to go, add the uniform
-	variables_.add_global(vrbl);
-	Uniform uni{ vrbl.name, vrbl.type, (uint8)uset, (uint8)ubind };
-	REFL->uniforms.push_back(uni);
-	if (vrbl.type.is_handle_type())
+	else {
+		auto vdec = ctx->variableDeclaration();
+
+		// Build the variable
+		auto vrbl = parse_variable(vdec, VarScope::Uniform);
+		if (!vrbl.type.is_handle_type())
+			ERROR(vdec->Type, "Uniforms outside of blocks must be a handle type.");
+		if (vrbl.type.is_array)
+			ERROR(vdec->Size, "Handle-type uniforms cannot be arrays.");
+
+		// Uniform-specific subpass input index checking
+		if (vrbl.type == HLSVType::SubpassInput) {
+			auto pre = REFL->get_subpass_input(vrbl.type.extra.subpass_input_index);
+			if (pre) {
+				ERROR(ctx, strarg("Subpass input index %u is already occupied by uniform '%s'.", (uint32)vrbl.type.extra.subpass_input_index,
+					pre->name.c_str()));
+			}
+		}
+
+		// Good to go, add the uniform
+		variables_.add_global(vrbl);
+		Uniform uni{ vrbl.name, vrbl.type, (uint8)uset, (uint8)ubind, 0, 0, 0 };
+		REFL->uniforms.push_back(uni);
 		gen_.emit_handle_uniform(uni);
+	}
 
 	return nullptr;
 }

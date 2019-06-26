@@ -7,6 +7,7 @@ lexer grammar HLSVLexer;
 
 // Keywords
 KW_ATTR         : 'attr' ;
+KW_BLOCK        : 'block' ;
 KW_COMPUTE      : 'compute' ;
 KW_FLAT         : 'flat' ;
 KW_FRAG         : 'frag' ;
@@ -37,6 +38,8 @@ LBRACKET    : '[' ;
 RBRACKET    : ']' ;
 LPAREN      : '(' ;
 RPAREN      : ')' ;
+LBRACE      : '{' ;
+RBRACE      : '}' ;
 SEMI_COLON  : ';' ;
 COMMA       : ',' ;
 

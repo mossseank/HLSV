@@ -234,9 +234,15 @@ struct _EXPORT Uniform final
 	HLSVType type;
 	uint8 set;
 	uint8 binding;
+	struct
+	{
+		uint8 index;   // The index of the uniform block that this uniform belongs to, if applicable
+		uint16 offset; // The offset of the uniform within its block, in bytes
+		uint16 size;   // The size of the uniform within its block, in bytes
+	} block; // Contains block information, only valid for value-type uniforms inside of blocks
 
-	Uniform(const string& name, HLSVType type, uint8 s, uint8 b) :
-		name{ name }, type{ type }, set{ s }, binding{ b }
+	Uniform(const string& name, HLSVType type, uint8 s, uint8 b, uint8 bl, uint16 o, uint16 sz) :
+		name{ name }, type{ type }, set{ s }, binding{ b }, block{ bl, o, sz }
 	{ }
 }; // struct Uniform
 

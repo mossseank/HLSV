@@ -42,6 +42,9 @@ public:
 	void emit_output(const Output& output);
 	void emit_local(const Variable& vrbl, uint32 loc);
 	void emit_handle_uniform(const Uniform& uni);
+	void emit_uniform_block_header(uint32 s, uint32 b);
+	void emit_uniform_block_close();
+	void emit_value_uniform(const Uniform& uni);
 }; // class GLSLGenerator
 
 } // namespace hlsv

@@ -19,7 +19,7 @@ Variable::Variable(const string& name, HLSVType type, VarScope scope) :
 	name{ name },
 	type{ type },
 	scope{ scope },
-	uniform{ 0, 0 }
+	local{ false }
 {
 	
 }

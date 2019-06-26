@@ -13,6 +13,10 @@
 
 static const std::string VERSION_STR = "#version 450";
 static const std::string VERSION_CMT = "// Generated with hlsvc version ";
+static const std::string EXTENSION_STR = "#extension %s : require\n";
+static const std::string EXTENSIONS [] = {
+	"GL_KHR_vulkan_glsl", "GL_EXT_scalar_block_layout"
+};
 
 
 namespace hlsv
@@ -23,8 +27,15 @@ GLSLGenerator::GLSLGenerator() :
 	vert_vars_{ },
 	frag_vars_{ }
 {
-	vert_vars_ << VERSION_STR << '\n' << VERSION_CMT << HLSV_VERSION << "\n\n";
-	frag_vars_ << VERSION_STR << '\n' << VERSION_CMT << HLSV_VERSION << "\n\n";
+	vert_vars_ << VERSION_CMT << HLSV_VERSION << '\n' << VERSION_STR << '\n';
+	frag_vars_ << VERSION_CMT << HLSV_VERSION << '\n' << VERSION_STR << '\n';
+	for (const auto& ext : EXTENSIONS) {
+		string estr = strarg(EXTENSION_STR.c_str(), ext.c_str());
+		vert_vars_ << estr;
+		frag_vars_ << estr;
+	}
+	vert_vars_ << '\n';
+	frag_vars_ << '\n';
 }
 
 // ====================================================================================================================
@@ -75,6 +86,31 @@ void GLSLGenerator::emit_handle_uniform(const Uniform& uni)
 		vert_vars_ << locstr << varstr << '\n';
 	}
 	frag_vars_ << locstr << varstr << '\n';
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_uniform_block_header(uint32 s, uint32 b)
+{
+	string head = strarg("layout(set = %u, binding = %u, std430) uniform Block_%u_%u {", s, b, s, b);
+	vert_vars_ << head << '\n';
+	frag_vars_ << head << '\n';
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_uniform_block_close()
+{
+	vert_vars_ << "};\n";
+	frag_vars_ << "};\n";
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_value_uniform(const Uniform& uni)
+{
+	string varstr = strarg("\t%s %s%s;", TypeHelper::GetGLSLStr(uni.type.type).c_str(), uni.name.c_str(),
+		(uni.type.is_array ? strarg("[%u]", uni.type.count) : "").c_str());
+	string cmtstr = strarg(" // Offset: %u, Size: %u\n", uni.block.offset, uni.block.size);
+	vert_vars_ << varstr << cmtstr;
+	frag_vars_ << varstr << cmtstr;
 }
 
 } // namespace hlsv
