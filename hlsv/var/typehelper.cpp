@@ -96,6 +96,17 @@ uint8 TypeHelper::GetPrimitiveSlotCount(HLSVType::PrimType type)
 
 // ====================================================================================================================
 /* static */
+uint8 TypeHelper::GetValueTypeSize(HLSVType::PrimType type)
+{
+	if (!HLSVType::IsValueType(type))
+		return 0;
+
+	// TODO: This will need to be completely re-done once non-32-bit types are added
+	return (uint16)(4 * HLSVType::GetComponentCount(type));
+}
+
+// ====================================================================================================================
+/* static */
 string TypeHelper::GetImageFormatStr(HLSVType::PrimType type)
 {
 	TYPE_TO_STR(Int, "r32i")   TYPE_TO_STR(Int2, "rg32i")   TYPE_TO_STR(Int4, "rgba32i")
@@ -103,6 +114,17 @@ string TypeHelper::GetImageFormatStr(HLSVType::PrimType type)
 	TYPE_TO_STR(Float, "r32f") TYPE_TO_STR(Float2, "rg32f") TYPE_TO_STR(Float4, "rgba32f")
 
 	return "ERROR";
+}
+
+// ====================================================================================================================
+/* static */
+void TypeHelper::GetScalarLayoutInfo(HLSVType type, uint16* align, uint16* size)
+{
+	*size = (uint16)GetValueTypeSize(type.type) * (uint16)(type.is_array ? type.count : 1);
+
+	// TODO: This will need to be completely re-done once non-32-bit types are added
+	// Simple to calculate, as the scalar layout allows the alignment to be equal to the scalar component size
+	*align = 4;
 }
 
 } // namespace hlsv

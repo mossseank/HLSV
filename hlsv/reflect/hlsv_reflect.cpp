@@ -49,7 +49,8 @@ ReflectionInfo::ReflectionInfo(ShaderType type, uint32 tv, uint32 sv) :
 	stages{ ShaderStages::None },
 	attributes{ },
 	outputs{ },
-	uniforms{ }
+	uniforms{ },
+	blocks{ }
 {
 
 }
@@ -73,10 +74,30 @@ void ReflectionInfo::sort()
 		return l.location < r.location;
 	});
 
-	// Uniforms (TODO: take offset into account)
+	// Uniforms
 	std::sort(uniforms.begin(), uniforms.end(), [](const Uniform& l, const Uniform& r) {
+		return (l.set == r.set) ?
+			((l.binding == r.binding) ? l.block.offset < r.block.offset : l.binding < r.binding) :
+			l.set < r.set;
+	});
+
+	// Blocks and block members (we have to adjust reference indices here, which makes it a bit more complex)
+	std::sort(blocks.begin(), blocks.end(), [](const UniformBlock& l, const UniformBlock& r) {
 		return (l.set == r.set) ? l.binding < r.binding : l.set < r.set;
 	});
+	uint8 bindex = 0;
+	for (auto& block : blocks) {
+		block.members.clear();
+		uint8 uindex = 0;
+		for (auto& uni : uniforms) { // Uniforms are already sorted by offset, so this will work
+			if (uni.set == block.set && uni.binding == block.binding) {
+				uni.block.index = bindex;
+				block.members.push_back(uindex);
+			}
+			++uindex;
+		}
+		++bindex;
+	}
 }
 
 // ====================================================================================================================

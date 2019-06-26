@@ -15,7 +15,7 @@ static const std::string VERSION_STR = "#version 450";
 static const std::string VERSION_CMT = "// Generated with hlsvc version ";
 static const std::string EXTENSION_STR = "#extension %s : require\n";
 static const std::string EXTENSIONS [] = {
-	"GL_KHR_vulkan_glsl", "GL_EXT_scalar_block_layout"
+	"GL_EXT_scalar_block_layout"
 };
 
 
@@ -91,7 +91,7 @@ void GLSLGenerator::emit_handle_uniform(const Uniform& uni)
 // ====================================================================================================================
 void GLSLGenerator::emit_uniform_block_header(uint32 s, uint32 b)
 {
-	string head = strarg("layout(set = %u, binding = %u, std430) uniform Block_%u_%u {", s, b, s, b);
+	string head = strarg("layout(set = %u, binding = %u, scalar) uniform Block_%u_%u {", s, b, s, b);
 	vert_vars_ << head << '\n';
 	frag_vars_ << head << '\n';
 }

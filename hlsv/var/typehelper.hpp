@@ -28,8 +28,11 @@ public:
 	inline static uint8 GetTypeSlotSize(HLSVType type) {
 		return GetPrimitiveSlotCount(type.type) * type.count;
 	}
+	static uint8 GetValueTypeSize(HLSVType::PrimType type);
 
 	static string GetImageFormatStr(HLSVType::PrimType type);
+
+	static void GetScalarLayoutInfo(HLSVType type, uint16* align, uint16* size);
 };
 
 } // namespace hlsv

@@ -246,6 +246,20 @@ struct _EXPORT Uniform final
 	{ }
 }; // struct Uniform
 
+// Contains information about a shader uniform block
+struct _EXPORT UniformBlock final
+{
+	uint8 set;
+	uint8 binding;
+	uint16 size;				// Total size of the block in bytes
+	bool packed;				// If the members in the block are tightly packed
+	std::vector<uint8> members; // The indices into the reflection uniforms array for the members of this block
+
+	UniformBlock(uint8 s, uint8 b) :
+		set{ s }, binding{ b }, size{ 0 }, packed{ false }, members{ }
+	{ }
+}; // struct UniformBlock
+
 // The core reflection type that contains all reflection information about an HSLV shader
 class _EXPORT ReflectionInfo final
 {
@@ -257,6 +271,7 @@ public:
 	std::vector<Attribute> attributes; // The vertex attributes for the shader
 	std::vector<Output> outputs;       // The fragment outputs for the shader
 	std::vector<Uniform> uniforms;     // The uniforms for the shader
+	std::vector<UniformBlock> blocks;  // The uniform blocks for the shader
 
 public:
 	ReflectionInfo(ShaderType type, uint32 tv, uint32 sv);

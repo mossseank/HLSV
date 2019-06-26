@@ -284,22 +284,39 @@ VISIT_FUNC(UniformStatement)
 			ERROR(ctx, "Empty uniform blocks are not allowed.");
 		gen_.emit_uniform_block_header(uset, ubind);
 
+		// Create the uniform block object
+		UniformBlock ub{ (uint8)uset, (uint8)ubind };
+		uint8 bindex = (uint8)REFL->blocks.size();
+
 		// Create a new uniform for each variable in the block
+		uint16 boff = 0;
+		bool packed = true;
 		for (auto vdec : vb->Declarations) {
 			// Build the variable
 			auto vrbl = parse_variable(vdec, VarScope::Uniform);
 			if (!vrbl.type.is_value_type())
 				ERROR(vdec->Type, "Uniforms inside of blocks must be a value type.");
 
-			// TODO: proper setup of offsets, sizes, and blocks
+			// Setup the offsets, sizes, and blocks
+			uint16 ualign, usize;
+			TypeHelper::GetScalarLayoutInfo(vrbl.type, &ualign, &usize);
+			if ((boff % ualign) != 0) {
+				boff += (ualign - (boff % ualign)); // Shift the offset to satisfy the type alignment
+				packed = false;
+			}
 
 			// Add the uniform
 			variables_.add_global(vrbl);
-			Uniform uni{ vrbl.name, vrbl.type, (uint8)uset, (uint8)ubind, 0, 0, 0 };
+			Uniform uni{ vrbl.name, vrbl.type, (uint8)uset, (uint8)ubind, bindex, boff, usize };
 			REFL->uniforms.push_back(uni);
 			gen_.emit_value_uniform(uni);
+			ub.members.push_back((uint8)(REFL->uniforms.size() - 1));
+			boff += usize;
 		}
 
+		ub.size = boff;
+		ub.packed = packed;
+		REFL->blocks.push_back(ub);
 		gen_.emit_uniform_block_close();
 	}
 	else {
