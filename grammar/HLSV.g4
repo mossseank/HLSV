@@ -24,6 +24,7 @@ topLevelStatement
     | fragmentOutputStatement
     | localStatement
     | uniformStatement
+    | pushConstantsStatement
     ;
 
 // Vertex attribute statement
@@ -48,6 +49,11 @@ uniformStatement
             variableDeclaration | 
             ('block' variableBlock BlockName=IDENTIFIER?)
         ) ';'
+    ;
+
+// Push constants
+pushConstantsStatement
+    : 'push' 'block' variableBlock BlockName=IDENTIFIER? ';'
     ;
 
 // Variable declaration

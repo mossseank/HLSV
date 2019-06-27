@@ -348,4 +348,38 @@ VISIT_FUNC(UniformStatement)
 	return nullptr;
 }
 
+// ====================================================================================================================
+VISIT_FUNC(PushConstantsStatement)
+{
+	auto vb = ctx->variableBlock();
+	if (vb->Declarations.size() == 0)
+		return nullptr;
+
+	// Loop over the block members
+	uint16 off = 0;
+	bool packed = true;
+	for (auto vdec : vb->Declarations) {
+		// Build the variable
+		auto vrbl = parse_variable(vdec, VarScope::PushConstant);
+		if (!vrbl.type.is_value_type())
+			ERROR(vdec->Type, "Push constants must be value types.");
+
+		// Setup the offsets, and sizes
+		uint16 ualign, usize;
+		TypeHelper::GetScalarLayoutInfo(vrbl.type, &ualign, &usize);
+		if ((off % ualign) != 0) {
+			off += (ualign - (off % ualign)); // Shift the offset to satisfy the type alignment
+			packed = false;
+		}
+
+		// Add the push constant
+		variables_.add_global(vrbl);
+		PushConstant pc{ vrbl.name, vrbl.type, off, usize };
+		REFL->push_constants.push_back(pc);
+		off += usize;
+	}
+
+	return nullptr;
+}
+
 } // namespace hlsv

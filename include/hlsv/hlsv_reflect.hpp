@@ -260,6 +260,19 @@ struct _EXPORT UniformBlock final
 	{ }
 }; // struct UniformBlock
 
+// Contains information about a push constant
+struct _EXPORT PushConstant final
+{
+	string name;
+	HLSVType type;
+	uint16 offset;
+	uint16 size;
+
+	PushConstant(const string& name, HLSVType type, uint16 o, uint16 s) :
+		name{ name }, type{ type }, offset{ o }, size{ s }
+	{ }
+}; // struct PushConstant
+
 // The core reflection type that contains all reflection information about an HSLV shader
 class _EXPORT ReflectionInfo final
 {
@@ -272,6 +285,8 @@ public:
 	std::vector<Output> outputs;       // The fragment outputs for the shader
 	std::vector<Uniform> uniforms;     // The uniforms for the shader
 	std::vector<UniformBlock> blocks;  // The uniform blocks for the shader
+	std::vector<PushConstant> push_constants; // The push constants for the shader
+	bool push_constants_packed; // If the push constants are tightly packed
 
 public:
 	ReflectionInfo(ShaderType type, uint32 tv, uint32 sv);
@@ -282,6 +297,8 @@ public:
 
 	inline bool is_graphics() const { return shader_type == ShaderType::Graphics; }
 	inline bool is_compute() const { return shader_type == ShaderType::Compute; }
+
+	inline bool has_push_constants() const { return push_constants.size() > 0; }
 
 	// Gets the highest binding slot that is occupied by the vertex attributes of the shader
 	uint32 get_highest_attr_slot() const;

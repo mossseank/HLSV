@@ -50,7 +50,9 @@ ReflectionInfo::ReflectionInfo(ShaderType type, uint32 tv, uint32 sv) :
 	attributes{ },
 	outputs{ },
 	uniforms{ },
-	blocks{ }
+	blocks{ },
+	push_constants{ },
+	push_constants_packed{ false }
 {
 
 }
@@ -98,6 +100,11 @@ void ReflectionInfo::sort()
 		}
 		++bindex;
 	}
+
+	// Push constants
+	std::sort(push_constants.begin(), push_constants.end(), [](const PushConstant& l, const PushConstant& r) {
+		return l.offset < r.offset;
+	});
 }
 
 // ====================================================================================================================

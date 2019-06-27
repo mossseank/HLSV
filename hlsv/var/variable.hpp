@@ -21,10 +21,11 @@ namespace hlsv
 // The different scopes the variables can have
 enum class VarScope : uint8
 {
-	Attribute, // Vertex attribute
-	Output,	   // Fragment output
-	Local,     // Inter-stage local
-	Uniform,   // Uniform or uniform block member
+	Attribute,    // Vertex attribute
+	Output,	      // Fragment output
+	Local,        // Inter-stage local
+	Uniform,      // Uniform or uniform block member
+	PushConstant, // Push constant (special uniform type)
 }; // enum class VarScope
 
 // Represents a named and scoped value object in a HLSV shader program
@@ -49,6 +50,7 @@ public:
 	inline bool is_output() const { return scope == VarScope::Output; }
 	inline bool is_local() const { return scope == VarScope::Local; }
 	inline bool is_uniform() const { return scope == VarScope::Uniform; }
+	inline bool is_push_constant() const { return scope == VarScope::PushConstant; }
 
 	inline uint32 get_slot_count() const { return type.get_slot_size(); }
 };

@@ -13,6 +13,7 @@ KW_FLAT         : 'flat' ;
 KW_FRAG         : 'frag' ;
 KW_GRAPHICS     : 'graphics' ;
 KW_LOCAL        : 'local' ;
+KW_PUSH         : 'push' ;
 KW_SHADER       : 'shader' ;
 KW_UNIF         : 'unif' ;
 
