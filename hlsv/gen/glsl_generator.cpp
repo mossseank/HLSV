@@ -116,7 +116,7 @@ void GLSLGenerator::emit_value_uniform(const Uniform& uni)
 // ====================================================================================================================
 void GLSLGenerator::emit_push_constant_block_header()
 {
-	static const string HEADER = "layout(push_constant, std430) uniform PushConstants {\n";
+	static const string HEADER = "layout(push_constant, scalar) uniform PushConstants {\n";
 	vert_vars_ << HEADER;
 	frag_vars_ << HEADER;
 }

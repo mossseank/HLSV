@@ -47,13 +47,13 @@ uniformStatement
     : 'unif' '(' (Set=SIZE_LITERAL ',')? Binding=SIZE_LITERAL ')' 
         (
             variableDeclaration | 
-            ('block' variableBlock BlockName=IDENTIFIER?)
+            ('block' variableBlock)
         ) ';'
     ;
 
 // Push constants
 pushConstantsStatement
-    : 'push' 'block' variableBlock BlockName=IDENTIFIER? ';'
+    : 'push' 'block' variableBlock ';'
     ;
 
 // Variable declaration
