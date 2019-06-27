@@ -273,6 +273,19 @@ struct _EXPORT PushConstant final
 	{ }
 }; // struct PushConstant
 
+// Contains information about a specialization constant
+struct _EXPORT SpecConstant final
+{
+	string name;
+	HLSVType type;
+	uint8 index;
+	uint16 size;
+
+	SpecConstant(const string& name, HLSVType type, uint8 i, uint16 s) :
+		name{ name }, type{ type }, index{ i }, size{ s }
+	{ }
+}; // struct SpecConstant
+
 // The core reflection type that contains all reflection information about an HSLV shader
 class _EXPORT ReflectionInfo final
 {
@@ -286,6 +299,7 @@ public:
 	std::vector<Uniform> uniforms;     // The uniforms for the shader
 	std::vector<UniformBlock> blocks;  // The uniform blocks for the shader
 	std::vector<PushConstant> push_constants; // The push constants for the shader
+	std::vector<SpecConstant> spec_constants; // The specialization constants for the shader
 	bool push_constants_packed; // If the push constants are tightly packed
 	uint16 push_constants_size; // The total size of the push constant block, in bytes
 

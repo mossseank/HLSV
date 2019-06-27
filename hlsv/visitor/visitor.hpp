@@ -73,6 +73,7 @@ public:
 	VISIT(LocalStatement)
 	VISIT(UniformStatement)
 	VISIT(PushConstantsStatement)
+	VISIT(ConstantStatement)
 }; // class Visitor
 
 } // namespace hlsv

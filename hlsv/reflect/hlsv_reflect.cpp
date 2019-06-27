@@ -52,6 +52,7 @@ ReflectionInfo::ReflectionInfo(ShaderType type, uint32 tv, uint32 sv) :
 	uniforms{ },
 	blocks{ },
 	push_constants{ },
+	spec_constants{ },
 	push_constants_packed{ false },
 	push_constants_size{ 0 }
 {

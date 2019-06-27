@@ -304,7 +304,7 @@ VISIT_FUNC(UniformStatement)
 				boff += (ualign - (boff % ualign)); // Shift the offset to satisfy the type alignment
 				packed = false;
 			}
-			if ((boff + usize) > LIMITS.uniform_block_size) {
+			if ((uint32)(boff + usize) > LIMITS.uniform_block_size) {
 				ERROR(vdec, strarg("The uniform block member '%s' is too large (%u bytes) for the block size limit (%u bytes).",
 					vrbl.name.c_str(), (uint32)usize, LIMITS.uniform_block_size));
 			}
@@ -379,7 +379,7 @@ VISIT_FUNC(PushConstantsStatement)
 			off += (ualign - (off % ualign)); // Shift the offset to satisfy the type alignment
 			packed = false;
 		}
-		if ((off + usize) > LIMITS.push_constants_size) {
+		if ((uint32)(off + usize) > LIMITS.push_constants_size) {
 			ERROR(vdec, strarg("The push constant '%s' is too large (%u bytes) for the push constants size limit (%u bytes).",
 				vrbl.name.c_str(), (uint32)usize, LIMITS.push_constants_size));
 		}
@@ -395,6 +395,32 @@ VISIT_FUNC(PushConstantsStatement)
 	REFL->push_constants_packed = packed;
 	REFL->push_constants_size = off;
 	gen_.emit_block_close();
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(ConstantStatement)
+{
+	auto vdec = ctx->variableDeclaration();
+
+	// Build the variable
+	auto vrbl = parse_variable(vdec, VarScope::Constant);
+	if (!vrbl.type.is_value_type())
+		ERROR(vdec->Type, "Constants must be value types.");
+
+	// Parse the specialization components
+	auto idx = ctx->Index;
+	if (idx) {
+		auto sidx = parse_size_literal(idx);
+		if (sidx >= 256u)
+			ERROR(idx, "Specialization constants cannot be bound above index 255.");
+		vrbl.constant.is_spec = true;
+		vrbl.constant.spec_index = sidx;
+		SpecConstant sc{ vrbl.name, vrbl.type, (uint8)sidx, 0 };
+		TypeHelper::GetScalarLayoutInfo(vrbl.type, nullptr, &sc.size);
+		REFL->spec_constants.push_back(sc);
+	}
+
 	return nullptr;
 }
 

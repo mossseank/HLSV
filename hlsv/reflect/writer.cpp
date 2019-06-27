@@ -151,6 +151,22 @@ bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, strin
 	}
 	else
 		file << "None" << std::endl << std::endl;
+
+	// Specialization constants
+	file << "Spec. Constants" << std::endl
+		 << "---------------" << std::endl;
+	if (refl.spec_constants.size() > 0) {
+		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Array", 8) << ' ' << pad("Count", 8) << ' '
+			 << pad("Index", 8) << ' ' << pad("Size", 8) << std::endl;
+		for (const auto& sc : refl.spec_constants) {
+			file << pad(sc.name, 16) << ' ' << pad(sc.type.get_type_str(), 12) << ' ' << pad(sc.type.is_array ? "Yes" : "No", 8)
+				 << ' ' << padf("%u", 8, (uint32)sc.type.count) << ' ' << padf("%u", 8, (uint32)sc.index) << ' '
+				 << padf("%u", 8, (uint32)sc.size) << std::endl;
+		}
+		file << std::endl;
+	}
+	else
+		file << "None" << std::endl << std::endl;
 	
 	// Close and return
 	file.flush();
@@ -221,6 +237,15 @@ bool ReflWriter::WriteBinary(const string& path, const ReflectionInfo& refl, str
 		for (const auto& pc : refl.push_constants) {
 			write_str(file, pc.name) << (uint8)pc.type.type << (uint8)(pc.type.is_array ? pc.type.count : 0)
 				<< WRITE_LE16(pc.offset) << WRITE_LE16(pc.size);
+		}
+	}
+
+	// Write specialization constants
+	file << (uint8)refl.spec_constants.size();
+	if (refl.spec_constants.size() > 0) {
+		for (const auto& sc : refl.spec_constants) {
+			write_str(file, sc.name) << (uint8)sc.type.type << (uint8)(sc.type.is_array ? sc.type.count : 0)
+				<< (uint8)sc.index << WRITE_LE16(sc.size);
 		}
 	}
 

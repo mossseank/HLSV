@@ -25,6 +25,7 @@ topLevelStatement
     | localStatement
     | uniformStatement
     | pushConstantsStatement
+    | constantStatement
     ;
 
 // Vertex attribute statement
@@ -54,6 +55,11 @@ uniformStatement
 // Push constants
 pushConstantsStatement
     : 'push' 'block' variableBlock ';'
+    ;
+
+// Constants and specialization constants
+constantStatement
+    : 'const' ('(' Index=SIZE_LITERAL ')')? variableDeclaration ';'
     ;
 
 // Variable declaration

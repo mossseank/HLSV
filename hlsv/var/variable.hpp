@@ -26,6 +26,7 @@ enum class VarScope : uint8
 	Local,        // Inter-stage local
 	Uniform,      // Uniform or uniform block member
 	PushConstant, // Push constant (special uniform type)
+	Constant,     // Normal constant or specialization constant
 }; // enum class VarScope
 
 // Represents a named and scoped value object in a HLSV shader program
@@ -41,6 +42,11 @@ public:
 		{
 			bool is_flat;
 		} local;
+		struct
+		{
+			bool is_spec;
+			uint32 spec_index;
+		} constant;
 	};
 
 public:
@@ -51,6 +57,7 @@ public:
 	inline bool is_local() const { return scope == VarScope::Local; }
 	inline bool is_uniform() const { return scope == VarScope::Uniform; }
 	inline bool is_push_constant() const { return scope == VarScope::PushConstant; }
+	inline bool is_constant() const { return scope == VarScope::Constant; }
 
 	inline uint32 get_slot_count() const { return type.get_slot_size(); }
 };

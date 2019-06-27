@@ -120,11 +120,11 @@ string TypeHelper::GetImageFormatStr(HLSVType::PrimType type)
 /* static */
 void TypeHelper::GetScalarLayoutInfo(HLSVType type, uint16* align, uint16* size)
 {
-	*size = (uint16)GetValueTypeSize(type.type) * (uint16)(type.is_array ? type.count : 1);
+	if (size) *size = (uint16)GetValueTypeSize(type.type) * (uint16)(type.is_array ? type.count : 1);
 
 	// TODO: This will need to be completely re-done once non-32-bit types are added
 	// Simple to calculate, as the scalar layout allows the alignment to be equal to the scalar component size
-	*align = 4;
+	if (align) *align = 4;
 }
 
 } // namespace hlsv

@@ -9,6 +9,7 @@ lexer grammar HLSVLexer;
 KW_ATTR         : 'attr' ;
 KW_BLOCK        : 'block' ;
 KW_COMPUTE      : 'compute' ;
+KW_CONST        : 'const' ;
 KW_FLAT         : 'flat' ;
 KW_FRAG         : 'frag' ;
 KW_GRAPHICS     : 'graphics' ;
