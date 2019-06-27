@@ -304,6 +304,10 @@ VISIT_FUNC(UniformStatement)
 				boff += (ualign - (boff % ualign)); // Shift the offset to satisfy the type alignment
 				packed = false;
 			}
+			if ((boff + usize) > LIMITS.uniform_block_size) {
+				ERROR(vdec, strarg("The uniform block member '%s' is too large (%u bytes) for the block size limit (%u bytes).",
+					vrbl.name.c_str(), (uint32)usize, LIMITS.uniform_block_size));
+			}
 
 			// Add the uniform
 			variables_.add_global(vrbl);
@@ -374,6 +378,10 @@ VISIT_FUNC(PushConstantsStatement)
 		if ((off % ualign) != 0) {
 			off += (ualign - (off % ualign)); // Shift the offset to satisfy the type alignment
 			packed = false;
+		}
+		if ((off + usize) > LIMITS.push_constants_size) {
+			ERROR(vdec, strarg("The push constant '%s' is too large (%u bytes) for the push constants size limit (%u bytes).",
+				vrbl.name.c_str(), (uint32)usize, LIMITS.push_constants_size));
 		}
 
 		// Add the push constant

@@ -103,6 +103,10 @@ bool Args::Parse(int argc, char** argv, Args& args)
 					args.options.limits.uniform_sets = rlval;
 				else if (rl == "ubind")
 					args.options.limits.uniform_bindings = rlval;
+				else if (rl == "ubsize")
+					args.options.limits.uniform_block_size = rlval;
+				else if (rl == "pcsize")
+					args.options.limits.push_constants_size = rlval;
 				else {
 					Console::Warnf("Unknown resource limit type '%s', ignoring.", rl.c_str());
 					continue;
@@ -155,5 +159,7 @@ void Args::PrintHelp()
 		"                                            local - The number of binding slots for locals (default 8)\n"
 		"                                            uset - The number of uniform sets (default 4)\n"
 		"                                            ubind - The number of uniform bindings per set (default 8)\n"
+		"                                            ubsize - The max size of any uniform block (default 1024)\n"
+		"                                            pcsize - The max size of the push constants (default 128)\n"
 	);
 }

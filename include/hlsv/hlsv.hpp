@@ -155,10 +155,12 @@ public:
 		uint32 local_slots;            // The number of binding slots available for locals (default 8)
 		uint32 uniform_sets;           // The number of uniform sets (default 4)
 		uint32 uniform_bindings;       // The number of uniform bindings per uniform sets (default 8)
+		uint32 uniform_block_size;     // The maximum size of any uniform block, in bytes (default 1024)
+		uint32 push_constants_size;    // The maximum size of the push constants block, in bytes (default 128)
 	};
 	
 	// The default resource limits
-	static constexpr Limits DEFAULT_LIMITS = { 16, 4, 8, 4, 8 };
+	static constexpr Limits DEFAULT_LIMITS = { 16, 4, 8, 4, 8, 1024, 128 };
 
 public:
 	bool generate_reflection_file; // If the reflection info file should be generated
