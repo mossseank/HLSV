@@ -317,7 +317,7 @@ VISIT_FUNC(UniformStatement)
 		ub.size = boff;
 		ub.packed = packed;
 		REFL->blocks.push_back(ub);
-		gen_.emit_uniform_block_close();
+		gen_.emit_block_close();
 	}
 	else {
 		auto vdec = ctx->variableDeclaration();
@@ -354,6 +354,10 @@ VISIT_FUNC(PushConstantsStatement)
 	auto vb = ctx->variableBlock();
 	if (vb->Declarations.size() == 0)
 		return nullptr;
+	if (REFL->push_constants.size() > 0)
+		ERROR(ctx, "Only one push constant block is allowed in a shader.");
+	
+	gen_.emit_push_constant_block_header();
 
 	// Loop over the block members
 	uint16 off = 0;
@@ -375,10 +379,14 @@ VISIT_FUNC(PushConstantsStatement)
 		// Add the push constant
 		variables_.add_global(vrbl);
 		PushConstant pc{ vrbl.name, vrbl.type, off, usize };
+		gen_.emit_push_constant(pc);
 		REFL->push_constants.push_back(pc);
 		off += usize;
 	}
 
+	REFL->push_constants_packed = packed;
+	REFL->push_constants_size = off;
+	gen_.emit_block_close();
 	return nullptr;
 }
 

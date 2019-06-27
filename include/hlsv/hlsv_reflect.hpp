@@ -287,6 +287,7 @@ public:
 	std::vector<UniformBlock> blocks;  // The uniform blocks for the shader
 	std::vector<PushConstant> push_constants; // The push constants for the shader
 	bool push_constants_packed; // If the push constants are tightly packed
+	uint16 push_constants_size; // The total size of the push constant block, in bytes
 
 public:
 	ReflectionInfo(ShaderType type, uint32 tv, uint32 sv);

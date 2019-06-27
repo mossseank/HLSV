@@ -135,6 +135,22 @@ bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, strin
 	}
 	else
 		file << "None" << std::endl << std::endl;
+
+	// Push constants
+	file << "Push Constants" << std::endl
+		 << "--------------" << std::endl;
+	if (refl.push_constants.size() > 0) {
+		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Array", 8) << ' ' << pad("Count", 8) << ' '
+			 << pad("Offset", 8) << ' ' << pad("Size", 8) << std::endl;
+		for (const auto& pc : refl.push_constants) {
+			file << pad(pc.name, 16) << ' ' << pad(pc.type.get_type_str(), 12) << ' ' << pad(pc.type.is_array ? "Yes" : "No", 8)
+				 << ' ' << padf("%u", 8, (uint32)pc.type.count) << ' ' << padf("%u", 8, (uint32)pc.offset) << ' '
+				 << padf("%u", 8, (uint32)pc.size) << std::endl;
+		}
+		file << std::endl;
+	}
+	else
+		file << "None" << std::endl << std::endl;
 	
 	// Close and return
 	file.flush();
@@ -196,6 +212,15 @@ bool ReflWriter::WriteBinary(const string& path, const ReflectionInfo& refl, str
 			for (auto mi : bl.members) {
 				file << mi;
 			}
+		}
+	}
+
+	// Write push constants
+	file << (uint8)refl.push_constants.size();
+	if (refl.push_constants.size() > 0) {
+		for (const auto& pc : refl.push_constants) {
+			write_str(file, pc.name) << (uint8)pc.type.type << (uint8)(pc.type.is_array ? pc.type.count : 0)
+				<< WRITE_LE16(pc.offset) << WRITE_LE16(pc.size);
 		}
 	}
 

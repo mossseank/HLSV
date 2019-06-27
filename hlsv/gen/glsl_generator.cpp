@@ -97,7 +97,7 @@ void GLSLGenerator::emit_uniform_block_header(uint32 s, uint32 b)
 }
 
 // ====================================================================================================================
-void GLSLGenerator::emit_uniform_block_close()
+void GLSLGenerator::emit_block_close()
 {
 	vert_vars_ << "};\n";
 	frag_vars_ << "};\n";
@@ -109,6 +109,24 @@ void GLSLGenerator::emit_value_uniform(const Uniform& uni)
 	string varstr = strarg("\t%s %s%s;", TypeHelper::GetGLSLStr(uni.type.type).c_str(), uni.name.c_str(),
 		(uni.type.is_array ? strarg("[%u]", uni.type.count) : "").c_str());
 	string cmtstr = strarg(" // Offset: %u, Size: %u\n", uni.block.offset, uni.block.size);
+	vert_vars_ << varstr << cmtstr;
+	frag_vars_ << varstr << cmtstr;
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_push_constant_block_header()
+{
+	static const string HEADER = "layout(push_constant, std430) uniform PushConstants {\n";
+	vert_vars_ << HEADER;
+	frag_vars_ << HEADER;
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_push_constant(const PushConstant& pc)
+{
+	string varstr = strarg("\t%s %s%s;", TypeHelper::GetGLSLStr(pc.type.type).c_str(), pc.name.c_str(),
+		(pc.type.is_array ? strarg("[%u]", pc.type.count) : "").c_str());
+	string cmtstr = strarg(" // Offset: %u, Size: %u\n", pc.offset, pc.size);
 	vert_vars_ << varstr << cmtstr;
 	frag_vars_ << varstr << cmtstr;
 }
