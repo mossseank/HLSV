@@ -405,12 +405,12 @@ VISIT_FUNC(ConstantStatement)
 
 	// Build the variable
 	auto vrbl = parse_variable(vdec, VarScope::Constant);
-	if (!vrbl.type.is_value_type())
-		ERROR(vdec->Type, "Constants must be value types.");
 
-	// Parse the specialization components
+	// Global constants and specialization constants have different rules
 	auto idx = ctx->Index;
 	if (idx) {
+		if (!vrbl.type.is_scalar_type() || vrbl.type.is_array)
+			ERROR(vdec, "Specialization constants must have a non-array scalar type.");
 		auto sidx = parse_size_literal(idx);
 		if (sidx >= 256u)
 			ERROR(idx, "Specialization constants cannot be bound above index 255.");
@@ -419,6 +419,12 @@ VISIT_FUNC(ConstantStatement)
 		SpecConstant sc{ vrbl.name, vrbl.type, (uint8)sidx, 0 };
 		TypeHelper::GetScalarLayoutInfo(vrbl.type, nullptr, &sc.size);
 		REFL->spec_constants.push_back(sc);
+		gen_.emit_spec_constant(sc);
+	}
+	else {
+		if (!vrbl.type.is_value_type())
+			ERROR(vdec, "Constants must have a value type.");
+		gen_.emit_global_constant(vrbl);
 	}
 
 	return nullptr;

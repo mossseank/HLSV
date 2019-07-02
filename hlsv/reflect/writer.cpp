@@ -156,12 +156,10 @@ bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, strin
 	file << "Spec. Constants" << std::endl
 		 << "---------------" << std::endl;
 	if (refl.spec_constants.size() > 0) {
-		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Array", 8) << ' ' << pad("Count", 8) << ' '
-			 << pad("Index", 8) << ' ' << pad("Size", 8) << std::endl;
+		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Index", 8) << ' ' << pad("Size", 8) << std::endl;
 		for (const auto& sc : refl.spec_constants) {
-			file << pad(sc.name, 16) << ' ' << pad(sc.type.get_type_str(), 12) << ' ' << pad(sc.type.is_array ? "Yes" : "No", 8)
-				 << ' ' << padf("%u", 8, (uint32)sc.type.count) << ' ' << padf("%u", 8, (uint32)sc.index) << ' '
-				 << padf("%u", 8, (uint32)sc.size) << std::endl;
+			file << pad(sc.name, 16) << ' ' << pad(sc.type.get_type_str(), 12) << ' ' << padf("%u", 8, (uint32)sc.index) 
+				 << ' ' << padf("%u", 8, (uint32)sc.size) << std::endl;
 		}
 		file << std::endl;
 	}
@@ -244,8 +242,7 @@ bool ReflWriter::WriteBinary(const string& path, const ReflectionInfo& refl, str
 	file << (uint8)refl.spec_constants.size();
 	if (refl.spec_constants.size() > 0) {
 		for (const auto& sc : refl.spec_constants) {
-			write_str(file, sc.name) << (uint8)sc.type.type << (uint8)(sc.type.is_array ? sc.type.count : 0)
-				<< (uint8)sc.index << WRITE_LE16(sc.size);
+			write_str(file, sc.name) << (uint8)sc.type.type << (uint8)sc.index << WRITE_LE16(sc.size);
 		}
 	}
 
