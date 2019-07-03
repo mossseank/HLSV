@@ -72,3 +72,20 @@ typeArgument
 variableBlock
     : '{' (Declarations+=variableDeclaration ';')* '}'
     ;
+
+
+// Expressions (anything that can evaluate to a typed value) (enforce order of operation)
+// See https://www.khronos.org/files/opengl45-quick-reference-card.pdf for GLSL Order of Operations
+expression
+    : atom
+    ;
+
+// Atomic expressions (those that cannot be subdivided)
+atom
+    : valueLiteral
+    ;
+valueLiteral
+    : INTEGER_LITERAL
+    | FLOAT_LITERAL
+    | BOOLEAN_LITERAL
+    ;

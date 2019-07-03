@@ -67,6 +67,8 @@ Variable Visitor::parse_variable(grammar::HLSV::VariableDeclarationContext* ctx,
 	auto asize = ctx->Size ? parse_size_literal(ctx->Size) : 0u;
 	if (ctx->Size && asize == 0)
 		ERROR(ctx->Size, "Arrays cannot have a size of zero.");
+	if (ctx->Size && asize > 255)
+		ERROR(ctx->Size, "Arrays cannot have a size >= 256.");
 	HLSVType vartype = (asize == 0) ? HLSVType{ btype } : HLSVType{ btype, (uint8)asize };
 
 	// Parse the type argument (if any), and perform match checking

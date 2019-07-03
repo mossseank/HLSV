@@ -5,6 +5,12 @@
 
 lexer grammar HLSVLexer;
 
+// Boolean literals
+BOOLEAN_LITERAL
+    : 'true'
+    | 'false'
+    ;
+
 // Keywords
 KW_ATTR         : 'attr' ;
 KW_BLOCK        : 'block' ;
@@ -27,7 +33,16 @@ VERSION_LITERAL
 SIZE_LITERAL // Special type of decimal, non-negative integer
     : DecimalLiteral
     ;
+INTEGER_LITERAL
+    : '-'? DecimalLiteral [uU]?
+    | '-'? HexLiteral [uU]?
+    ;
+FLOAT_LITERAL
+    : '-'? DecimalLiteral '.' DecimalLiteral? ExponentPart?
+    ;
 fragment DecimalLiteral : DigitChar+ ;
+fragment HexLiteral     : '0x' HexDigitChar+ ;
+fragment ExponentPart   : [eE] ('-'|'+')? DigitChar+ ;
 
 // Identifiers, valid for variable and type names, also includes the built-in variables
 IDENTIFIER
@@ -48,6 +63,8 @@ COMMA       : ',' ;
 // Operators
 OP_LT       : '<' ;
 OP_GT       : '>' ;
+OP_ADD      : '+' ;
+OP_SUB      : '-' ;
 
 // Whitespace and comments (ignore)
 WS
