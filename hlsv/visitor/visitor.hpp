@@ -14,6 +14,7 @@
 #include "../gen/glsl_generator.hpp"
 #include "../var/manager.hpp"
 #include "../generated/HLSVBaseVisitor.h"
+#include "expr.hpp"
 #include "antlr/CommonTokenStream.h"
 
 #define VISIT(vtype) antlrcpp::Any visit##vtype(grammar::HLSV::vtype##Context* ctx) override;
@@ -53,17 +54,23 @@ public:
 	Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl, const CompilerOptions* opt);
 	~Visitor();
 
-	inline void ERROR(antlr4::RuleContext* ctx, const string& msg) {
+	inline void ERROR(antlr4::RuleContext* ctx, const string& msg) const {
 		auto tk = tokens_->get(ctx->getSourceInterval().a);
 		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine());
 	}
-	inline void ERROR(antlr4::Token* tk, const string& msg) {
+	inline void ERROR(antlr4::Token* tk, const string& msg) const {
+		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine());
+	}
+	inline void ERROR(antlr4::tree::TerminalNode* node, const string& msg) const {
+		auto tk = tokens_->get(node->getSourceInterval().a);
 		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine());
 	}
 
 	inline GLSLGenerator& get_generator() { return gen_; }
 
-	uint32 parse_size_literal(antlr4::Token* tk, uint32 limit = UINT32_MAX);
+	uint32 parse_size_literal(antlr4::Token* tk) const;
+	int64 parse_integer_literal(antlr4::tree::TerminalNode* tk, bool* isuns) const;
+	float parse_float_literal(antlr4::tree::TerminalNode* tk) const;
 	Variable parse_variable(grammar::HLSV::VariableDeclarationContext* ctx, VarScope scope);
 
 	VISIT(File)
@@ -74,6 +81,8 @@ public:
 	VISIT(UniformStatement)
 	VISIT(PushConstantsStatement)
 	VISIT(ConstantStatement)
+
+	VISIT(ScalarLiteral)
 }; // class Visitor
 
 } // namespace hlsv

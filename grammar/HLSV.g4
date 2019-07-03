@@ -82,9 +82,9 @@ expression
 
 // Atomic expressions (those that cannot be subdivided)
 atom
-    : valueLiteral
+    : scalarLiteral
     ;
-valueLiteral
+scalarLiteral
     : INTEGER_LITERAL
     | FLOAT_LITERAL
     | BOOLEAN_LITERAL

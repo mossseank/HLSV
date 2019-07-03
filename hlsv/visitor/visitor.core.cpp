@@ -44,13 +44,60 @@ Visitor::~Visitor()
 }
 
 // ====================================================================================================================
-uint32 Visitor::parse_size_literal(antlr4::Token* tk, uint32 limit)
+uint32 Visitor::parse_size_literal(antlr4::Token* tk) const
 {
 	auto txt = tk->getText();
 	uint64 val = std::strtoull(txt.c_str(), nullptr, 10);
-	if (val >= limit) // Catches both out or range errors are parse errors
+	if (val >= UINT32_MAX) // Catches both out of range errors and parse errors
 		ERROR(tk, strarg("Invalid or out of range integer value ('%s').", txt.c_str()));
 	return (uint32)val;
+}
+
+// ====================================================================================================================
+int64 Visitor::parse_integer_literal(antlr4::tree::TerminalNode* tk, bool* isuns) const
+{
+	// Detect sign info
+	auto txt = tk->getText();
+	std::transform(txt.begin(), txt.end(), txt.begin(), ::tolower);
+	bool is_neg = (txt[0] == '-');
+	bool is_uns = (*txt.rbegin() == 'u');
+	if (is_neg && is_uns)
+		ERROR(tk, "Cannot negate an unsigned integer literal."); // Probably ok but will be dealt with in the future
+
+	// Detect the base
+	bool has_base = is_neg ? (txt.length() > 3 && txt[1] == '0' && (txt[2] == 'x' || txt[2] == 'b')) :
+		(txt.length() > 2 && txt[0] == '0' && (txt[1] == 'x' || txt[1] == 'b'));
+	int radix = has_base ? ((txt.find('x') != string::npos) ? 16 : 2) : 10;
+
+	// Parse the value
+	uint64 val = std::strtoull(txt.substr((is_neg ? 1 : 0) + (has_base ? 2 : 0)).c_str(), nullptr, radix);
+	if (val >= UINT32_MAX)
+		ERROR(tk, strarg("Out of range integer literal ('%s').", txt.c_str()));
+	if (is_neg) {
+		if (val > INT32_MAX)
+			ERROR(tk, strarg("Integer value (%llu) is too large for a signed integer.", val));
+		if (isuns) 
+			*isuns = false;
+		return -(int64)(uint32)val;
+	}
+	else {
+		if (isuns) // Explicitly unsigned -OR- base other than 10 (default unsigned) -OR- too big for signed integer
+			*isuns = is_uns || has_base || (val > INT32_MAX);
+		return (int64)(uint32)val;
+	}
+	return val;
+}
+
+// ====================================================================================================================
+float Visitor::parse_float_literal(antlr4::tree::TerminalNode* tk) const
+{
+	auto txt = tk->getText();
+	float val = std::strtof(txt.c_str(), nullptr);
+	if (val == HUGE_VALF || errno == ERANGE) {
+		errno = 0;
+		ERROR(tk, strarg("Invalid or out of range floating point value ('%s').", txt.c_str()));
+	}
+	return val;
 }
 
 // ====================================================================================================================

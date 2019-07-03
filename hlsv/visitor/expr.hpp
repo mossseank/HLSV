@@ -10,8 +10,31 @@
 
 #pragma once
 
+#include "../config.hpp"
+
 
 namespace hlsv
 {
+
+// Contains information about an rvalue expresssion in a source tree
+class Expr final
+{
+public:
+	HLSVType type;
+	bool is_literal;
+	bool is_compile_constant; // If it is a compile time constant (value literal or spec. constant ref)
+	union
+	{
+		bool b;
+		double f;
+		int64 i;
+	} literal_value;
+
+public:
+	Expr() : Expr(HLSVType::Error) { }
+	explicit Expr(HLSVType type) :
+		type{ type }, is_literal{ false }, is_compile_constant{ false }, literal_value{ 0ull }
+	{ }
+}; // class Expr
 
 } // namespace hlsv

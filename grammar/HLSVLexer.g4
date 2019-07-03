@@ -35,13 +35,15 @@ SIZE_LITERAL // Special type of decimal, non-negative integer
     ;
 INTEGER_LITERAL
     : '-'? DecimalLiteral [uU]?
-    | '-'? HexLiteral [uU]?
+    | '-'? HexLiteral
+    | '-'? BinLiteral
     ;
 FLOAT_LITERAL
     : '-'? DecimalLiteral '.' DecimalLiteral? ExponentPart?
     ;
 fragment DecimalLiteral : DigitChar+ ;
-fragment HexLiteral     : '0x' HexDigitChar+ ;
+fragment HexLiteral     : ('0x'|'0X') HexDigitChar+ ;
+fragment BinLiteral     : ('0b'|'0B') BinDigitChar+ ;
 fragment ExponentPart   : [eE] ('-'|'+')? DigitChar+ ;
 
 // Identifiers, valid for variable and type names, also includes the built-in variables
@@ -82,3 +84,4 @@ fragment AlphaChar      : [a-zA-Z] ;
 fragment DigitChar      : [0-9] ;
 fragment AlnumChar      : AlphaChar | DigitChar ;
 fragment HexDigitChar   : [a-fA-F0-9] ;
+fragment BinDigitChar   : [01] ;
