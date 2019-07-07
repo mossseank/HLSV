@@ -54,6 +54,8 @@ void ErrorListener::syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* o
 		errMsg = "Invalid version in shader version statement.";
 	else if (ridx == grammar::HLSV::RuleShaderVersionStatement)
 		errMsg = "Invalid shader version statement.";
+	else if (ridx == grammar::HLSV::RuleConstantStatement && MSG_STR("expecting '='"))
+		errMsg = "Must provide a value to constant statements.";
 	// Unknown error
 	else {
 		errMsg = strarg("(Rule '%s') (Bad text: '%s') - %s", (ridx == -1) ? "none" : recognizer->getRuleNames()[ridx].c_str(),

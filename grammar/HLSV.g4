@@ -30,12 +30,12 @@ topLevelStatement
 
 // Vertex attribute statement
 vertexAttributeStatement
-    : 'attr' '(' Index=SIZE_LITERAL ')' variableDeclaration ';'
+    : 'attr' '(' Index=INTEGER_LITERAL ')' variableDeclaration ';'
     ;
 
 // Fragment output statement
 fragmentOutputStatement
-    : 'frag' '(' Index=SIZE_LITERAL ')' variableDeclaration ';'
+    : 'frag' '(' Index=INTEGER_LITERAL ')' variableDeclaration ';'
     ;
 
 // Local variable statement
@@ -45,7 +45,7 @@ localStatement
 
 // Uniforms and uniform blocks
 uniformStatement
-    : 'unif' '(' (Set=SIZE_LITERAL ',')? Binding=SIZE_LITERAL ')' 
+    : 'unif' '(' (Set=INTEGER_LITERAL ',')? Binding=INTEGER_LITERAL ')' 
         (
             variableDeclaration | 
             ('block' variableBlock)
@@ -59,15 +59,15 @@ pushConstantsStatement
 
 // Constants and specialization constants
 constantStatement
-    : 'const' ('(' Index=SIZE_LITERAL ')')? variableDeclaration ';'
+    : 'const' ('(' Index=INTEGER_LITERAL ')')? variableDeclaration '=' Value=constAtom ';'
     ;
 
 // Variable declaration
 variableDeclaration
-    : Type=IDENTIFIER typeArgument? Name=IDENTIFIER ('[' Size=SIZE_LITERAL ']')?
+    : Type=IDENTIFIER typeArgument? Name=IDENTIFIER ('[' Size=INTEGER_LITERAL ']')?
     ;
 typeArgument
-    : '<' (Format=IDENTIFIER | Index=SIZE_LITERAL) '>'
+    : '<' (Format=IDENTIFIER | Index=INTEGER_LITERAL) '>'
     ;
 variableBlock
     : '{' (Declarations+=variableDeclaration ';')* '}'
@@ -78,6 +78,11 @@ variableBlock
 // See https://www.khronos.org/files/opengl45-quick-reference-card.pdf for GLSL Order of Operations
 expression
     : atom
+    ;
+
+// Constant atomic expressions (atomics that can be assigned to 'const' variables)
+constAtom
+    : scalarLiteral
     ;
 
 // Atomic expressions (those that cannot be subdivided)

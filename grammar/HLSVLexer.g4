@@ -30,9 +30,6 @@ VERSION_LITERAL
     ;
 
 // Numeric literals
-SIZE_LITERAL // Special type of decimal, non-negative integer
-    : DecimalLiteral
-    ;
 INTEGER_LITERAL
     : '-'? DecimalLiteral [uU]?
     | '-'? HexLiteral
@@ -63,6 +60,7 @@ SEMI_COLON  : ';' ;
 COMMA       : ',' ;
 
 // Operators
+OP_ASSIGN   : '=' ;
 OP_LT       : '<' ;
 OP_GT       : '>' ;
 OP_ADD      : '+' ;

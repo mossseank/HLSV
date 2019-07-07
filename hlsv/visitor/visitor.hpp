@@ -68,8 +68,13 @@ public:
 
 	inline GLSLGenerator& get_generator() { return gen_; }
 
-	uint32 parse_size_literal(antlr4::Token* tk) const;
-	int64 parse_integer_literal(antlr4::tree::TerminalNode* tk, bool* isuns) const;
+	int64 parse_integer_literal(antlr4::Token* tk, bool* isuns, bool forceSize = false) const;
+	int64 parse_integer_literal(antlr4::tree::TerminalNode* tn, bool* isuns, bool forceSize = false) const {
+		return parse_integer_literal(tn->getSymbol(), isuns, forceSize);
+	}
+	inline uint32 parse_size_literal(antlr4::Token* tk) const {
+		return (uint32)parse_integer_literal(tk, nullptr, true);
+	}
 	float parse_float_literal(antlr4::tree::TerminalNode* tk) const;
 	Variable parse_variable(grammar::HLSV::VariableDeclarationContext* ctx, VarScope scope);
 
