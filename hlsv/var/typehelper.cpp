@@ -127,4 +127,30 @@ void TypeHelper::GetScalarLayoutInfo(HLSVType type, uint16* align, uint16* size)
 	if (align) *align = 4;
 }
 
+// ====================================================================================================================
+/* static */
+// TODO: THIS MUST BE CHANGED WHEN 64-BIT TYPES ARE ADDED
+bool TypeHelper::CanPromoteTo(HLSVType::PrimType src, HLSVType::PrimType dst)
+{
+	if (src == dst)
+		return true; // Duh
+	if (src == HLSVType::Void || dst == HLSVType::Void || HLSVType::IsHandleType(src) || HLSVType::IsHandleType(dst))
+		return false; // 'void' and handle types cannot ever be cast to any other type
+	
+	if (HLSVType::IsMatrixType(src)) {
+		return src == dst; // Matrices must cast to matrices of the same size
+	}
+	else { // src = scalar/vector
+		if (HLSVType::IsMatrixType(dst)) return false; // non-matrix -> matrix = Nope
+		if (HLSVType::GetComponentCount(src) != HLSVType::GetComponentCount(dst))
+			return false; // Casting cannot change the component count
+
+		auto stype = HLSVType::GetComponentType(src);
+		auto dtype = HLSVType::GetComponentType(dst);
+		if (stype == HLSVType::Bool || dtype == HLSVType::Bool)
+			return false; // Cannot cast to or from boolean values
+		return stype <= dtype; // This only works because of the ordering of the PrimType enum
+	}
+}
+
 } // namespace hlsv

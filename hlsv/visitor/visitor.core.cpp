@@ -453,6 +453,15 @@ VISIT_FUNC(ConstantStatement)
 	// Build the variable
 	auto vrbl = parse_variable(vdec, VarScope::Constant);
 
+	// Visit the constant value and check types
+	auto expr = visit(ctx->Value).as<Expr>();
+	if (expr.type.is_array != vrbl.type.is_array || expr.type.count != vrbl.type.count)
+		ERROR(ctx->Value, "Constant expression array size mismatch.");
+	if (!TypeHelper::CanPromoteTo(expr.type.type, vrbl.type.type)) {
+		ERROR(ctx->Value, strarg("Expression type '%s' cannot be promoted to variable type '%s'.",
+			expr.type.get_type_str().c_str(), vrbl.type.get_type_str().c_str()));
+	}
+
 	// Global constants and specialization constants have different rules
 	auto idx = ctx->Index;
 	if (idx) {

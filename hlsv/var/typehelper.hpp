@@ -33,6 +33,8 @@ public:
 	static string GetImageFormatStr(HLSVType::PrimType type);
 
 	static void GetScalarLayoutInfo(HLSVType type, uint16* align, uint16* size);
+
+	static bool CanPromoteTo(HLSVType::PrimType src, HLSVType::PrimType dst);
 };
 
 } // namespace hlsv
