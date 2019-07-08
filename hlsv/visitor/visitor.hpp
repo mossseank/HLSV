@@ -19,6 +19,10 @@
 
 #define VISIT(vtype) antlrcpp::Any visit##vtype(grammar::HLSV::vtype##Context* ctx) override;
 
+#define NEW_EXPR(name) auto name = new Expr;
+#define NEW_EXPR_T(name, type) auto name = new Expr{(type)};
+#define VISIT_EXPR(vis) (std::shared_ptr<Expr>(visit(vis).as<Expr*>()))
+
 
 namespace hlsv
 {

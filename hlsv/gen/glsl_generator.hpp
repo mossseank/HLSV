@@ -12,6 +12,7 @@
 
 #include "../config.hpp"
 #include "../var/variable.hpp"
+#include "../visitor/expr.hpp"
 #include <sstream>
 
 
@@ -47,8 +48,8 @@ public:
 	void emit_value_uniform(const Uniform& uni);
 	void emit_push_constant_block_header();
 	void emit_push_constant(const PushConstant& pc);
-	void emit_spec_constant(const SpecConstant& sc);
-	void emit_global_constant(const Variable& vrbl);
+	void emit_spec_constant(const SpecConstant& sc, const Expr& expr);
+	void emit_global_constant(const Variable& vrbl, const Expr& expr);
 }; // class GLSLGenerator
 
 } // namespace hlsv

@@ -27,22 +27,22 @@ namespace hlsv
 // ====================================================================================================================
 VISIT_FUNC(ScalarLiteral)
 {
-	Expr expr{};
-	expr.is_compile_constant = true;
-	expr.is_literal = true;
+	NEW_EXPR(expr);
+	expr->is_compile_constant = true;
+	expr->is_literal = true;
 
 	if (ctx->BOOLEAN_LITERAL()) {
-		expr.type = HLSVType::Bool;
-		expr.literal_value.b = (ctx->BOOLEAN_LITERAL()->getText() == "true");
+		expr->type = HLSVType::Bool;
+		expr->set_default_value(ctx->BOOLEAN_LITERAL()->getText() == "true");
 	}
 	else if (ctx->FLOAT_LITERAL()) {
-		expr.type = HLSVType::Float;
-		expr.literal_value.f = parse_float_literal(ctx->FLOAT_LITERAL());
+		expr->type = HLSVType::Float;
+		expr->set_default_value(parse_float_literal(ctx->FLOAT_LITERAL()));
 	}
 	else { // int
 		bool isuns;
-		expr.literal_value.i = parse_integer_literal(ctx->INTEGER_LITERAL(), &isuns);
-		expr.type = isuns ? HLSVType::UInt : HLSVType::Int;
+		expr->set_default_value(parse_integer_literal(ctx->INTEGER_LITERAL(), &isuns));
+		expr->type = isuns ? HLSVType::UInt : HLSVType::Int;
 	}
 
 	return expr;

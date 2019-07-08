@@ -132,20 +132,20 @@ void GLSLGenerator::emit_push_constant(const PushConstant& pc)
 }
 
 // ====================================================================================================================
-void GLSLGenerator::emit_spec_constant(const SpecConstant& sc)
+void GLSLGenerator::emit_spec_constant(const SpecConstant& sc, const Expr& expr)
 {
 	string locstr = strarg("layout(constant_id = %u)", (uint32)sc.index);
-	string varstr = strarg(" const %s %s%s;\n", TypeHelper::GetGLSLStr(sc.type.type).c_str(), sc.name.c_str(),
-		sc.type.is_array ? strarg("[%u]", sc.type.count).c_str() : "");
+	string varstr = strarg(" const %s %s = %s;\n", TypeHelper::GetGLSLStr(sc.type.type).c_str(), sc.name.c_str(),
+		expr.init_text.c_str());
 	vert_vars_ << locstr << varstr;
 	frag_vars_ << locstr << varstr;
 }
 
 // ====================================================================================================================
-void GLSLGenerator::emit_global_constant(const Variable& vrbl)
+void GLSLGenerator::emit_global_constant(const Variable& vrbl, const Expr& expr)
 {
-	string varstr = strarg("%s %s%s;\n", TypeHelper::GetGLSLStr(vrbl.type.type).c_str(), vrbl.name.c_str(),
-		vrbl.type.is_array ? strarg("[%u]", vrbl.type.count).c_str() : "");
+	string varstr = strarg("%s %s%s = %s;\n", TypeHelper::GetGLSLStr(vrbl.type.type).c_str(), vrbl.name.c_str(),
+		vrbl.type.is_array ? strarg("[%u]", vrbl.type.count).c_str() : "", expr.init_text.c_str());
 	vert_vars_ << varstr;
 	frag_vars_ << varstr;
 }

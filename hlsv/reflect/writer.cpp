@@ -40,6 +40,19 @@ static std::ofstream& write_str(std::ofstream& s, const string& str)
 }
 
 // ====================================================================================================================
+static string spec_const_value_str(const SpecConstant& sc)
+{
+	switch (sc.type.type)
+	{
+	case HLSVType::Bool: return sc.default_value.b ? "true" : "false";
+	case HLSVType::Float: return strarg("%f", sc.default_value.f);
+	case HLSVType::Int:
+	case HLSVType::UInt: return strarg("%lld", sc.default_value.i);
+	}
+	return "ERROR";
+}
+
+// ====================================================================================================================
 /* static */
 bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, string& err)
 {
@@ -156,10 +169,11 @@ bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, strin
 	file << "Spec. Constants" << std::endl
 		 << "---------------" << std::endl;
 	if (refl.spec_constants.size() > 0) {
-		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Index", 8) << ' ' << pad("Size", 8) << std::endl;
+		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Index", 8) << ' ' << pad("Size", 8) << ' '
+			 << pad("Value", 10) << std::endl;
 		for (const auto& sc : refl.spec_constants) {
 			file << pad(sc.name, 16) << ' ' << pad(sc.type.get_type_str(), 12) << ' ' << padf("%u", 8, (uint32)sc.index) 
-				 << ' ' << padf("%u", 8, (uint32)sc.size) << std::endl;
+				 << ' ' << padf("%u", 8, (uint32)sc.size) << ' ' << pad(spec_const_value_str(sc), 10) << std::endl;
 		}
 		file << std::endl;
 	}

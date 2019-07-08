@@ -143,6 +143,13 @@ public:
 	HLSVType(enum PrimType type, uint8 array_size) :
 		type{ type }, is_array{ true }, count{ array_size }, extra{ 0 }
 	{ }
+	HLSVType& operator = (enum PrimType type) {
+		this->type = type;
+		is_array = false;
+		count = 1;
+		extra = { 0 };
+		return *this;
+	}
 
 	inline bool is_error() const { return type == Error; } // Gets if the type represents a type error
 	inline bool is_value_type() const { return IsValueType(type); }
@@ -280,9 +287,15 @@ struct _EXPORT SpecConstant final
 	HLSVType type;
 	uint8 index;
 	uint16 size;
+	union
+	{
+		bool b;   // The default boolean value
+		double f; // The default floating point value
+		int64 i;  // The default integer value
+	} default_value; // The default value for the spec constant
 
 	SpecConstant(const string& name, HLSVType type, uint8 i, uint16 s) :
-		name{ name }, type{ type }, index{ i }, size{ s }
+		name{ name }, type{ type }, index{ i }, size{ s }, default_value{ 0ull }
 	{ }
 }; // struct SpecConstant
 

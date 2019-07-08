@@ -454,12 +454,12 @@ VISIT_FUNC(ConstantStatement)
 	auto vrbl = parse_variable(vdec, VarScope::Constant);
 
 	// Visit the constant value and check types
-	auto expr = visit(ctx->Value).as<Expr>();
-	if (expr.type.is_array != vrbl.type.is_array || expr.type.count != vrbl.type.count)
+	auto expr = VISIT_EXPR(ctx->Value);
+	if (expr->type.is_array != vrbl.type.is_array || expr->type.count != vrbl.type.count)
 		ERROR(ctx->Value, "Constant expression array size mismatch.");
-	if (!TypeHelper::CanPromoteTo(expr.type.type, vrbl.type.type)) {
+	if (!TypeHelper::CanPromoteTo(expr->type.type, vrbl.type.type)) {
 		ERROR(ctx->Value, strarg("Expression type '%s' cannot be promoted to variable type '%s'.",
-			expr.type.get_type_str().c_str(), vrbl.type.get_type_str().c_str()));
+			expr->type.get_type_str().c_str(), vrbl.type.get_type_str().c_str()));
 	}
 
 	// Global constants and specialization constants have different rules
@@ -473,14 +473,15 @@ VISIT_FUNC(ConstantStatement)
 		vrbl.constant.is_spec = true;
 		vrbl.constant.spec_index = sidx;
 		SpecConstant sc{ vrbl.name, vrbl.type, (uint8)sidx, 0 };
+		memcpy(&sc.default_value, &expr->default_value, sizeof(sc.default_value));
 		TypeHelper::GetScalarLayoutInfo(vrbl.type, nullptr, &sc.size);
 		REFL->spec_constants.push_back(sc);
-		gen_.emit_spec_constant(sc);
+		gen_.emit_spec_constant(sc, *expr);
 	}
 	else {
 		if (!vrbl.type.is_value_type())
 			ERROR(vdec, "Constants must have a value type.");
-		gen_.emit_global_constant(vrbl);
+		gen_.emit_global_constant(vrbl, *expr);
 	}
 
 	return nullptr;
