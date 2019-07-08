@@ -33,7 +33,8 @@ Visitor::Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl, const Com
 	reflect_{ refl },
 	options_{ opt },
 	gen_{ },
-	variables_{ }
+	variables_{ },
+	infer_type_{ HLSVType::Error }
 {
 
 }
@@ -450,40 +451,51 @@ VISIT_FUNC(ConstantStatement)
 {
 	auto vdec = ctx->variableDeclaration();
 
-	// Build the variable
+	// Build the variable and check types
 	auto vrbl = parse_variable(vdec, VarScope::Constant);
-
-	// Visit the constant value and check types
-	auto expr = VISIT_EXPR(ctx->Value);
-	if (expr->type.is_array != vrbl.type.is_array || expr->type.count != vrbl.type.count)
-		ERROR(ctx->Value, "Constant expression array size mismatch.");
-	if (!TypeHelper::CanPromoteTo(expr->type.type, vrbl.type.type)) {
-		ERROR(ctx->Value, strarg("Expression type '%s' cannot be promoted to variable type '%s'.",
-			expr->type.get_type_str().c_str(), vrbl.type.get_type_str().c_str()));
-	}
-
-	// Global constants and specialization constants have different rules
 	auto idx = ctx->Index;
 	if (idx) {
 		if (!vrbl.type.is_scalar_type() || vrbl.type.is_array)
 			ERROR(vdec, "Specialization constants must have a non-array scalar type.");
+	}
+	else {
+		if (!vrbl.type.is_value_type())
+			ERROR(vdec, "Constants must have a value type.");
+	}
+	infer_type_ = vrbl.type;
+
+	// Visit the constant value and check types
+	auto expr = GET_VISIT_SPTR(ctx->Value);
+	if (expr->type.is_array != vrbl.type.is_array || expr->type.count != vrbl.type.count)
+		ERROR(ctx->Value, "Constant expression array size mismatch.");
+
+	// Global constants and specialization constants have different rules
+	if (idx) {
+		if (!TypeHelper::CanPromoteTo(expr->type.type, vrbl.type.type)) {
+			ERROR(ctx->Value, strarg("Expression type '%s' cannot be promoted to variable type '%s'.",
+				expr->type.get_type_str().c_str(), vrbl.type.get_type_str().c_str()));
+		}
 		auto sidx = parse_size_literal(idx);
 		if (sidx >= 256u)
 			ERROR(idx, "Specialization constants cannot be bound above index 255.");
 		vrbl.constant.is_spec = true;
 		vrbl.constant.spec_index = sidx;
 		SpecConstant sc{ vrbl.name, vrbl.type, (uint8)sidx, 0 };
-		memcpy(&sc.default_value, &expr->default_value, sizeof(sc.default_value));
+		std::memcpy(&sc.default_value, &expr->default_value, sizeof(sc.default_value));
 		TypeHelper::GetScalarLayoutInfo(vrbl.type, nullptr, &sc.size);
 		REFL->spec_constants.push_back(sc);
 		gen_.emit_spec_constant(sc, *expr);
 	}
 	else {
-		if (!vrbl.type.is_value_type())
-			ERROR(vdec, "Constants must have a value type.");
+		if (!vrbl.type.is_array && !TypeHelper::CanPromoteTo(expr->type.type, vrbl.type.type)) {
+			ERROR(ctx->Value, strarg("Expression type '%s' cannot be promoted to variable type '%s'.",
+				expr->type.get_type_str().c_str(), vrbl.type.get_type_str().c_str()));
+		}
 		gen_.emit_global_constant(vrbl, *expr);
 	}
 
+	variables_.add_global(vrbl);
+	infer_type_ = HLSVType::Error;
 	return nullptr;
 }
 

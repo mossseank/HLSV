@@ -21,7 +21,7 @@
 
 #define NEW_EXPR(name) auto name = new Expr;
 #define NEW_EXPR_T(name, type) auto name = new Expr{(type)};
-#define VISIT_EXPR(vis) (std::shared_ptr<Expr>(visit(vis).as<Expr*>()))
+#define GET_VISIT_SPTR(vis) (std::shared_ptr<Expr>(visit(vis).as<Expr*>()))
 
 
 namespace hlsv
@@ -53,6 +53,7 @@ private:
 	const CompilerOptions* options_;
 	GLSLGenerator gen_;
 	VariableManager variables_;
+	HLSVType infer_type_; // The type to use when inferring how to interpret an initializer list
 
 public:
 	Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl, const CompilerOptions* opt);
@@ -91,6 +92,7 @@ public:
 	VISIT(PushConstantsStatement)
 	VISIT(ConstantStatement)
 
+	VISIT(ConstValue)
 	VISIT(ScalarLiteral)
 }; // class Visitor
 

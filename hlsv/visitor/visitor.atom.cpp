@@ -9,6 +9,7 @@
 // This file implements the functions of the visitor class that deal with atomic expressions
 
 #include "visitor.hpp"
+#include <sstream>
 
 #ifdef HLSV_COMPILER_MSVC
 	// Lots of warnings about ignoring the return value of visit...() functions
@@ -23,6 +24,99 @@
 
 namespace hlsv
 {
+
+// ====================================================================================================================
+VISIT_FUNC(ConstValue)
+{
+	if (ctx->scalarLiteral())
+		return visit(ctx->scalarLiteral());
+	else if (ctx->TypeName) {
+		auto ctype = TypeHelper::ParseTypeStr(ctx->TypeName->getText());
+		if (ctype == HLSVType::Error)
+			ERROR(ctx->TypeName, strarg("Type constructor '%s' not a valid type.", ctx->TypeName->getText().c_str()));
+		if (!HLSVType::IsValueType(ctype))
+			ERROR(ctx->TypeName, "Constant expressions must use value types only.");
+		if (HLSVType::IsScalarType(ctype))
+			ERROR(ctx->TypeName, "Scalar casting is not allowed in constant expressions.");
+
+		// Visit all of the arguments and build the init text
+		std::vector<Expr*> args{};
+		std::stringstream ss{}; ss << TypeHelper::GetGLSLStr(ctype) << "( ";
+		for (auto a : ctx->Args) {
+			if (a->constInitializerList())
+				ERROR(a, "Cannot use initializer lists in type constructors.");
+			auto aexpr = visit(a).as<Expr*>();
+			if (args.size() != 0) ss << ", ";
+			ss << aexpr->init_text;
+			args.push_back(aexpr);
+		}
+		ss << " )";
+
+		// TODO: CHECK THE ARGUMENTS
+
+		// Return the expression
+		NEW_EXPR_T(expr, ctype);
+		expr->is_compile_constant = true;
+		expr->is_literal = true;
+		expr->init_text = ss.str();
+		return expr;
+	}
+	else { // initializer list
+		if (infer_type_.is_array) {
+			if (ctx->constInitializerList()->Args.size() >= 256u)
+				ERROR(ctx->constInitializerList(), "Initializer lists cannot have more than 255 elements.");
+			auto save_type = infer_type_;
+			infer_type_ = infer_type_.type; // Keeps the type, but sets is_array to false to generate children
+
+			// Visit the children and build init string
+			std::stringstream ss{}; ss << (HLSVType::IsScalarType(infer_type_.type) ? "{ " : TypeHelper::GetGLSLStr(infer_type_.type) + "[]( ");
+			bool first = true;
+			for (auto c : ctx->constInitializerList()->Args) {
+				auto aexpr = GET_VISIT_SPTR(c);
+				if (!TypeHelper::CanPromoteTo(aexpr->type.type, infer_type_.type)) {
+					ERROR(c, strarg("Cannot promote type '%s' to array member type '%s'.", aexpr->type.get_type_str().c_str(),
+						infer_type_.get_type_str().c_str()));
+				}
+				if (!first) ss << ", ";
+				else first = false;
+				ss << aexpr->init_text;
+			}
+			ss << (HLSVType::IsScalarType(infer_type_.type) ? " }" : " )");
+
+			// Return the expression
+			NEW_EXPR(expr);
+			expr->type = { infer_type_.type, (uint8)ctx->constInitializerList()->Args.size() };
+			expr->is_compile_constant = true;
+			expr->init_text = ss.str();
+			infer_type_ = save_type;
+			return expr;
+		}
+		else {
+			if (HLSVType::IsScalarType(infer_type_.type))
+				ERROR(ctx, "Initializer lists cannot be used on scalar types.");
+
+			// Visit all of the arguments and build the init text
+			std::vector<Expr*> args{};
+			std::stringstream ss{}; ss << TypeHelper::GetGLSLStr(infer_type_.type) << "( ";
+			for (auto a : ctx->constInitializerList()->Args) {
+				if (a->constInitializerList())
+					ERROR(a, "Cannot use initializer lists within type construction lists.");
+				auto aexpr = visit(a).as<Expr*>();
+				if (args.size() != 0) ss << ", ";
+				ss << aexpr->init_text;
+				args.push_back(aexpr);
+			}
+			ss << " )";
+
+			// TODO: CHECK THE ARGUMENTS
+
+			// Return the expression
+			NEW_EXPR_T(expr, infer_type_.type);
+			expr->init_text = ss.str();
+			return expr;
+		}
+	}
+}
 
 // ====================================================================================================================
 VISIT_FUNC(ScalarLiteral)

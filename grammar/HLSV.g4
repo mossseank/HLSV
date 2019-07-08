@@ -59,7 +59,7 @@ pushConstantsStatement
 
 // Constants and specialization constants
 constantStatement
-    : 'const' ('(' Index=INTEGER_LITERAL ')')? variableDeclaration '=' Value=constAtom ';'
+    : 'const' ('(' Index=INTEGER_LITERAL ')')? variableDeclaration '=' Value=constValue ';'
     ;
 
 // Variable declaration
@@ -80,9 +80,14 @@ expression
     : atom
     ;
 
-// Constant atomic expressions (atomics that can be assigned to 'const' variables)
-constAtom
+// Expressions that can be used to initialize `const` statements
+constValue
     : scalarLiteral
+    | TypeName=IDENTIFIER '(' Args+=constValue (',' Args+=constValue)* ')'
+    | constInitializerList
+    ;
+constInitializerList
+    : '{' Args+=constValue (',' Args+=constValue)* '}'
     ;
 
 // Atomic expressions (those that cannot be subdivided)
