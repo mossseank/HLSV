@@ -9,7 +9,7 @@
 // This file implements the main ReflectionInfo type from hlsv_reflect.hpp
 
 #include "../config.hpp"
-#include "../var/typehelper.hpp"
+#include "../type/typehelper.hpp"
 #include <algorithm>
 
 

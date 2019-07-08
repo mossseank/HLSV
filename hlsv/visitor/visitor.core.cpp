@@ -9,7 +9,7 @@
 // This file implements the functions of the visitor class that are utility, as well as top level statements
 
 #include "visitor.hpp"
-#include "../var/typehelper.hpp"
+#include "../type/typehelper.hpp"
 #include <stdlib.h>
 #include <cmath>
 

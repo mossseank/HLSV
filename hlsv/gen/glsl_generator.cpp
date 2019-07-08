@@ -9,7 +9,7 @@
 // This file implements glsl_generator.hpp
 
 #include "glsl_generator.hpp"
-#include "../var/typehelper.hpp"
+#include "../type/typehelper.hpp"
 
 static const std::string VERSION_STR = "#version 450";
 static const std::string VERSION_CMT = "// Generated with hlsvc version ";

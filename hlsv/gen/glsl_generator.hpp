@@ -11,7 +11,7 @@
 #pragma once
 
 #include "../config.hpp"
-#include "../var/variable.hpp"
+#include "../type/variable.hpp"
 #include "../visitor/expr.hpp"
 #include <sstream>
 
