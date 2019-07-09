@@ -54,7 +54,9 @@ enum class ShaderStages : uint8
 
 /* ShaderStages Operators */
 inline ShaderStages operator | (ShaderStages l, ShaderStages r) { return (ShaderStages)((uint8)l | (uint8)r); }
+inline ShaderStages& operator |= (ShaderStages& l, ShaderStages r) { l = l | r; return l; }
 inline ShaderStages operator ^ (ShaderStages l, ShaderStages r) { return (ShaderStages)((uint8)l & ~(uint8)r); }
+inline ShaderStages& operator ^= (ShaderStages& l, ShaderStages r) { l = l ^ r; return l; }
 inline bool operator & (ShaderStages l, ShaderStages r) { return (ShaderStages)((uint8)l & (uint8)r) == r; }
 
 // Represents a record about a specific primitive HLSV type

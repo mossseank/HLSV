@@ -93,6 +93,8 @@ public:
 	VISIT(UniformStatement)
 	VISIT(PushConstantsStatement)
 	VISIT(ConstantStatement)
+	VISIT(VertFunction)
+	VISIT(FragFunction)
 
 	VISIT(ConstValue)
 	VISIT(ScalarLiteral)

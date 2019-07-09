@@ -26,6 +26,7 @@ topLevelStatement
     | uniformStatement
     | pushConstantsStatement
     | constantStatement
+    | stageFunction
     ;
 
 // Vertex attribute statement
@@ -60,6 +61,21 @@ pushConstantsStatement
 // Constants and specialization constants
 constantStatement
     : 'const' ('(' Index=INTEGER_LITERAL ')')? variableDeclaration '=' Value=constValue ';'
+    ;
+
+// Stage functions
+stageFunction
+    : '@vert' block     # vertFunction
+    | '@frag' block     # fragFunction
+    ;
+
+
+// Statements (any line that can stand alone in meaning within a function body)
+block
+    : '{' statement* '}'
+    ;
+statement
+    : variableDeclaration ';'
     ;
 
 // Variable declaration

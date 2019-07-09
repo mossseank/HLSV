@@ -192,6 +192,10 @@ VISIT_FUNC(File)
 		}
 	}
 
+	// Validate the shader stages
+	if (!(REFL->stages & ShaderStages::MinGraphics))
+		ERROR(ctx, "Missing shader stages - at minimum the vertex and fragment shaders must be defined.");
+
 	// Sort the reflection info
 	REFL->sort();
 
@@ -498,6 +502,26 @@ VISIT_FUNC(ConstantStatement)
 
 	variables_.add_global(vrbl);
 	infer_type_ = HLSVType::Error;
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(VertFunction)
+{
+	if (REFL->stages & ShaderStages::Vertex)
+		ERROR(ctx, "Cannot define more than one vertex function per shader.");
+	REFL->stages |= ShaderStages::Vertex;
+
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(FragFunction)
+{
+	if (REFL->stages & ShaderStages::Fragment)
+		ERROR(ctx, "Cannot define more than one fragment function per shader.");
+	REFL->stages |= ShaderStages::Fragment;
+
 	return nullptr;
 }
 

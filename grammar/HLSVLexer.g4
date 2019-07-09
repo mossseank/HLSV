@@ -24,6 +24,10 @@ KW_PUSH         : 'push' ;
 KW_SHADER       : 'shader' ;
 KW_UNIF         : 'unif' ;
 
+// Stage function keywords
+KW_STAGE_VERT   : '@vert' ;
+KW_STAGE_FRAG   : '@frag' ;
+
 // Literals
 VERSION_LITERAL
     : DigitChar DigitChar DigitChar
