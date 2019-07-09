@@ -207,7 +207,7 @@ bool Compiler::writeGLSL(void* gen)
 	GLSLGenerator* glsl = static_cast<GLSLGenerator*>(gen);
 
 	// Write vertex
-	{
+	if (reflect_->stages & ShaderStages::Vertex) {
 		std::ofstream file{ paths_.vert_path };
 		if (!file.is_open() || !file.good()) {
 			SET_ERR(ES_FILEIO, "Unable to write intermediate glsl file.");
@@ -217,7 +217,7 @@ bool Compiler::writeGLSL(void* gen)
 	}
 
 	// Write fragment
-	{
+	if (reflect_->stages & ShaderStages::Fragment) {
 		std::ofstream file{ paths_.frag_path };
 		if (!file.is_open() || !file.good()) {
 			SET_ERR(ES_FILEIO, "Unable to write intermediate glsl file.");

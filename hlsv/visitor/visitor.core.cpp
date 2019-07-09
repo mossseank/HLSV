@@ -511,7 +511,13 @@ VISIT_FUNC(VertFunction)
 	if (REFL->stages & ShaderStages::Vertex)
 		ERROR(ctx, "Cannot define more than one vertex function per shader.");
 	REFL->stages |= ShaderStages::Vertex;
+	gen_.set_stage(ShaderStages::Vertex);
+	gen_.push_indent();
 
+	visit(ctx->block());
+
+	gen_.pop_indent();
+	gen_.emit_func_block_close();
 	return nullptr;
 }
 
@@ -521,7 +527,13 @@ VISIT_FUNC(FragFunction)
 	if (REFL->stages & ShaderStages::Fragment)
 		ERROR(ctx, "Cannot define more than one fragment function per shader.");
 	REFL->stages |= ShaderStages::Fragment;
+	gen_.set_stage(ShaderStages::Fragment);
+	gen_.push_indent();
 
+	visit(ctx->block());
+
+	gen_.pop_indent();
+	gen_.emit_func_block_close();
 	return nullptr;
 }
 

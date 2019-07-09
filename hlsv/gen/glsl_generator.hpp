@@ -14,6 +14,7 @@
 #include "../type/variable.hpp"
 #include "../visitor/expr.hpp"
 #include <sstream>
+#include <map>
 
 
 namespace hlsv
@@ -27,16 +28,22 @@ class GLSLGenerator final
 private:
 	sstream vert_vars_;
 	sstream frag_vars_;
+	std::map<ShaderStages, sstream*> stage_funcs_;
+	string indent_str_;
+	ShaderStages current_stage_;
 
 public:
 	GLSLGenerator();
 	~GLSLGenerator();
 
+	inline ShaderStages get_stage() const { return current_stage_; }
+	inline void set_stage(ShaderStages ss) { current_stage_ = ss; }
+
 	inline string vert_str() const {
-		return vert_vars_.str();
+		return vert_vars_.str() + '\n' + stage_funcs_.at(ShaderStages::Vertex)->str();
 	}
 	inline string frag_str() const {
-		return frag_vars_.str();
+		return frag_vars_.str() + '\n' + stage_funcs_.at(ShaderStages::Fragment)->str();
 	}
 
 	void emit_attribute(const Attribute& attr);
@@ -50,6 +57,12 @@ public:
 	void emit_push_constant(const PushConstant& pc);
 	void emit_spec_constant(const SpecConstant& sc, const Expr& expr);
 	void emit_global_constant(const Variable& vrbl, const Expr& expr);
+
+	inline void push_indent() { indent_str_ += '\t'; }
+	inline void pop_indent() { 
+		if (indent_str_.length() > 0) indent_str_ = string(indent_str_.length() - 1, '\t');
+	}
+	void emit_func_block_close();
 }; // class GLSLGenerator
 
 } // namespace hlsv

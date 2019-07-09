@@ -11,12 +11,15 @@
 #include "glsl_generator.hpp"
 #include "../type/typehelper.hpp"
 
+#define CSTAGE (*stage_funcs_.at(current_stage_))
+
 static const std::string VERSION_STR = "#version 450";
 static const std::string VERSION_CMT = "// Generated with hlsvc version ";
 static const std::string EXTENSION_STR = "#extension %s : require\n";
 static const std::string EXTENSIONS [] = {
 	"GL_EXT_scalar_block_layout"
 };
+static const std::ios_base::openmode DOM = std::ios_base::out | std::ios_base::ate;
 
 
 namespace hlsv
@@ -25,7 +28,16 @@ namespace hlsv
 // ====================================================================================================================
 GLSLGenerator::GLSLGenerator() :
 	vert_vars_{ },
-	frag_vars_{ }
+	frag_vars_{ },
+	stage_funcs_{
+		{ ShaderStages::Vertex, new sstream{ "// Vertex stage\nvoid vert_main() {\n", DOM } },
+		{ ShaderStages::TessControl, new sstream{ "// TessControl stage\nvoid tesc_main() {\n", DOM } },
+		{ ShaderStages::TessEval, new sstream{ "// TessEval stage\nvoid tese_main() {\n", DOM } },
+		{ ShaderStages::Geometry, new sstream{ "// Geometry stage\nvoid geom_main() {\n", DOM } },
+		{ ShaderStages::Fragment, new sstream{ "// Fragment stage\nvoid frag_main() {\n", DOM } }
+	},
+	indent_str_{ "" },
+	current_stage_{ ShaderStages::None }
 {
 	vert_vars_ << VERSION_CMT << HLSV_VERSION << '\n' << VERSION_STR << '\n';
 	frag_vars_ << VERSION_CMT << HLSV_VERSION << '\n' << VERSION_STR << '\n';
@@ -41,7 +53,9 @@ GLSLGenerator::GLSLGenerator() :
 // ====================================================================================================================
 GLSLGenerator::~GLSLGenerator()
 {
-
+	for (auto pair : stage_funcs_)
+		delete pair.second;
+	stage_funcs_.clear();
 }
 
 // ====================================================================================================================
@@ -148,6 +162,12 @@ void GLSLGenerator::emit_global_constant(const Variable& vrbl, const Expr& expr)
 		vrbl.type.is_array ? strarg("[%u]", vrbl.type.count).c_str() : "", expr.init_text.c_str());
 	vert_vars_ << varstr;
 	frag_vars_ << varstr;
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_func_block_close()
+{
+	CSTAGE << indent_str_ << "}\n";
 }
 
 } // namespace hlsv
