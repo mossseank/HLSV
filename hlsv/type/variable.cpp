@@ -19,9 +19,41 @@ Variable::Variable(const string& name, HLSVType type, VarScope scope) :
 	name{ name },
 	type{ type },
 	scope{ scope },
-	constant{ false, 0 }
+	constant{ false, 0 },
+	read{ GetDefaultReadStages(scope) },
+	write{ GetDefaultWriteStages(scope) }
 {
 	
+}
+
+// ====================================================================================================================
+/* static */
+ShaderStages Variable::GetDefaultReadStages(VarScope scope)
+{
+	switch (scope) {
+	case VarScope::Attribute: return ShaderStages::Vertex;
+	case VarScope::Output: return ShaderStages::None;
+	case VarScope::Local: return ShaderStages::Fragment;
+	case VarScope::Uniform: return ShaderStages::AllGraphics;
+	case VarScope::PushConstant: return ShaderStages::AllGraphics;
+	case VarScope::Constant: return ShaderStages::AllGraphics;
+	}
+	return ShaderStages::None;
+}
+
+// ====================================================================================================================
+/* static */
+ShaderStages Variable::GetDefaultWriteStages(VarScope scope)
+{
+	switch (scope) {
+	case VarScope::Attribute: return ShaderStages::None;
+	case VarScope::Output: return ShaderStages::Fragment;
+	case VarScope::Local: return ShaderStages::Vertex;
+	case VarScope::Uniform: return ShaderStages::None;
+	case VarScope::PushConstant: return ShaderStages::None;
+	case VarScope::Constant: return ShaderStages::None;
+	}
+	return ShaderStages::None;
 }
 
 } // namespace hlsv

@@ -48,6 +48,8 @@ public:
 			uint32 spec_index;
 		} constant;
 	};
+	ShaderStages read;
+	ShaderStages write;
 
 public:
 	Variable(const string& name, HLSVType type, VarScope scope);
@@ -60,6 +62,12 @@ public:
 	inline bool is_constant() const { return scope == VarScope::Constant; }
 
 	inline uint32 get_slot_count() const { return type.get_slot_size(); }
+
+	inline bool can_read(ShaderStages stage) const { return read & stage; }
+	inline bool can_write(ShaderStages stage) const { return write & stage; }
+
+	static ShaderStages GetDefaultReadStages(VarScope scope);
+	static ShaderStages GetDefaultWriteStages(VarScope scope);
 };
 
 } // namespace hlsv

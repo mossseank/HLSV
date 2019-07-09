@@ -85,6 +85,7 @@
 
 #include <cstdint>
 #include <string>
+#include <cstring>
 #include <vector>
 
 

@@ -35,8 +35,7 @@ namespace hlsv
 // The types of shaders
 enum class ShaderType : uint8
 {
-	Graphics = 0, // The shader operates in the graphics pipeline
-	Compute       // The shader operates in the general compute pipeline
+	Graphics = 0 // The shader operates in the graphics pipeline
 }; // enum class ShaderType
 
 // Shader stages (as a bitset of flags), contains flags for all shader types, but the types shouldn't be mixed
@@ -50,11 +49,7 @@ enum class ShaderStages : uint8
 	Geometry    = 0x08, // The geometry stage for graphics shaders
 	Fragment    = 0x10, // The fragment stage for graphics shaders
 	MinGraphics = 0x11, // A bitset representing the minimal set of stages required for a "complete" graphics shader
-	AllGraphics = 0x1F, // A bitset representing all graphics shader stages
-	/// Compute Stages
-	Kernel     = 0x01, // The kernel execution stage for compute shaders (the only compute shader stage)
-	MinCompute = 0x01, // A bitset representing the minimal set of stages required for a "complete" compute shader
-	AllCompute = 0x01  // A bitset representing all compute shader stages
+	AllGraphics = 0x1F  // A bitset representing all graphics shader stages
 }; // enum class ShaderStages
 
 /* ShaderStages Operators */
@@ -324,7 +319,6 @@ public:
 	void sort();
 
 	inline bool is_graphics() const { return shader_type == ShaderType::Graphics; }
-	inline bool is_compute() const { return shader_type == ShaderType::Compute; }
 
 	inline bool has_push_constants() const { return push_constants.size() > 0; }
 
