@@ -9,6 +9,7 @@
 // This file implements the functions of the visitor class that deal with atomic expressions
 
 #include "visitor.hpp"
+#include "../type/functions.hpp"
 #include <sstream>
 
 #ifdef HLSV_COMPILER_MSVC
@@ -30,7 +31,7 @@ VISIT_FUNC(ConstValue)
 {
 	if (ctx->scalarLiteral())
 		return visit(ctx->scalarLiteral());
-	else if (ctx->TypeName) {
+	else if (ctx->TypeName) { // Type constructor
 		auto ctype = TypeHelper::ParseTypeStr(ctx->TypeName->getText());
 		if (ctype == HLSVType::Error)
 			ERROR(ctx->TypeName, strarg("Type constructor '%s' not a valid type.", ctx->TypeName->getText().c_str()));
@@ -40,19 +41,23 @@ VISIT_FUNC(ConstValue)
 			ERROR(ctx->TypeName, "Scalar casting is not allowed in constant expressions.");
 
 		// Visit all of the arguments and build the init text
+		auto save_type = infer_type_;
+		infer_type_ = HLSVType::Error;
 		std::vector<Expr*> args{};
 		std::stringstream ss{}; ss << TypeHelper::GetGLSLStr(ctype) << "( ";
 		for (auto a : ctx->Args) {
-			if (a->constInitializerList())
-				ERROR(a, "Cannot use initializer lists in type constructors.");
 			auto aexpr = visit(a).as<Expr*>();
 			if (args.size() != 0) ss << ", ";
 			ss << aexpr->init_text;
 			args.push_back(aexpr);
 		}
 		ss << " )";
+		infer_type_ = save_type;
 
-		// TODO: CHECK THE ARGUMENTS
+		// Check the arguments
+		string err{ "" };
+		if (!FunctionRegistry::CheckConstructor(ctype, args, err))
+			ERROR(ctx->Args[0], err);
 
 		// Return the expression
 		NEW_EXPR_T(expr, ctype);
@@ -92,6 +97,8 @@ VISIT_FUNC(ConstValue)
 			return expr;
 		}
 		else {
+			if (infer_type_.type == HLSVType::Error)
+				ERROR(ctx, "Unable to infer type for initializer list.");
 			if (HLSVType::IsScalarType(infer_type_.type))
 				ERROR(ctx, "Initializer lists cannot be used on scalar types.");
 
@@ -99,8 +106,6 @@ VISIT_FUNC(ConstValue)
 			std::vector<Expr*> args{};
 			std::stringstream ss{}; ss << TypeHelper::GetGLSLStr(infer_type_.type) << "( ";
 			for (auto a : ctx->constInitializerList()->Args) {
-				if (a->constInitializerList())
-					ERROR(a, "Cannot use initializer lists within type construction lists.");
 				auto aexpr = visit(a).as<Expr*>();
 				if (args.size() != 0) ss << ", ";
 				ss << aexpr->init_text;
@@ -108,7 +113,10 @@ VISIT_FUNC(ConstValue)
 			}
 			ss << " )";
 
-			// TODO: CHECK THE ARGUMENTS
+			// Check the arguments
+			string err{ "" };
+			if (!FunctionRegistry::CheckConstructor(infer_type_.type, args, err))
+				ERROR(ctx->constInitializerList(), err);
 
 			// Return the expression
 			NEW_EXPR_T(expr, infer_type_.type);

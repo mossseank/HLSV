@@ -52,10 +52,10 @@ private:
 	static std::map<string, std::vector<FunctionEntry>> Functions_;
 
 public:
-	bool CheckFunction(const string& name, const std::vector<HLSVType>& args, string& err);
-	bool CheckFunction(const string& name, const std::vector<Expr*>& args, string& err);
-	bool CheckConstructor(HLSVType::PrimType type, const std::vector<HLSVType>& args, string& err);
-	inline bool CheckConstructor(HLSVType::PrimType type, const std::vector<Expr*>& args, string& err) {
+	static bool CheckFunction(const string& name, const std::vector<HLSVType>& args, string& err);
+	static bool CheckFunction(const string& name, const std::vector<Expr*>& args, string& err);
+	static bool CheckConstructor(HLSVType::PrimType type, const std::vector<HLSVType>& args, string& err);
+	inline static bool CheckConstructor(HLSVType::PrimType type, const std::vector<Expr*>& args, string& err) {
 		std::vector<HLSVType> atyp{ args.size(), HLSVType::Error };
 		std::transform(args.begin(), args.end(), atyp.data(), [](Expr* e) { return e->type; });
 		return CheckConstructor(type, atyp, err);

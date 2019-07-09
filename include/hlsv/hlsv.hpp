@@ -127,13 +127,15 @@ public:
 	uint32 line; // The line that the error occured on, if the error is from the source code
 	uint32 character; // The character position of the error, if the error is from the source code
 	std::vector<string> rule_stack; // The grammar rule stack that generated the error, if the error is from the source code
+	string bad_text; // The source text that generated the error, if applicable
 
 	CompilerError(error_source src, const string& msg, uint32 l = 0, uint32 c = 0, const std::vector<string> & rs = {}) :
 		source{ src },
 		message{ msg },
 		line{ l },
 		character{ c },
-		rule_stack{ rs }
+		rule_stack{ rs },
+		bad_text{ "" }
 	{ }
 
 	// Gets a string representation of the rule stack for the error

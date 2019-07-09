@@ -151,7 +151,8 @@ bool FunctionRegistry::CheckConstructor(HLSVType::PrimType type, const std::vect
 		else if (args.size() == ccount) { // Directly specifying each component
 			for (uint32 i = 0; i < ccount; ++i) {
 				if (!args[i].is_scalar_type() || !TypeHelper::CanPromoteTo(args[i].type, ctype)) {
-					err = strarg("Vector constructor argument %u must be a promotable scalar type.", i);
+					err = strarg("'%s' constructor argument %u must be a promotable scalar type.", 
+						HLSVType::GetTypeStr(type).c_str(), i);
 					return false;
 				}
 			}
@@ -163,13 +164,15 @@ bool FunctionRegistry::CheckConstructor(HLSVType::PrimType type, const std::vect
 			uint32 acount = 0;
 			for (uint32 i = 0; i < args.size(); ++i) {
 				if (args[i].is_matrix_type() || !TypeHelper::CanPromoteTo(args[i].get_component_type(), ctype)) {
-					err = strarg("Vector constructor argument %u must be a promotable scalar or vector type.", i);
+					err = strarg("'%s' constructor argument %u must be a promotable scalar or vector type.", 
+						HLSVType::GetTypeStr(type).c_str(), i);
 					return false;
 				}
 				acount += args[i].get_component_count();
 			}
 			if (acount != ccount) {
-				err = strarg("Vector constructor expected %u total components, but got %u.", (uint32)ccount, acount);
+				err = strarg("'%s' constructor expected %u total components, but got %u.", HLSVType::GetTypeStr(type).c_str(),
+					(uint32)ccount, acount);
 				return false;
 			}
 			return true;

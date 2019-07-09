@@ -38,9 +38,11 @@ public:
 	VisitError(const CompilerError& e) :
 		std::runtime_error(e.message), error{ e }
 	{ }
-	VisitError(CompilerError::error_source src, const string& msg, uint32 l = 0, uint32 c = 0, const std::vector<string> & rs = {}) :
-		std::runtime_error(msg), error{ src, msg, l, c, rs }
-	{ }
+	VisitError(CompilerError::error_source src, const string& msg, uint32 l, uint32 c, const string& bt) :
+		std::runtime_error(msg), error{ src, msg, l, c, {} }
+	{ 
+		error.bad_text = bt;
+	}
 }; // class VisitError 
 
 // The actual source tree visitor type
@@ -61,14 +63,14 @@ public:
 
 	inline void ERROR(antlr4::RuleContext* ctx, const string& msg) const {
 		auto tk = tokens_->get(ctx->getSourceInterval().a);
-		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine());
+		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine(), ctx->getText());
 	}
 	inline void ERROR(antlr4::Token* tk, const string& msg) const {
-		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine());
+		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine(), tk->getText());
 	}
 	inline void ERROR(antlr4::tree::TerminalNode* node, const string& msg) const {
 		auto tk = tokens_->get(node->getSourceInterval().a);
-		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine());
+		throw VisitError(CompilerError::ES_COMPILER, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine(), node->getText());
 	}
 
 	inline GLSLGenerator& get_generator() { return gen_; }

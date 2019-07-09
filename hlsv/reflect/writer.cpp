@@ -42,8 +42,7 @@ static std::ofstream& write_str(std::ofstream& s, const string& str)
 // ====================================================================================================================
 static string spec_const_value_str(const SpecConstant& sc)
 {
-	switch (sc.type.type)
-	{
+	switch (sc.type.type) {
 	case HLSVType::Bool: return sc.default_value.b ? "true" : "false";
 	case HLSVType::Float: return strarg("%f", sc.default_value.f);
 	case HLSVType::Int:

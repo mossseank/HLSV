@@ -48,7 +48,8 @@ int main(int argc, char** argv)
 				}
 			}
 			else if (err.source == CompilerError::ES_COMPILER) {
-				Console::Errorf("[%u:%u] - %s", err.line, err.character, err.message.c_str());
+				auto bt = (err.bad_text.length() > 12) ? err.bad_text.substr(9) + "..." : err.bad_text;
+				Console::Errorf("[%u:%u] '%s' - %s", err.line, err.character, bt.c_str(), err.message.c_str());
 			}
 		}
 		else {

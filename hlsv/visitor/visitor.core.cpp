@@ -478,6 +478,8 @@ VISIT_FUNC(ConstantStatement)
 		auto sidx = parse_size_literal(idx);
 		if (sidx >= 256u)
 			ERROR(idx, "Specialization constants cannot be bound above index 255.");
+		if (vrbl.type.type == HLSVType::Float && expr->type.type != HLSVType::Float)
+			expr->set_default_value((double)expr->default_value.i);
 		vrbl.constant.is_spec = true;
 		vrbl.constant.spec_index = sidx;
 		SpecConstant sc{ vrbl.name, vrbl.type, (uint8)sidx, 0 };
