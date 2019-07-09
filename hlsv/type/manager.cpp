@@ -16,8 +16,18 @@ namespace hlsv
 {
 
 // ====================================================================================================================
+Variable* VariableManager::VarBlock::find(const string& name)
+{
+	auto it = std::find_if(vars.begin(), vars.end(), [name](const Variable& var) {
+		return var.name == name;
+	});
+	return (it != vars.end()) ? &(*it) : nullptr;
+}
+
+// ====================================================================================================================
 VariableManager::VariableManager() :
-	globals_{ }
+	globals_{ },
+	blocks_{ }
 {
 
 }
@@ -40,13 +50,30 @@ Variable* VariableManager::find_global(const string& name)
 // ====================================================================================================================
 Variable* VariableManager::find_variable(const string& name)
 {
-	return find_global(name); // TODO: search the scope stack when implemented
+	for (auto it = blocks_.rbegin(); it != blocks_.rend(); ++it) {
+		auto var = (*it)->find(name);
+		if (var) return var;
+	}
+	return find_global(name);
 }
 
 // ====================================================================================================================
 void VariableManager::add_global(const Variable& var)
 {
 	globals_.push_back(var);
+}
+
+// ====================================================================================================================
+void VariableManager::push_block()
+{
+	blocks_.push_back(new VarBlock);
+}
+
+// ====================================================================================================================
+void VariableManager::pop_block()
+{
+	delete blocks_.back();
+	blocks_.pop_back();
 }
 
 // ====================================================================================================================

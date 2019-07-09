@@ -24,8 +24,19 @@ class VariableManager final
 {
 	using varvec = std::vector<Variable>;
 
+	class VarBlock final
+	{
+	public:
+		varvec vars;
+
+		VarBlock() : vars{ } { }
+
+		Variable* find(const string& name);
+	}; // class VarBlock
+
 private:
 	varvec globals_; // The global variables (all that dont exist in any local scopes)
+	std::vector<VarBlock*> blocks_;
 
 public:
 	VariableManager();
@@ -34,6 +45,9 @@ public:
 	Variable* find_global(const string& name);
 	Variable* find_variable(const string& name);
 	void add_global(const Variable& var); // Does not check if a variable with the name already exists
+
+	void push_block();
+	void pop_block();
 
 	inline const varvec& get_globals() const { return globals_; }
 

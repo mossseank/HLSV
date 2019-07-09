@@ -198,10 +198,10 @@ public:
 
 /* HLSVType Operators */
 inline bool operator == (HLSVType l, HLSVType r) {
-	return l.type == r.type && l.is_array == r.is_array && l.count == r.count;
+	return l.type == r.type && l.is_array == r.is_array && l.count == r.count && l.extra.subpass_input_index == r.extra.subpass_input_index;
 }
 inline bool operator != (HLSVType l, HLSVType r) {
-	return l.type != r.type || l.is_array != r.is_array || l.count != r.count;
+	return l.type != r.type || l.is_array != r.is_array || l.count != r.count || l.extra.subpass_input_index != r.extra.subpass_input_index;
 }
 inline bool operator == (HLSVType l, enum HLSVType::PrimType r) { return l.type == r; }
 inline bool operator != (HLSVType l, enum HLSVType::PrimType r) { return l.type != r; }

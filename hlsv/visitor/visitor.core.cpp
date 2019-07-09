@@ -514,7 +514,9 @@ VISIT_FUNC(VertFunction)
 	gen_.set_stage(ShaderStages::Vertex);
 	gen_.push_indent();
 
+	variables_.push_block();
 	visit(ctx->block());
+	variables_.pop_block();
 
 	gen_.pop_indent();
 	gen_.emit_func_block_close();
@@ -530,7 +532,9 @@ VISIT_FUNC(FragFunction)
 	gen_.set_stage(ShaderStages::Fragment);
 	gen_.push_indent();
 
+	variables_.push_block();
 	visit(ctx->block());
+	variables_.pop_block();
 
 	gen_.pop_indent();
 	gen_.emit_func_block_close();

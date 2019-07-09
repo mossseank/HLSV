@@ -37,6 +37,7 @@ ShaderStages Variable::GetDefaultReadStages(VarScope scope)
 	case VarScope::Uniform: return ShaderStages::AllGraphics;
 	case VarScope::PushConstant: return ShaderStages::AllGraphics;
 	case VarScope::Constant: return ShaderStages::AllGraphics;
+	case VarScope::Block: return ShaderStages::AllGraphics;
 	}
 	return ShaderStages::None;
 }
@@ -52,6 +53,7 @@ ShaderStages Variable::GetDefaultWriteStages(VarScope scope)
 	case VarScope::Uniform: return ShaderStages::None;
 	case VarScope::PushConstant: return ShaderStages::None;
 	case VarScope::Constant: return ShaderStages::None;
+	case VarScope::Block: return ShaderStages::AllGraphics;
 	}
 	return ShaderStages::None;
 }
