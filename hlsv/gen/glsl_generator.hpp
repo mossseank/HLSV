@@ -20,25 +20,24 @@
 namespace hlsv
 {
 
+class Visitor;
+
 // Generates GLSL source by emitting operations one at a time
 class GLSLGenerator final
 {
 	using sstream = std::ostringstream;
 
 private:
+	Visitor* vis_;
 	sstream vert_vars_;
 	sstream frag_vars_;
 	std::map<ShaderStages, sstream*> stage_funcs_;
 	string indent_str_;
-	ShaderStages current_stage_;
 
 public:
-	GLSLGenerator();
+	GLSLGenerator(Visitor* vis);
 	~GLSLGenerator();
-
-	inline ShaderStages get_stage() const { return current_stage_; }
-	inline void set_stage(ShaderStages ss) { current_stage_ = ss; }
-
+	
 	inline string vert_str() const {
 		return vert_vars_.str() + '\n' + stage_funcs_.at(ShaderStages::Vertex)->str();
 	}

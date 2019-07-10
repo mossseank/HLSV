@@ -32,9 +32,10 @@ Visitor::Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl, const Com
 	tokens_{ ts },
 	reflect_{ refl },
 	options_{ opt },
-	gen_{ },
+	gen_{ this },
 	variables_{ },
-	infer_type_{ HLSVType::Error }
+	infer_type_{ HLSVType::Error },
+	current_stage_{ ShaderStages::None }
 {
 
 }
@@ -513,7 +514,7 @@ VISIT_FUNC(VertFunction)
 	if (REFL->stages & ShaderStages::Vertex)
 		ERROR(ctx, "Cannot define more than one vertex function per shader.");
 	REFL->stages |= ShaderStages::Vertex;
-	gen_.set_stage(ShaderStages::Vertex);
+	current_stage_ = ShaderStages::Vertex;
 	gen_.push_indent();
 
 	variables_.push_block();
@@ -522,6 +523,7 @@ VISIT_FUNC(VertFunction)
 
 	gen_.pop_indent();
 	gen_.emit_func_block_close();
+	current_stage_ = ShaderStages::None;
 	return nullptr;
 }
 
@@ -531,7 +533,7 @@ VISIT_FUNC(FragFunction)
 	if (REFL->stages & ShaderStages::Fragment)
 		ERROR(ctx, "Cannot define more than one fragment function per shader.");
 	REFL->stages |= ShaderStages::Fragment;
-	gen_.set_stage(ShaderStages::Fragment);
+	current_stage_ = ShaderStages::Fragment;
 	gen_.push_indent();
 
 	variables_.push_block();
@@ -540,6 +542,7 @@ VISIT_FUNC(FragFunction)
 
 	gen_.pop_indent();
 	gen_.emit_func_block_close();
+	current_stage_ = ShaderStages::None;
 	return nullptr;
 }
 

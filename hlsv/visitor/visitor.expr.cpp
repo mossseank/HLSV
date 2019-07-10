@@ -29,7 +29,17 @@ namespace hlsv
 // ====================================================================================================================
 VISIT_FUNC(VariableAtom)
 {
-	return nullptr;
+	auto vrbl = variables_.find_variable(ctx->IDENTIFIER()->getText());
+	if (!vrbl) {
+		ERROR(ctx->IDENTIFIER(), strarg("A variable with the name '%s' does not exist in the current context.",
+			ctx->IDENTIFIER()->getText().c_str()));
+	}
+	if (!(vrbl->can_read(current_stage_)))
+		ERROR(ctx, strarg("The variable '%s' cannot be read in the current context.", ctx->IDENTIFIER()->getText().c_str()));
+	NEW_EXPR_T(expr, vrbl->type);
+	expr->is_compile_constant = vrbl->is_constant() || vrbl->is_push_constant();
+	expr->ref_text = vrbl->name;
+	return expr;
 }
 
 // ====================================================================================================================
@@ -84,7 +94,7 @@ VISIT_FUNC(InitializerList)
 		for (auto a : ctx->Args) {
 			auto aexpr = visit(a).as<Expr*>();
 			if (args.size() != 0) ss << ", ";
-			ss << aexpr->init_text;
+			ss << aexpr->ref_text;
 			args.push_back(aexpr);
 			cconst = cconst && aexpr->is_compile_constant;
 		}
@@ -118,13 +128,13 @@ VISIT_FUNC(FunctionCall)
 		// Visit all of the arguments and build the init text
 		auto save_type = infer_type_;
 		std::vector<Expr*> args{};
-		std::stringstream ss{}; ss << TypeHelper::GetGLSLStr(infer_type_.type) << "( ";
+		std::stringstream ss{}; ss << TypeHelper::GetGLSLStr(ctype) << "( ";
 		infer_type_ = HLSVType::Error;
 		bool cconst = true;
 		for (auto a : ctx->Args) {
 			auto aexpr = visit(a).as<Expr*>();
 			if (args.size() != 0) ss << ", ";
-			ss << aexpr->init_text;
+			ss << aexpr->ref_text;
 			args.push_back(aexpr);
 			cconst = cconst && aexpr->is_compile_constant;
 		}
@@ -133,12 +143,12 @@ VISIT_FUNC(FunctionCall)
 
 		// Check the arguments
 		string err{ "" };
-		if (!FunctionRegistry::CheckConstructor(infer_type_.type, args, err))
+		if (!FunctionRegistry::CheckConstructor(ctype, args, err))
 			ERROR(ctx, err);
 
 		// Return the expression
 		for (auto arg : args) delete arg;
-		NEW_EXPR_T(expr, infer_type_.type);
+		NEW_EXPR_T(expr, ctype);
 		expr->is_compile_constant = cconst;
 		expr->ref_text = expr->init_text = ss.str();
 		return expr;

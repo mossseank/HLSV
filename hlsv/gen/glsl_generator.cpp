@@ -10,8 +10,9 @@
 
 #include "glsl_generator.hpp"
 #include "../type/typehelper.hpp"
+#include "../visitor/visitor.hpp"
 
-#define CSTAGE (*stage_funcs_.at(current_stage_))
+#define CSTAGE (*stage_funcs_.at(vis_->current_stage_))
 
 static const std::string VERSION_STR = "#version 450";
 static const std::string VERSION_CMT = "// Generated with hlsvc version ";
@@ -26,7 +27,8 @@ namespace hlsv
 {
 
 // ====================================================================================================================
-GLSLGenerator::GLSLGenerator() :
+GLSLGenerator::GLSLGenerator(Visitor* vis) :
+	vis_{ vis },
 	vert_vars_{ },
 	frag_vars_{ },
 	stage_funcs_{
@@ -36,8 +38,7 @@ GLSLGenerator::GLSLGenerator() :
 		{ ShaderStages::Geometry, new sstream{ "// Geometry stage\nvoid geom_main() {\n", DOM } },
 		{ ShaderStages::Fragment, new sstream{ "// Fragment stage\nvoid frag_main() {\n", DOM } }
 	},
-	indent_str_{ "" },
-	current_stage_{ ShaderStages::None }
+	indent_str_{ "" }
 {
 	vert_vars_ << VERSION_CMT << HLSV_VERSION << '\n' << VERSION_STR << '\n';
 	frag_vars_ << VERSION_CMT << HLSV_VERSION << '\n' << VERSION_STR << '\n';

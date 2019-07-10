@@ -49,6 +49,8 @@ public:
 class Visitor final :
 	public grammar::HLSVBaseVisitor
 {
+	friend class GLSLGenerator;
+
 private:
 	antlr4::CommonTokenStream* tokens_;
 	ReflectionInfo** reflect_;
@@ -56,6 +58,7 @@ private:
 	GLSLGenerator gen_;
 	VariableManager variables_;
 	HLSVType infer_type_; // The type to use when inferring how to interpret an initializer list
+	ShaderStages current_stage_;
 
 public:
 	Visitor(antlr4::CommonTokenStream* ts, ReflectionInfo** refl, const CompilerOptions* opt);

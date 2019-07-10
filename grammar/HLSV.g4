@@ -60,7 +60,7 @@ pushConstantsStatement
 
 // Constants and specialization constants
 constantStatement
-    : 'const' ('(' Index=INTEGER_LITERAL ')')? variableDeclaration '=' Value=constValue ';'
+    : 'const' ('(' Index=INTEGER_LITERAL ')')? variableDeclaration '=' Value=atom ';'
     ;
 
 // Stage functions
@@ -98,16 +98,6 @@ variableDefinition
 // See https://www.khronos.org/files/opengl45-quick-reference-card.pdf for GLSL Order of Operations
 expression
     : atom
-    ;
-
-// Expressions that can be used to initialize `const` statements
-constValue
-    : scalarLiteral
-    | TypeName=IDENTIFIER '(' Args+=constValue (',' Args+=constValue)* ')'
-    | constInitializerList
-    ;
-constInitializerList
-    : '{' Args+=constValue (',' Args+=constValue)* '}'
     ;
 
 // Atomic expressions (those that cannot be subdivided)
