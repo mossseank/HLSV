@@ -99,9 +99,15 @@ public:
 
 	// Statement
 	VISIT(VariableDeclaration)
+	VISIT(VariableDefinition)
 
 	// Expr
-	VISIT(ConstValue)
+	//VISIT(ConstValue)
+	VISIT(ParenAtom)
+	VISIT(InitListAtom)
+	VISIT(FunctionCallAtom)
+	VISIT(LiteralAtom)
+	VISIT(VariableAtom)
 	VISIT(ScalarLiteral)
 }; // class Visitor
 

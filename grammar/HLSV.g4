@@ -75,7 +75,8 @@ block
     : '{' statement* '}'
     ;
 statement
-    : variableDeclaration ';'
+    : variableDefinition ';'
+    | variableDeclaration ';'
     ;
 
 // Variable declaration
@@ -87,6 +88,9 @@ typeArgument
     ;
 variableBlock
     : '{' (Declarations+=variableDeclaration ';')* '}'
+    ;
+variableDefinition
+    : variableDeclaration '=' Value=expression
     ;
 
 
@@ -108,7 +112,17 @@ constInitializerList
 
 // Atomic expressions (those that cannot be subdivided)
 atom
-    : scalarLiteral
+    : '(' expression ')'    # ParenAtom
+    | initializerList       # InitListAtom
+    | functionCall          # FunctionCallAtom
+    | scalarLiteral         # LiteralAtom
+    | IDENTIFIER            # VariableAtom
+    ;
+initializerList
+    : '{' Args+=expression (',' Args+=expression)* '}'
+    ;
+functionCall // Includes function calls, type constructions, and casting
+    : Name=IDENTIFIER '(' Args+=expression (',' Args+=expression)* ')'
     ;
 scalarLiteral
     : INTEGER_LITERAL

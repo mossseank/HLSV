@@ -39,4 +39,28 @@ VISIT_FUNC(VariableDeclaration)
 	return nullptr;
 }
 
+// ====================================================================================================================
+VISIT_FUNC(VariableDefinition)
+{
+	// Create and check variable
+	auto vrbl = parse_variable(ctx->variableDeclaration(), VarScope::Block);
+	if (vrbl.type.is_array || !vrbl.type.is_value_type())
+		ERROR(ctx->variableDeclaration()->Type, "Function locals can only be non-array value types.");
+
+	// Visit the value
+	infer_type_ = vrbl.type;
+	auto expr = GET_VISIT_SPTR(ctx->Value);
+	infer_type_ = HLSVType::Error;
+	if (!TypeHelper::CanPromoteTo(expr->type.type, vrbl.type.type)) {
+		ERROR(ctx->Value, strarg("The rvalue type '%s' cannot be promoted to type '%s'.", expr->type.get_type_str().c_str(),
+			vrbl.type.get_type_str().c_str()));
+	}
+
+	// Add and emit
+	variables_.add_variable(vrbl);
+	gen_.emit_variable_declaration(vrbl, expr.get());
+
+	return nullptr;
+}
+
 } // namespace hlsv
