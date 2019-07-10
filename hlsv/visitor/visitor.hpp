@@ -85,6 +85,7 @@ public:
 	float parse_float_literal(antlr4::tree::TerminalNode* tk) const;
 	Variable parse_variable(grammar::HLSV::VariableDeclarationContext* ctx, VarScope scope);
 
+	// Core
 	VISIT(File)
 	VISIT(ShaderVersionStatement)
 	VISIT(VertexAttributeStatement)
@@ -96,6 +97,10 @@ public:
 	VISIT(VertFunction)
 	VISIT(FragFunction)
 
+	// Statement
+	VISIT(VariableDeclaration)
+
+	// Expr
 	VISIT(ConstValue)
 	VISIT(ScalarLiteral)
 }; // class Visitor

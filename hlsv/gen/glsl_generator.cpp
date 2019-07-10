@@ -170,4 +170,14 @@ void GLSLGenerator::emit_func_block_close()
 	CSTAGE << indent_str_ << "}\n";
 }
 
+// ====================================================================================================================
+void GLSLGenerator::emit_variable_declaration(const Variable& vrbl, Expr* value)
+{
+	string varstr = TypeHelper::GetGLSLStr(vrbl.type.type) + ' ' + vrbl.name;
+	CSTAGE << indent_str_ << varstr;
+	if (value)
+		CSTAGE << " = " << value->ref_text;
+	CSTAGE << ";\n";
+}
+
 } // namespace hlsv

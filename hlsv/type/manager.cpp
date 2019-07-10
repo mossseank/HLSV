@@ -64,6 +64,12 @@ void VariableManager::add_global(const Variable& var)
 }
 
 // ====================================================================================================================
+void VariableManager::add_variable(const Variable& var)
+{
+	blocks_.back()->vars.push_back(var);
+}
+
+// ====================================================================================================================
 void VariableManager::push_block()
 {
 	blocks_.push_back(new VarBlock);

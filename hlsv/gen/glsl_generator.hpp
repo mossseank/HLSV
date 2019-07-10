@@ -59,10 +59,9 @@ public:
 	void emit_global_constant(const Variable& vrbl, const Expr& expr);
 
 	inline void push_indent() { indent_str_ += '\t'; }
-	inline void pop_indent() { 
-		if (indent_str_.length() > 0) indent_str_ = string(indent_str_.length() - 1, '\t');
-	}
+	inline void pop_indent() { indent_str_ = indent_str_.substr(1); }
 	void emit_func_block_close();
+	void emit_variable_declaration(const Variable& vrbl, Expr* value);
 }; // class GLSLGenerator
 
 } // namespace hlsv

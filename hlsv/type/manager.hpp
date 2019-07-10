@@ -45,6 +45,7 @@ public:
 	Variable* find_global(const string& name);
 	Variable* find_variable(const string& name);
 	void add_global(const Variable& var); // Does not check if a variable with the name already exists
+	void add_variable(const Variable& var); // Same
 
 	void push_block();
 	void pop_block();
