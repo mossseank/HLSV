@@ -470,6 +470,8 @@ VISIT_FUNC(ConstantStatement)
 
 	// Visit the constant value and check types
 	auto expr = GET_VISIT_SPTR(ctx->Value);
+	if (!expr->is_compile_constant)
+		ERROR(ctx->Value, "Constants must be initialized with a compile-time constant expression.");
 	if (expr->type.is_array != vrbl.type.is_array || expr->type.count != vrbl.type.count)
 		ERROR(ctx->Value, "Constant expression array size mismatch.");
 

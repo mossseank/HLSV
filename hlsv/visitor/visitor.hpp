@@ -102,13 +102,10 @@ public:
 	VISIT(VariableDefinition)
 
 	// Expr
-	//VISIT(ConstValue)
-	VISIT(ParenAtom)
-	VISIT(InitListAtom)
-	VISIT(FunctionCallAtom)
-	VISIT(LiteralAtom)
 	VISIT(VariableAtom)
 	VISIT(ScalarLiteral)
+	VISIT(InitializerList)
+	VISIT(FunctionCall)
 }; // class Visitor
 
 } // namespace hlsv
