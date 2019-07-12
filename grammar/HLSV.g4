@@ -102,11 +102,13 @@ expression
 
 // Atomic expressions (those that cannot be subdivided)
 atom
-    : '(' expression ')'    # ParenAtom
-    | initializerList       # InitListAtom
-    | functionCall          # FunctionCallAtom
-    | scalarLiteral         # LiteralAtom
-    | IDENTIFIER            # VariableAtom
+    : '(' expression ')'                # ParenAtom
+    | atom '[' Index=expression ']'     # ArrayIndexerAtom
+    | atom '.' SWIZZLE                  # SwizzleAtom
+    | initializerList                   # InitListAtom
+    | functionCall                      # FunctionCallAtom
+    | scalarLiteral                     # LiteralAtom
+    | IDENTIFIER                        # VariableAtom
     ;
 initializerList
     : '{' Args+=expression (',' Args+=expression)* '}'

@@ -28,6 +28,14 @@ KW_UNIF         : 'unif' ;
 KW_STAGE_VERT   : '@vert' ;
 KW_STAGE_FRAG   : '@frag' ;
 
+// Swizzles
+SWIZZLE
+    : SwizzleCharPos+ | SwizzleCharColor+ | SwizzleCharTexCoord+
+    ;
+fragment SwizzleCharPos         : [xyzw] ;
+fragment SwizzleCharColor       : [rgba] ;
+fragment SwizzleCharTexCoord    : [stpq] ;
+
 // Literals
 VERSION_LITERAL
     : DigitChar DigitChar DigitChar
@@ -62,6 +70,7 @@ LBRACE      : '{' ;
 RBRACE      : '}' ;
 SEMI_COLON  : ';' ;
 COMMA       : ',' ;
+PERIOD      : '.' ;
 
 // Operators
 OP_ASSIGN   : '=' ;

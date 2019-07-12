@@ -12,6 +12,7 @@
 #include "../generated/HLSV.h"
 
 #define MSG_STR(stxt) (msg.find(stxt)!=string::npos)
+#define IS_RULE(rtype) (ridx==grammar::HLSV::Rule##rtype)
 
 
 namespace hlsv
@@ -52,10 +53,12 @@ void ErrorListener::syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* o
 		errMsg = "Invalid shader type in shader version statement.";
 	else if (MSG_STR("missing VERSION_LITERAL"))
 		errMsg = "Invalid version in shader version statement.";
-	else if (ridx == grammar::HLSV::RuleShaderVersionStatement)
+	else if (IS_RULE(ShaderVersionStatement))
 		errMsg = "Invalid shader version statement.";
-	else if (ridx == grammar::HLSV::RuleConstantStatement && MSG_STR("expecting '='"))
+	else if (IS_RULE(ConstantStatement) && MSG_STR("expecting '='"))
 		errMsg = "Must provide a value to constant statements.";
+	else if (IS_RULE(Atom) && MSG_STR("expecting SWIZZLE"))
+		errMsg = strarg("Cannot mix swizzle characters of different types (%s).", badText.c_str());
 	// Unknown error
 	else {
 		errMsg = strarg("(Rule '%s') (Bad text: '%s') - %s", (ridx == -1) ? "none" : recognizer->getRuleNames()[ridx].c_str(),

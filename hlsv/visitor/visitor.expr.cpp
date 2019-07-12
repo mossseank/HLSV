@@ -29,18 +29,61 @@ namespace hlsv
 {
 
 // ====================================================================================================================
-VISIT_FUNC(VariableAtom)
+VISIT_FUNC(ArrayIndexerAtom)
 {
-	auto vrbl = variables_.find_variable(ctx->IDENTIFIER()->getText());
-	if (!vrbl) {
-		ERROR(ctx->IDENTIFIER(), strarg("A variable with the name '%s' does not exist in the current context.",
-			ctx->IDENTIFIER()->getText().c_str()));
+	// Get the index
+	auto idx = GET_VISIT_SPTR(ctx->Index);
+	if (idx->type.is_array || !idx->type.is_integer_type() || !idx->type.is_scalar_type())
+		ERROR(ctx->Index, "Arrays can only be accessed using scalar non-array integer types.");
+
+	// Get the value expression
+	auto val = GET_VISIT_SPTR(ctx->atom());
+	if (!val->type.is_array && !val->type.is_vector_type())
+		ERROR(ctx->atom(), "Array indexers can only be used on array and vector types.");
+	if (idx->is_literal) {
+		if (val->type.is_array && (idx->default_value.i >= val->type.count))
+			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the array it is accessing.", idx->default_value.i));
+		else if (idx->default_value.i >= val->type.get_component_count())
+			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the vector it is accessing.", idx->default_value.i));
 	}
-	if (!(vrbl->can_read(current_stage_)))
-		ERROR(ctx, strarg("The variable '%s' cannot be read in the current context.", ctx->IDENTIFIER()->getText().c_str()));
-	NEW_EXPR_T(expr, vrbl->type);
-	expr->is_compile_constant = vrbl->is_constant() || vrbl->is_push_constant();
-	expr->ref_text = Variable::GetOutputName(vrbl->name);
+
+	// Build the expression
+	NEW_EXPR_T(expr, val->type.is_array ? val->type.type : val->type.get_component_type());
+	expr->ref_text = "(" + val->ref_text + '[' + idx->ref_text + "])";
+	return expr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(SwizzleAtom)
+{
+	// Get and validate swizzle
+	auto stxt = ctx->SWIZZLE()->getText();
+	if (stxt.length() > 4)
+		ERROR(ctx->SWIZZLE(), "Swizzles cannot be larger than 4 components.");
+
+	// Visit the value expression
+	auto val = GET_VISIT_SPTR(ctx->atom());
+	if (val->type.is_array || !val->type.is_vector_type())
+		ERROR(ctx->atom(), "Can only apply swizzles to non-array vector types.");
+	auto ct = val->type.get_component_type();
+	auto cc = val->type.get_component_count();
+
+	// Validate the components
+	for (auto sc : stxt) {
+		auto cidx = (sc == 'x' || sc == 'r' || sc == 's') ? 1u :
+					(sc == 'y' || sc == 'g' || sc == 't') ? 2u :
+					(sc == 'z' || sc == 'b' || sc == 'p') ? 3u :
+					(sc == 'w' || sc == 'a' || sc == 'q') ? 4u : UINT32_MAX;
+		if (cidx > cc) {
+			ERROR(ctx->atom(), strarg("The type '%s' does not have the '%c' swizzle component.",
+				val->type.get_type_str().c_str(), sc));
+		}
+	}
+
+	// Build the expression
+	auto nt = (HLSVType::PrimType)(ct + (stxt.length() - 1)); // Only works because of the ordering of the PrimType enum
+	NEW_EXPR_T(expr, nt);
+	expr->ref_text = "(" + val->ref_text + '.' + stxt + ')';
 	return expr;
 }
 
@@ -159,6 +202,22 @@ VISIT_FUNC(FunctionCall)
 		ERROR(ctx->Name, strarg("There is no function with the name '%s'.", ctx->Name->getText().c_str()));
 		return nullptr;
 	}
+}
+
+// ====================================================================================================================
+VISIT_FUNC(VariableAtom)
+{
+	auto vrbl = variables_.find_variable(ctx->IDENTIFIER()->getText());
+	if (!vrbl) {
+		ERROR(ctx->IDENTIFIER(), strarg("A variable with the name '%s' does not exist in the current context.",
+			ctx->IDENTIFIER()->getText().c_str()));
+	}
+	if (!(vrbl->can_read(current_stage_)))
+		ERROR(ctx, strarg("The variable '%s' cannot be read in the current context.", ctx->IDENTIFIER()->getText().c_str()));
+	NEW_EXPR_T(expr, vrbl->type);
+	expr->is_compile_constant = vrbl->is_constant() || vrbl->is_push_constant();
+	expr->ref_text = Variable::GetOutputName(vrbl->name);
+	return expr;
 }
 
 // ====================================================================================================================
