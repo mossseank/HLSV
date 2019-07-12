@@ -11,6 +11,7 @@
 #include "visitor.hpp"
 #include "../type/functions.hpp"
 #include <sstream>
+#include <cmath>
 
 #ifdef HLSV_COMPILER_MSVC
 	// Lots of warnings about ignoring the return value of visit...() functions
@@ -36,19 +37,31 @@ VISIT_FUNC(ArrayIndexerAtom)
 	if (idx->type.is_array || !idx->type.is_integer_type() || !idx->type.is_scalar_type())
 		ERROR(ctx->Index, "Arrays can only be accessed using scalar non-array integer types.");
 
-	// Get the value expression
+	// Check the types to create the expression type properly
 	auto val = GET_VISIT_SPTR(ctx->atom());
-	if (!val->type.is_array && !val->type.is_vector_type())
-		ERROR(ctx->atom(), "Array indexers can only be used on array and vector types.");
-	if (idx->is_literal) {
-		if (val->type.is_array && (idx->default_value.i >= val->type.count))
+	HLSVType::PrimType etype = HLSVType::Error;
+	if (val->type.is_array) {
+		if (idx->is_literal && (idx->default_value.i >= val->type.count))
 			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the array it is accessing.", idx->default_value.i));
-		else if (idx->default_value.i >= val->type.get_component_count())
-			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the vector it is accessing.", idx->default_value.i));
+		etype = val->type.type;
 	}
+	else if (val->type.is_vector_type()) {
+		if (idx->is_literal && (idx->default_value.i >= val->type.get_component_count()))
+			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the vector it is accessing.", idx->default_value.i));
+		etype = val->type.get_component_type();
+	}
+	else if (val->type.is_matrix_type()) {
+		auto size = (uint32)sqrt(val->type.get_component_count());
+		auto ct = val->type.get_component_type();
+		if (idx->is_literal && (idx->default_value.i >= size))
+			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the matrix it is accessing.", idx->default_value.i));
+		etype = (HLSVType::PrimType)(ct + (size - 1)); // Get the correctly sized vector type
+	}
+	else
+		ERROR(ctx->atom(), strarg("The type '%s' cannot have an array indexer applied.", val->type.get_type_str().c_str()));
 
 	// Build the expression
-	NEW_EXPR_T(expr, val->type.is_array ? val->type.type : val->type.get_component_type());
+	NEW_EXPR_T(expr, etype);
 	expr->ref_text = "(" + val->ref_text + '[' + idx->ref_text + "])";
 	return expr;
 }
