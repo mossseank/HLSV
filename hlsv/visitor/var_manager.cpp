@@ -8,7 +8,7 @@
 
 // This file implements manager.hpp
 
-#include "manager.hpp"
+#include "var_manager.hpp"
 #include <numeric>
 
 

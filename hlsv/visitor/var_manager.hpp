@@ -11,8 +11,8 @@
 #pragma once
 
 #include "../config.hpp"
-#include "variable.hpp"
-#include "typehelper.hpp"
+#include "../type/variable.hpp"
+#include "../type/typehelper.hpp"
 #include <vector>
 
 

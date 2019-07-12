@@ -12,7 +12,7 @@
 
 #include "../config.hpp"
 #include "../gen/glsl_generator.hpp"
-#include "../type/manager.hpp"
+#include "var_manager.hpp"
 #include "../generated/HLSVBaseVisitor.h"
 #include "expr.hpp"
 #include "antlr/CommonTokenStream.h"
