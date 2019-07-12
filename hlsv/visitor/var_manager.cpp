@@ -83,11 +83,33 @@ void VariableManager::pop_block()
 }
 
 // ====================================================================================================================
+void VariableManager::push_stage_variables(ShaderType type, ShaderStages stage)
+{
+	auto it = Builtins_.find({ type, stage });
+	if (it != Builtins_.end()) {
+		auto bl = blocks_.back();
+		for (const auto& v : it->second)
+			bl->vars.push_back(v);
+	}
+}
+
+// ====================================================================================================================
 uint32 VariableManager::get_local_slot_count()
 {
 	return std::accumulate(globals_.begin(), globals_.end(), 0u, [](uint32 acc, const Variable& v) {
 		return acc + (v.is_local() ? v.type.get_slot_size() : 0u);
 	});
 }
+
+
+// ====================================================================================================================
+const std::map<std::pair<ShaderType, ShaderStages>, std::vector<Variable>> VariableManager::Builtins_ = {
+	{{ ShaderType::Graphics, ShaderStages::Vertex }, {
+			
+	}},
+	{{ ShaderType::Graphics, ShaderStages::Fragment }, {
+
+	}}
+};
 
 } // namespace hlsv

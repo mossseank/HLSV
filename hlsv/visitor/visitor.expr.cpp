@@ -15,6 +15,8 @@
 #ifdef HLSV_COMPILER_MSVC
 	// Lots of warnings about ignoring the return value of visit...() functions
 #	pragma warning( disable : 26444 )
+	// Incorrect "dereferencing null pointer" warnings
+#	pragma warning( disable : 6011 )
 #endif // HLSV_COMPILER_MSVC
 
 #define VISIT_FUNC(vtype) antlrcpp::Any Visitor::visit##vtype(grammar::HLSV::vtype##Context* ctx)
@@ -38,7 +40,7 @@ VISIT_FUNC(VariableAtom)
 		ERROR(ctx, strarg("The variable '%s' cannot be read in the current context.", ctx->IDENTIFIER()->getText().c_str()));
 	NEW_EXPR_T(expr, vrbl->type);
 	expr->is_compile_constant = vrbl->is_constant() || vrbl->is_push_constant();
-	expr->ref_text = vrbl->name;
+	expr->ref_text = Variable::GetOutputName(vrbl->name);
 	return expr;
 }
 

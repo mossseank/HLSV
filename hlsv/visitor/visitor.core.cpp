@@ -216,6 +216,9 @@ VISIT_FUNC(ShaderVersionStatement)
 	// Create and populate the initial reflection info
 	*reflect_ = new ReflectionInfo{ ShaderType::Graphics, HLSV_VERSION, ver };
 
+	// Load extra shader type info now that we know the type
+	Variable::LoadNames(ShaderType::Graphics);
+
 	// No return
 	return nullptr;
 }
@@ -518,6 +521,7 @@ VISIT_FUNC(VertFunction)
 	gen_.push_indent();
 
 	variables_.push_block();
+	variables_.push_stage_variables(ShaderType::Graphics, ShaderStages::Vertex);
 	visit(ctx->block());
 	variables_.pop_block();
 
@@ -537,6 +541,7 @@ VISIT_FUNC(FragFunction)
 	gen_.push_indent();
 
 	variables_.push_block();
+	variables_.push_stage_variables(ShaderType::Graphics, ShaderStages::Fragment);
 	visit(ctx->block());
 	variables_.pop_block();
 

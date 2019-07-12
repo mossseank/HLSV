@@ -13,6 +13,7 @@
 #include "../config.hpp"
 #include "typehelper.hpp"
 #include "../../generated/HLSV.h"
+#include <map>
 
 
 namespace hlsv
@@ -33,6 +34,10 @@ enum class VarScope : uint8
 // Represents a named and scoped value object in a HLSV shader program
 class Variable final
 {
+private:
+	static std::map<string, string> BuiltinNames_;
+	static ShaderType LoadedNames_;
+
 public:
 	string name;
 	HLSVType type;
@@ -72,6 +77,8 @@ public:
 
 	static ShaderStages GetDefaultReadStages(VarScope scope);
 	static ShaderStages GetDefaultWriteStages(VarScope scope);
+	static void LoadNames(ShaderType type);
+	static string GetOutputName(const string& name);
 };
 
 } // namespace hlsv

@@ -14,6 +14,7 @@
 #include "../type/variable.hpp"
 #include "../type/typehelper.hpp"
 #include <vector>
+#include <map>
 
 
 namespace hlsv
@@ -35,6 +36,7 @@ class VariableManager final
 	}; // class VarBlock
 
 private:
+	static const std::map<std::pair<ShaderType, ShaderStages>, std::vector<Variable>> Builtins_;
 	varvec globals_; // The global variables (all that dont exist in any local scopes)
 	std::vector<VarBlock*> blocks_;
 
@@ -49,6 +51,8 @@ public:
 
 	void push_block();
 	void pop_block();
+
+	void push_stage_variables(ShaderType type, ShaderStages stage);
 
 	inline const varvec& get_globals() const { return globals_; }
 

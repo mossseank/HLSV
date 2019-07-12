@@ -15,6 +15,10 @@ namespace hlsv
 {
 
 // ====================================================================================================================
+std::map<string, string> Variable::BuiltinNames_ = {};
+ShaderType Variable::LoadedNames_ = (ShaderType)0xFF;
+
+// ====================================================================================================================
 Variable::Variable(const string& name, HLSVType type, VarScope scope) :
 	name{ name },
 	type{ type },
@@ -56,6 +60,34 @@ ShaderStages Variable::GetDefaultWriteStages(VarScope scope)
 	case VarScope::Block: return ShaderStages::AllGraphics;
 	}
 	return ShaderStages::None;
+}
+
+// ====================================================================================================================
+/* static */
+void Variable::LoadNames(ShaderType type)
+{
+	if (LoadedNames_ == type)
+		return;
+	BuiltinNames_.clear();
+	LoadedNames_ = type;
+
+	if (type == ShaderType::Graphics) {
+		BuiltinNames_.insert({
+			
+		});
+	}
+}
+
+// ====================================================================================================================
+/* static */
+string Variable::GetOutputName(const string& name)
+{
+	if (name[0] == '$') {
+		auto it = BuiltinNames_.find(name.substr(1));
+		return (it != BuiltinNames_.end()) ? it->second : "NAME_ERROR";
+	}
+	else
+		return name;
 }
 
 } // namespace hlsv
