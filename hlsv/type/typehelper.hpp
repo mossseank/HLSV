@@ -35,6 +35,8 @@ public:
 	static void GetScalarLayoutInfo(HLSVType type, uint16* align, uint16* size);
 
 	static bool CanPromoteTo(HLSVType::PrimType src, HLSVType::PrimType dst);
+
+	static bool CheckBinaryOperator(size_t op, HLSVType left, HLSVType right, HLSVType& res, string& err);
 };
 
 } // namespace hlsv

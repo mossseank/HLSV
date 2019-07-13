@@ -153,4 +153,24 @@ bool TypeHelper::CanPromoteTo(HLSVType::PrimType src, HLSVType::PrimType dst)
 	}
 }
 
+// ====================================================================================================================
+/* static */
+bool TypeHelper::CheckBinaryOperator(size_t op, HLSVType left, HLSVType right, HLSVType& res, string& err)
+{
+	// Setup initial error reporting defaults and initial checks
+	res = HLSVType::Error;
+	err = strarg("Invalid operand types '%s' OP '%s'", left.get_type_str().c_str(), right.get_type_str().c_str());
+	if (left.is_array || right.is_array) {
+		err += " - operands cannot be arrays.";
+		return false;
+	}
+	if (!left.is_value_type() || !right.is_value_type()) {
+		err += " - operands cannot be non-value types.";
+		return false;
+	}
+
+	// Return final status
+	return false;
+}
+
 } // namespace hlsv

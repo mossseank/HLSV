@@ -117,51 +117,98 @@ VISIT_FUNC(NegateExpr)
 }
 
 // ====================================================================================================================
+Expr* Visitor::visit_binary_expr(antlr4::RuleContext* ctx, antlr4::Token* op, std::shared_ptr<Expr> left, std::shared_ptr<Expr> right)
+{
+	// Check the operator validity
+	string err{};
+	HLSVType rtype{};
+	if (!TypeHelper::CheckBinaryOperator(op->getType(), left->type, right->type, rtype, err))
+		ERROR(ctx, err);
+
+	// Generate expression
+	NEW_EXPR_T(expr, rtype);
+	expr->text = "(" + left->text + ") " + op->getText() + " (" + right->text + ')';
+	return expr;
+}
+
+// ====================================================================================================================
 VISIT_FUNC(MulDivModExpr)
 {
-	return nullptr;
+	return visit_binary_expr(ctx, ctx->Op, GET_VISIT_SPTR(ctx->Left), GET_VISIT_SPTR(ctx->Right));
 }
 
 // ====================================================================================================================
 VISIT_FUNC(AddSubExpr)
 {
-	return nullptr;
+	return visit_binary_expr(ctx, ctx->Op, GET_VISIT_SPTR(ctx->Left), GET_VISIT_SPTR(ctx->Right));
 }
 
 // ====================================================================================================================
 VISIT_FUNC(BitShiftExpr)
 {
-	return nullptr;
+	return visit_binary_expr(ctx, ctx->Op, GET_VISIT_SPTR(ctx->Left), GET_VISIT_SPTR(ctx->Right));
 }
 
 // ====================================================================================================================
 VISIT_FUNC(RelationalExpr)
 {
-	return nullptr;
+	return visit_binary_expr(ctx, ctx->Op, GET_VISIT_SPTR(ctx->Left), GET_VISIT_SPTR(ctx->Right));
 }
 
 // ====================================================================================================================
 VISIT_FUNC(EqualityExpr)
 {
-	return nullptr;
+	return visit_binary_expr(ctx, ctx->Op, GET_VISIT_SPTR(ctx->Left), GET_VISIT_SPTR(ctx->Right));
 }
 
 // ====================================================================================================================
 VISIT_FUNC(BitLogicExpr)
 {
-	return nullptr;
+	return visit_binary_expr(ctx, ctx->Op, GET_VISIT_SPTR(ctx->Left), GET_VISIT_SPTR(ctx->Right));
 }
 
 // ====================================================================================================================
 VISIT_FUNC(BoolLogicExpr)
 {
-	return nullptr;
+	return visit_binary_expr(ctx, ctx->Op, GET_VISIT_SPTR(ctx->Left), GET_VISIT_SPTR(ctx->Right));
 }
 
 // ====================================================================================================================
 VISIT_FUNC(TernaryExpr)
 {
-	return nullptr;
+	// Check condition expression
+	auto cond = GET_VISIT_SPTR(ctx->Cond);
+	if (cond->type.is_array || cond->type != HLSVType::Bool)
+		ERROR(ctx->Cond, "Ternary operator condition must be a scalar boolean type.");
+
+	// Check the expressions
+	auto texpr = GET_VISIT_SPTR(ctx->TExpr);
+	if (texpr->type.is_array)
+		ERROR(ctx->TExpr, "Ternary operator true expression cannot be an array.");
+	if (!texpr->type.is_value_type())
+		ERROR(ctx->TExpr, "Ternary operator true expression cannot be a non-value type.");
+	auto fexpr = GET_VISIT_SPTR(ctx->FExpr);
+	if (fexpr->type.is_array)
+		ERROR(ctx->FExpr, "Ternary operator false expression cannot be an array.");
+	if (!fexpr->type.is_value_type())
+		ERROR(ctx->FExpr, "Ternary operator false expression cannot be a non-value type.");
+
+	// Check the types
+	auto ttype = (infer_type_ != HLSVType::Error) ? infer_type_ : texpr->type;
+	NEW_EXPR_T(expr, ttype);
+	if (!TypeHelper::CanPromoteTo(texpr->type.type, ttype.type)) {
+		ERROR(ctx->TExpr, strarg("The ternary true expression type '%s' cannot be promoted to inferred type '%s'.",
+			texpr->type.get_type_str().c_str(), ttype.get_type_str().c_str()));
+	}
+	if (!TypeHelper::CanPromoteTo(fexpr->type.type, ttype.type)) {
+		auto tstr = (texpr->type.type == ttype.type) ? "true" : "inferred";
+		ERROR(ctx->FExpr, strarg("The ternary false expression type '%s' cannot be promoted to the %s type '%s'.",
+			fexpr->type.get_type_str().c_str(), tstr, ttype.get_type_str().c_str()));
+	}
+	expr->text = "(( " + cond->text + " ) ? ";
+	expr->text += (texpr->type != ttype ? ttype.get_type_str() : "") + "( " + texpr->text + " ) : ";
+	expr->text += (fexpr->type != ttype ? ttype.get_type_str() : "") + "( " + fexpr->text + " ))";
+	return expr;
 }
 
 // ====================================================================================================================

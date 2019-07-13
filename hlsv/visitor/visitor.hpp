@@ -123,6 +123,8 @@ public:
 	VISIT(FunctionCall)
 	VISIT(VariableAtom)
 	VISIT(ScalarLiteral)
+
+	Expr* visit_binary_expr(antlr4::RuleContext* ctx, antlr4::Token* op, std::shared_ptr<Expr> left, std::shared_ptr<Expr> right);
 }; // class Visitor
 
 } // namespace hlsv
