@@ -286,13 +286,13 @@ struct _EXPORT SpecConstant final
 	uint16 size;
 	union
 	{
-		bool b;   // The default boolean value
-		double f; // The default floating point value
-		int64 i;  // The default integer value
+		float f;   // The default floating point value
+		int32 si;  // The default signed integer value
+		uint32 ui; // The default unsigned integer value
 	} default_value; // The default value for the spec constant
 
 	SpecConstant(const string& name, HLSVType type, uint8 i, uint16 s) :
-		name{ name }, type{ type }, index{ i }, size{ s }, default_value{ 0ull }
+		name{ name }, type{ type }, index{ i }, size{ s }, default_value{ 0u }
 	{ }
 }; // struct SpecConstant
 

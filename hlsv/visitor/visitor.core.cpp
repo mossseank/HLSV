@@ -489,11 +489,11 @@ VISIT_FUNC(ConstantStatement)
 		if (sidx >= 256u)
 			ERROR(idx, "Specialization constants cannot be bound above index 255.");
 		if (vrbl.type.type == HLSVType::Float && expr->type.type != HLSVType::Float)
-			expr->set_default_value((double)expr->default_value.i);
+			expr->set_literal_value(expr->type.type == HLSVType::Int ? (float)expr->literal_value.si : (float)expr->literal_value.ui);
 		vrbl.constant.is_spec = true;
 		vrbl.constant.spec_index = sidx;
 		SpecConstant sc{ vrbl.name, vrbl.type, (uint8)sidx, 0 };
-		std::memcpy(&sc.default_value, &expr->default_value, sizeof(sc.default_value));
+		std::memcpy(&sc.default_value, &expr->literal_value, sizeof(sc.default_value));
 		TypeHelper::GetScalarLayoutInfo(vrbl.type, nullptr, &sc.size);
 		REFL->spec_constants.push_back(sc);
 		gen_.emit_spec_constant(sc, *expr);

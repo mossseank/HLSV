@@ -25,37 +25,39 @@ public:
 	bool is_compile_constant; // If it is a compile time constant (value literal or spec. constant ref)
 	union
 	{
-		bool b;
-		double f;
-		int64 i;
-	} default_value; // This must exactly match the "default_value" union in the SpecConstant type
-	string init_text; // The text used to initialize the expression value
-	string ref_text;  // The text used to refer to the expression value (for SSA)
+		float f;
+		int32 si;
+		uint32 ui;
+	} literal_value; // This must exactly match the "default_value" union in the SpecConstant type
+	string text;  // The text used to refer to the expression value (for SSA)
 
 public:
 	Expr() : Expr(HLSVType::Error) { }
 	explicit Expr(HLSVType type) :
-		type{ type }, is_literal{ false }, is_compile_constant{ false }, default_value{ 0ull },
-		init_text{ "" }, ref_text{ "" }
+		type{ type }, is_literal{ false }, is_compile_constant{ false }, literal_value{ 0u },
+		text{ "" }
 	{ }
 	Expr(const Expr& o) :
 		type{ o.type }, is_literal{ o.is_literal }, is_compile_constant{ o.is_compile_constant },
-		default_value{ o.default_value }, init_text{ o.init_text }, ref_text{ o.ref_text }
+		literal_value{ o.literal_value }, text{ o.text }
 	{ }
 
-	inline void set_default_value(bool b) {
-		is_literal = true; default_value.b = b; ref_text = init_text = b ? "true" : "false";
+	inline void set_literal_value(bool b) {
+		is_literal = true; literal_value.ui = b ? 1u : 0u; text = b ? "true" : "false";
 	}
-	inline void set_default_value(double f) {
-		is_literal = true; default_value.f = f; ref_text = init_text = strarg("%f", f);
+	inline void set_literal_value(float f) {
+		is_literal = true; literal_value.f = f; text = strarg("%f", f);
 	}
-	inline void set_default_value(int64 i) {
-		is_literal = true; default_value.i = i; ref_text = init_text = strarg("%lld", i);
+	inline void set_literal_value(int32 i) {
+		is_literal = true; literal_value.si = i; text = strarg("%d", i);
+	}
+	inline void set_literal_value(uint32 i) {
+		is_literal = true; literal_value.ui = i; text = strarg("%u", i);
 	}
 }; // class Expr
 
 // This enforces keeping the default_value unions of the different types equivalent to the first order
-static_assert(sizeof(Expr::default_value) == sizeof(SpecConstant::default_value),
-	"The sizes of the `default_value` unions between SpecConstant and Expr do not match.");
+static_assert(sizeof(Expr::literal_value) == sizeof(SpecConstant::default_value),
+	"Size mismatch between Expr::literal_value and SpecConstant::default_value.");
 
 } // namespace hlsv

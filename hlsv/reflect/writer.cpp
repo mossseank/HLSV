@@ -12,6 +12,7 @@
 #include <fstream>
 
 #define WRITE_LE16(val) uint8((val)&0xFF) << uint8(((val)>>8)&0xFF)
+#define WRITE_LE32(val) uint8((val)&0xFF) << uint8(((val)>>8)&0xFF) << uint8(((val)>>16)&0xFF) << uint8(((val)>>24)&0xFF)
 
 
 namespace hlsv
@@ -43,10 +44,10 @@ static std::ofstream& write_str(std::ofstream& s, const string& str)
 static string spec_const_value_str(const SpecConstant& sc)
 {
 	switch (sc.type.type) {
-	case HLSVType::Bool: return sc.default_value.b ? "true" : "false";
+	case HLSVType::Bool: return (sc.default_value.ui == 1) ? "true" : "false";
 	case HLSVType::Float: return strarg("%f", sc.default_value.f);
-	case HLSVType::Int:
-	case HLSVType::UInt: return strarg("%lld", sc.default_value.i);
+	case HLSVType::Int: return strarg("%d", sc.default_value.si);
+	case HLSVType::UInt: return strarg("%u", sc.default_value.ui);
 	}
 	return "ERROR";
 }
@@ -169,10 +170,10 @@ bool ReflWriter::WriteText(const string& path, const ReflectionInfo& refl, strin
 		 << "---------------" << std::endl;
 	if (refl.spec_constants.size() > 0) {
 		file << pad("Name", 16) << ' ' << pad("Type", 12) << ' ' << pad("Index", 8) << ' ' << pad("Size", 8) << ' '
-			 << pad("Value", 10) << std::endl;
+			 << pad("Value", 20) << std::endl;
 		for (const auto& sc : refl.spec_constants) {
 			file << pad(sc.name, 16) << ' ' << pad(sc.type.get_type_str(), 12) << ' ' << padf("%u", 8, (uint32)sc.index) 
-				 << ' ' << padf("%u", 8, (uint32)sc.size) << ' ' << pad(spec_const_value_str(sc), 10) << std::endl;
+				 << ' ' << padf("%u", 8, (uint32)sc.size) << ' ' << pad(spec_const_value_str(sc), 20) << std::endl;
 		}
 		file << std::endl;
 	}
@@ -255,7 +256,7 @@ bool ReflWriter::WriteBinary(const string& path, const ReflectionInfo& refl, str
 	file << (uint8)refl.spec_constants.size();
 	if (refl.spec_constants.size() > 0) {
 		for (const auto& sc : refl.spec_constants) {
-			write_str(file, sc.name) << (uint8)sc.type.type << (uint8)sc.index << WRITE_LE16(sc.size);
+			write_str(file, sc.name) << (uint8)sc.type.type << (uint8)sc.index << (uint8)sc.size << WRITE_LE32(sc.default_value.ui);
 		}
 	}
 

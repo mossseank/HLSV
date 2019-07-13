@@ -41,20 +41,20 @@ VISIT_FUNC(ArrayIndexerAtom)
 	auto val = GET_VISIT_SPTR(ctx->atom());
 	HLSVType::PrimType etype = HLSVType::Error;
 	if (val->type.is_array) {
-		if (idx->is_literal && (idx->default_value.i >= val->type.count))
-			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the array it is accessing.", idx->default_value.i));
+		if (idx->is_literal && (idx->literal_value.ui >= val->type.count))
+			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the array it is accessing.", idx->literal_value.ui));
 		etype = val->type.type;
 	}
 	else if (val->type.is_vector_type()) {
-		if (idx->is_literal && (idx->default_value.i >= val->type.get_component_count()))
-			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the vector it is accessing.", idx->default_value.i));
+		if (idx->is_literal && (idx->literal_value.ui >= val->type.get_component_count()))
+			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the vector it is accessing.", idx->literal_value.ui));
 		etype = val->type.get_component_type();
 	}
 	else if (val->type.is_matrix_type()) {
 		auto size = (uint32)sqrt(val->type.get_component_count());
 		auto ct = val->type.get_component_type();
-		if (idx->is_literal && (idx->default_value.i >= size))
-			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the matrix it is accessing.", idx->default_value.i));
+		if (idx->is_literal && (idx->literal_value.ui >= size))
+			ERROR(ctx->Index, strarg("The integer literal '%lld' is larger than the matrix it is accessing.", idx->literal_value.ui));
 		etype = (HLSVType::PrimType)(ct + (size - 1)); // Get the correctly sized vector type
 	}
 	else
@@ -62,7 +62,7 @@ VISIT_FUNC(ArrayIndexerAtom)
 
 	// Build the expression
 	NEW_EXPR_T(expr, etype);
-	expr->ref_text = "(" + val->ref_text + '[' + idx->ref_text + "])";
+	expr->text = "(" + val->text + '[' + idx->text + "])";
 	return expr;
 }
 
@@ -96,7 +96,7 @@ VISIT_FUNC(SwizzleAtom)
 	// Build the expression
 	auto nt = (HLSVType::PrimType)(ct + (stxt.length() - 1)); // Only works because of the ordering of the PrimType enum
 	NEW_EXPR_T(expr, nt);
-	expr->ref_text = "(" + val->ref_text + '.' + stxt + ')';
+	expr->text = "(" + val->text + '.' + stxt + ')';
 	return expr;
 }
 
@@ -126,7 +126,7 @@ VISIT_FUNC(InitializerList)
 			}
 			if (!first) ss << ", ";
 			else first = false;
-			ss << aexpr->ref_text;
+			ss << aexpr->text;
 			cconst = cconst && aexpr->is_compile_constant;
 		}
 		ss << (HLSVType::IsScalarType(infer_type_.type) ? " }" : " )");
@@ -135,7 +135,7 @@ VISIT_FUNC(InitializerList)
 		NEW_EXPR(expr);
 		expr->type = { infer_type_.type, (uint8)ctx->Args.size() };
 		expr->is_compile_constant = cconst;
-		expr->ref_text = expr->init_text = ss.str();
+		expr->text = ss.str();
 		infer_type_ = save_type;
 		return expr;
 	}
@@ -152,7 +152,7 @@ VISIT_FUNC(InitializerList)
 		for (auto a : ctx->Args) {
 			auto aexpr = visit(a).as<Expr*>();
 			if (args.size() != 0) ss << ", ";
-			ss << aexpr->ref_text;
+			ss << aexpr->text;
 			args.push_back(aexpr);
 			cconst = cconst && aexpr->is_compile_constant;
 		}
@@ -168,7 +168,7 @@ VISIT_FUNC(InitializerList)
 		for (auto arg : args) delete arg;
 		NEW_EXPR_T(expr, infer_type_.type);
 		expr->is_compile_constant = cconst;
-		expr->ref_text = expr->init_text = ss.str();
+		expr->text = ss.str();
 		return expr;
 	}
 }
@@ -192,7 +192,7 @@ VISIT_FUNC(FunctionCall)
 		for (auto a : ctx->Args) {
 			auto aexpr = visit(a).as<Expr*>();
 			if (args.size() != 0) ss << ", ";
-			ss << aexpr->ref_text;
+			ss << aexpr->text;
 			args.push_back(aexpr);
 			cconst = cconst && aexpr->is_compile_constant;
 		}
@@ -208,7 +208,7 @@ VISIT_FUNC(FunctionCall)
 		for (auto arg : args) delete arg;
 		NEW_EXPR_T(expr, ctype);
 		expr->is_compile_constant = cconst;
-		expr->ref_text = expr->init_text = ss.str();
+		expr->text = ss.str();
 		return expr;
 	}
 	else { // Function call
@@ -229,7 +229,7 @@ VISIT_FUNC(VariableAtom)
 		ERROR(ctx, strarg("The variable '%s' cannot be read in the current context.", ctx->IDENTIFIER()->getText().c_str()));
 	NEW_EXPR_T(expr, vrbl->type);
 	expr->is_compile_constant = vrbl->is_constant() || vrbl->is_push_constant();
-	expr->ref_text = Variable::GetOutputName(vrbl->name);
+	expr->text = Variable::GetOutputName(vrbl->name);
 	return expr;
 }
 
@@ -242,16 +242,23 @@ VISIT_FUNC(ScalarLiteral)
 
 	if (ctx->BOOLEAN_LITERAL()) {
 		expr->type = HLSVType::Bool;
-		expr->set_default_value(ctx->BOOLEAN_LITERAL()->getText() == "true");
+		expr->set_literal_value(ctx->BOOLEAN_LITERAL()->getText() == "true");
 	}
 	else if (ctx->FLOAT_LITERAL()) {
 		expr->type = HLSVType::Float;
-		expr->set_default_value(parse_float_literal(ctx->FLOAT_LITERAL()));
+		expr->set_literal_value(parse_float_literal(ctx->FLOAT_LITERAL()));
 	}
 	else { // int
 		bool isuns;
-		expr->set_default_value(parse_integer_literal(ctx->INTEGER_LITERAL(), &isuns));
-		expr->type = isuns ? HLSVType::UInt : HLSVType::Int;
+		auto lval = parse_integer_literal(ctx->INTEGER_LITERAL(), &isuns);
+		if (isuns) {
+			expr->type = HLSVType::UInt;
+			expr->set_literal_value((uint32)lval);
+		}
+		else {
+			expr->type = HLSVType::Int;
+			expr->set_literal_value((int32)lval);
+		}
 	}
 
 	return expr;
