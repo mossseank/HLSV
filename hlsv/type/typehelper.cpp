@@ -181,7 +181,7 @@ bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVTyp
 	}
 
 	// Check the types based on the operators
-	if (op == HLSV::OP_MUL) { // Multiplication ('*', probably most complex operator)
+	if (op == HLSV::OP_MUL || op == HLSV::OP_ASN_MUL) { // Multiplication ('*', probably most complex operator)
 		if (left.is_boolean_type() || right.is_boolean_type()) {
 			err += " - boolean types do not support multiplication.";
 			return false;
@@ -224,7 +224,7 @@ bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVTyp
 				res = HLSVType::MakeVectorType(HLSVType::GetMostPromotedType(left.type, right.type), right.get_component_count());
 		}
 	}
-	else if (op == HLSV::OP_DIV) { // Division ('/')
+	else if (op == HLSV::OP_DIV || op == HLSV::OP_ASN_DIV) { // Division ('/')
 		if (left.is_boolean_type() || right.is_boolean_type()) {
 			err += " - boolean types do not support division.";
 			return false;
@@ -256,14 +256,14 @@ bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVTyp
 			res = left;
 		}
 	}
-	else if (op == HLSV::OP_MOD) { // Modulo ('%')
+	else if (op == HLSV::OP_MOD || op == HLSV::OP_ASN_MOD) { // Modulo ('%')
 		if (!left.is_scalar_type() || !right.is_scalar_type() || !left.is_integer_type() || !right.is_integer_type()) {
 			err += " - modulus operator requires scalar integer types.";
 			return false;
 		}
 		res = (left == HLSVType::Int || right == HLSVType::Int) ? HLSVType::Int : HLSVType::UInt;
 	}
-	else if (op == HLSV::OP_ADD || op == HLSV::OP_SUB) { // Add/subtract ('+', '-')
+	else if (op == HLSV::OP_ADD || op == HLSV::OP_SUB || op == HLSV::OP_ASN_ADD || op == HLSV::OP_ASN_SUB) { // Add/subtract ('+', '-')
 		if (left.is_boolean_type() || right.is_boolean_type()) {
 			err += " - boolean types do not support addition/subtraction.";
 			return false;
@@ -277,7 +277,7 @@ bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVTyp
 		else
 			res = HLSVType::MakeVectorType(HLSVType::GetMostPromotedType(left.type, right.type), left.get_component_count());
 	}
-	else if (op == HLSV::OP_LSHIFT || op == HLSV::OP_RSHIFT) { // Bit shifting ('<<', '>>')
+	else if (op == HLSV::OP_LSHIFT || op == HLSV::OP_RSHIFT || op == HLSV::OP_ASN_LSH || op == HLSV::OP_ASN_RSH) { // Bit shifting ('<<', '>>')
 		if (!left.is_integer_type() || !left.is_scalar_type() || !right.is_integer_type() || !right.is_scalar_type()) {
 			err += " - bit shifting operations only work with scalar integers.";
 			return false;
@@ -306,7 +306,8 @@ bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVTyp
 		}
 		res = HLSVType::Bool;
 	}
-	else if (op == HLSV::OP_BITAND || op == HLSV::OP_BITOR || op == HLSV::OP_BITXOR) { // Bit logic ('&', '|', '^')
+	else if (op == HLSV::OP_BITAND || op == HLSV::OP_BITOR || op == HLSV::OP_BITXOR || op == HLSV::OP_ASN_AND || op == HLSV::OP_ASN_OR
+				|| op == HLSV::OP_ASN_XOR) { // Bit logic ('&', '|', '^')
 		if (!left.is_integer_type() || !left.is_scalar_type() || left != right) {
 			err += " - bitwise operations only work on scalar integers of the same type.";
 			return false;

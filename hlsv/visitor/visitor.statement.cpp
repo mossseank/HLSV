@@ -10,6 +10,11 @@
 
 #include "visitor.hpp"
 
+#ifdef HLSV_COMPILER_MSVC
+	// Incorrect "dereferencing null pointer" warnings
+#	pragma warning( disable : 6011 )
+#endif // HLSV_COMPILER_MSVC
+
 #define VISIT_FUNC(vtype) antlrcpp::Any Visitor::visit##vtype(grammar::HLSV::vtype##Context* ctx)
 #define REFL (*reflect_)
 #define OPT (options_)
@@ -61,12 +66,58 @@ VISIT_FUNC(VariableDefinition)
 // ====================================================================================================================
 VISIT_FUNC(SimpleAssign)
 {
+	// Get the variable
+	auto vname = ctx->Name->getText();
+	auto vrbl = variables_.find_variable(vname);
+	if (!vrbl)
+		ERROR(ctx->Name, strarg("The variable '%s' does not exist in the current context.", vname.c_str()));
+	if (!vrbl->can_write(current_stage_))
+		ERROR(ctx->Name, strarg("The variable '%s' cannot be written to.", vname.c_str()));
+
+	// Visit the value
+	infer_type_ = vrbl->type;
+	auto expr = GET_VISIT_SPTR(ctx->Value);
+	infer_type_ = HLSVType::Error;
+	if (expr->type.is_array)
+		ERROR(ctx->Name, "The value of an assignment cannot be an array.");
+	if (!TypeHelper::CanPromoteTo(expr->type.type, vrbl->type.type)) {
+		ERROR(ctx->Value, strarg("The value type '%s' cannot be promoted to the variable type '%s'.",
+			expr->type.get_type_str().c_str(), vrbl->type.get_type_str().c_str()));
+	}
+
+	// Write the assignment
+	gen_.emit_assignment(vrbl->name, "=", *expr.get());
+
 	return nullptr;
 }
 
 // ====================================================================================================================
 VISIT_FUNC(ComplexAssign)
 {
+	// Get the variable
+	auto vname = ctx->Name->getText();
+	auto vrbl = variables_.find_variable(vname);
+	if (!vrbl)
+		ERROR(ctx->Name, strarg("The variable '%s' does not exist in the current context.", vname.c_str()));
+	if (!vrbl->can_write(current_stage_))
+		ERROR(ctx->Name, strarg("The variable '%s' cannot be written to.", vname.c_str()));
+
+	// Visit the value
+	infer_type_ = vrbl->type;
+	auto expr = GET_VISIT_SPTR(ctx->Value);
+	infer_type_ = HLSVType::Error;
+	if (expr->type.is_array)
+		ERROR(ctx->Name, "The value of an assignment cannot be an array.");
+	string err{};
+	HLSVType rtype{};
+	if (!TypeHelper::CheckBinaryOperator(ctx->Op, vrbl->type, expr->type, rtype, err))
+		ERROR(ctx, err);
+	if (rtype != vrbl->type)
+		ERROR(ctx->Value, "The result of the operation does not match the variable type.");
+
+	// Write the assignment
+	gen_.emit_assignment(vrbl->name, ctx->Op->getText(), *expr.get());
+
 	return nullptr;
 }
 

@@ -181,4 +181,10 @@ void GLSLGenerator::emit_variable_declaration(const Variable& vrbl, Expr* value)
 	CSTAGE << ";\n";
 }
 
+// ====================================================================================================================
+void GLSLGenerator::emit_assignment(const string& vrbl, const string& op, const Expr& value)
+{
+	CSTAGE << indent_str_ << vrbl << ' ' << op << ' ' << value.text << ";\n";
+}
+
 } // namespace hlsv

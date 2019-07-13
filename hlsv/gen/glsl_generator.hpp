@@ -61,6 +61,7 @@ public:
 	inline void pop_indent() { indent_str_ = indent_str_.substr(1); }
 	void emit_func_block_close();
 	void emit_variable_declaration(const Variable& vrbl, Expr* value);
+	void emit_assignment(const string& vrbl, const string& op, const Expr& value);
 }; // class GLSLGenerator
 
 } // namespace hlsv
