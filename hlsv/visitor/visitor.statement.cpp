@@ -10,11 +10,6 @@
 
 #include "visitor.hpp"
 
-#ifdef HLSV_COMPILER_MSVC
-// Lots of warnings about ignoring the return value of visit...() functions
-#	pragma warning( disable : 26444 )
-#endif // HLSV_COMPILER_MSVC
-
 #define VISIT_FUNC(vtype) antlrcpp::Any Visitor::visit##vtype(grammar::HLSV::vtype##Context* ctx)
 #define REFL (*reflect_)
 #define OPT (options_)
@@ -60,6 +55,18 @@ VISIT_FUNC(VariableDefinition)
 	variables_.add_variable(vrbl);
 	gen_.emit_variable_declaration(vrbl, expr.get());
 
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(SimpleAssign)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(ComplexAssign)
+{
 	return nullptr;
 }
 

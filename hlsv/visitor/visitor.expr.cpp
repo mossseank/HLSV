@@ -14,8 +14,6 @@
 #include <cmath>
 
 #ifdef HLSV_COMPILER_MSVC
-	// Lots of warnings about ignoring the return value of visit...() functions
-#	pragma warning( disable : 26444 )
 	// Incorrect "dereferencing null pointer" warnings
 #	pragma warning( disable : 6011 )
 #endif // HLSV_COMPILER_MSVC

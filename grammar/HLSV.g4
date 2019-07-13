@@ -77,6 +77,7 @@ block
 statement
     : variableDefinition ';'
     | variableDeclaration ';'
+    | assignment ';'
     ;
 
 // Variable declaration
@@ -91,6 +92,12 @@ variableBlock
     ;
 variableDefinition
     : variableDeclaration '=' Value=expression
+    ;
+
+// Assignments
+assignment
+    : Name=IDENTIFIER '=' Value=expression                                                          # SimpleAssign
+    | Name=IDENTIFIER Op=('+='|'-='|'*='|'/='|'%='|'<<='|'>>='|'&='|'|='|'^=') Value=expression     # ComplexAssign
     ;
 
 

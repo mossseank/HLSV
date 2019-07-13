@@ -103,6 +103,8 @@ public:
 	// Statement
 	VISIT(VariableDeclaration)
 	VISIT(VariableDefinition)
+	VISIT(SimpleAssign)
+	VISIT(ComplexAssign)
 
 	// Expr
 	VISIT(PostfixExpr)

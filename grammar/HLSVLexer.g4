@@ -75,6 +75,16 @@ Q_MARK      : '?' ;
 
 // Operators
 OP_ASSIGN   : '=' ;
+OP_ASN_ADD  : '+=' ;
+OP_ASN_SUB  : '-=' ;
+OP_ASN_MUL  : '*=' ;
+OP_ASN_DIV  : '/=' ;
+OP_ASN_MOD  : '%=' ;
+OP_ASN_LSH  : '<<=' ;
+OP_ASN_RSH  : '>>=' ;
+OP_ASN_AND  : '&=' ;
+OP_ASN_OR   : '|=' ;
+OP_ASN_XOR  : '^=' ;
 OP_INC      : '++' ;
 OP_DEC      : '--' ;
 OP_MUL      : '*' ;
