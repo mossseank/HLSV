@@ -25,16 +25,17 @@ struct FunctionEntry final
 {
 public:
 	uint32 version;         // The minimum shader version that the function is available in
+	HLSVType return_type;
 	std::vector<HLSVType> types;
 
 	FunctionEntry() : 
-		version{ 0 }, types{ } 
+		version{ 0 }, return_type{ HLSVType::Error }, types{ }
 	{ }
-	FunctionEntry(uint32 v, const std::initializer_list<HLSVType>& typ) :
-		version{ v }, types{ typ }
+	FunctionEntry(uint32 v, HLSVType rt, const std::initializer_list<HLSVType>& typ) :
+		version{ v }, return_type{ rt }, types{ typ }
 	{ }
-	FunctionEntry(uint32 v, const std::initializer_list<HLSVType::PrimType>& typ) :
-		version{ v }, types{ typ.begin(), typ.end() }
+	FunctionEntry(uint32 v, HLSVType rt, const std::initializer_list<HLSVType::PrimType>& typ) :
+		version{ v }, return_type{ rt }, types{ typ.begin(), typ.end() }
 	{ }
 
 	bool matches(const std::vector<HLSVType>& args) const;
@@ -52,8 +53,8 @@ private:
 	static std::map<string, std::vector<FunctionEntry>> Functions_;
 
 public:
-	static bool CheckFunction(const string& name, const std::vector<HLSVType>& args, string& err);
-	static bool CheckFunction(const string& name, const std::vector<Expr*>& args, string& err);
+	static bool CheckFunction(const string& name, const std::vector<HLSVType>& args, string& err, HLSVType& ret);
+	static bool CheckFunction(const string& name, const std::vector<Expr*>& args, string& err, HLSVType& ret);
 	static bool CheckConstructor(HLSVType::PrimType type, const std::vector<HLSVType>& args, string& err);
 	inline static bool CheckConstructor(HLSVType::PrimType type, const std::vector<Expr*>& args, string& err) {
 		std::vector<HLSVType> atyp{ args.size(), HLSVType::Error };

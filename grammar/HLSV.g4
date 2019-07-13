@@ -95,9 +95,24 @@ variableDefinition
 
 
 // Expressions (anything that can evaluate to a typed value) (enforce order of operation)
-// See https://www.khronos.org/files/opengl45-quick-reference-card.pdf for GLSL Order of Operations
+// See https://www.khronos.org/files/opengl45-quick-reference-card.pdf (page 9) for GLSL Order of Operations
 expression
-    : atom
+    : atom  # AtomExpr
+    // Unary operators
+    | Expr=IDENTIFIER Op=('--'|'++')    # PostfixExpr
+    | Op=('--'|'++') Expr=IDENTIFIER    # PrefixExpr
+    | Op=('+'|'-') Expr=expression      # FactorExpr
+    | Op=('!'|'~') Expr=expression      # NegateExpr
+    // Binary Operators
+    | Left=expression Op=('*'|'/'|'%') Right=expression         # MulDivModExpr
+    | Left=expression Op=('+'|'-') Right=expression             # AddSubExpr
+    | Left=expression Op=('<<'|'>>') Right=expression           # BitShiftExpr
+    | Left=expression Op=('<'|'>'|'<='|'>=') Right=expression   # RelationalExpr
+    | Left=expression Op=('=='|'!=') Right=expression           # EqualityExpr
+    | Left=expression Op=('&'|'|'|'^') Right=expression         # BitLogicExpr
+    | Left=expression Op=('&&'|'||') Right=expression           # BoolLogicExpr
+    // Ternary (selection) operator
+    | Cond=expression '?' TExpr=expression ':' FExpr=expression     # TernaryExpr
     ;
 
 // Atomic expressions (those that cannot be subdivided)

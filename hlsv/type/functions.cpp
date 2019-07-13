@@ -42,7 +42,7 @@ bool FunctionEntry::matches(const std::vector<HLSVType>& args) const
 
 // ====================================================================================================================
 /* static */
-bool FunctionRegistry::CheckFunction(const string& name, const std::vector<HLSVType>& args, string& err)
+bool FunctionRegistry::CheckFunction(const string& name, const std::vector<HLSVType>& args, string& err, HLSVType& ret)
 {
 	if (!Populated_)
 		Populate();
@@ -50,8 +50,10 @@ bool FunctionRegistry::CheckFunction(const string& name, const std::vector<HLSVT
 	try {
 		const auto& ents = Functions_.at(name);
 		for (const auto& e : ents) {
-			if (e.matches(args))
+			if (e.matches(args)) {
+				ret = e.return_type;
 				return true;
+			}
 		}
 		err = strarg("No argument list for the function '%s' matches the given arguments.", name.c_str());
 		return false;
@@ -64,7 +66,7 @@ bool FunctionRegistry::CheckFunction(const string& name, const std::vector<HLSVT
 
 // ====================================================================================================================
 /* static */
-bool FunctionRegistry::CheckFunction(const string& name, const std::vector<Expr*>& args, string& err)
+bool FunctionRegistry::CheckFunction(const string& name, const std::vector<Expr*>& args, string& err, HLSVType& ret)
 {
 	if (!Populated_)
 		Populate();
@@ -72,8 +74,10 @@ bool FunctionRegistry::CheckFunction(const string& name, const std::vector<Expr*
 	try {
 		const auto& ents = Functions_.at(name);
 		for (const auto& e : ents) {
-			if (e.matches(args))
+			if (e.matches(args)) {
+				ret = e.return_type;
 				return true;
+			}
 		}
 		err = strarg("No argument list for the function '%s' matches the given arguments.", name.c_str());
 		return false;

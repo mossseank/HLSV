@@ -30,6 +30,78 @@ namespace hlsv
 {
 
 // ====================================================================================================================
+VISIT_FUNC(PostfixExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(PrefixExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(FactorExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(NegateExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(MulDivModExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(AddSubExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(BitShiftExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(RelationalExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(EqualityExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(BitLogicExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(BoolLogicExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(TernaryExpr)
+{
+	return nullptr;
+}
+
+// ====================================================================================================================
 VISIT_FUNC(ArrayIndexerAtom)
 {
 	// Get the index
@@ -176,7 +248,9 @@ VISIT_FUNC(InitializerList)
 // ====================================================================================================================
 VISIT_FUNC(FunctionCall)
 {
-	auto ctype = TypeHelper::ParseTypeStr(ctx->Name->getText());
+	auto fname = ctx->Name->getText();
+	auto ctype = TypeHelper::ParseTypeStr(fname);
+
 	if (ctype != HLSVType::Error) { // Type construction or casting
 		if (ctype == HLSVType::Void)
 			ERROR(ctx, "Cannot construct 'void' type.");
@@ -212,8 +286,31 @@ VISIT_FUNC(FunctionCall)
 		return expr;
 	}
 	else { // Function call
-		ERROR(ctx->Name, strarg("There is no function with the name '%s'.", ctx->Name->getText().c_str()));
-		return nullptr;
+		// Visit all of the arguments and build the init text
+		auto save_type = infer_type_;
+		std::vector<Expr*> args{};
+		std::stringstream ss{}; ss << fname << "( ";
+		infer_type_ = HLSVType::Error;
+		for (auto a : ctx->Args) {
+			auto aexpr = visit(a).as<Expr*>();
+			if (args.size() != 0) ss << ", ";
+			ss << aexpr->text;
+			args.push_back(aexpr);
+		}
+		ss << " )";
+		infer_type_ = save_type;
+
+		// Check the arguments
+		string err{ "" };
+		HLSVType rtype{};
+		if (!FunctionRegistry::CheckFunction(fname, args, err, rtype))
+			ERROR(ctx, err);
+
+		// Return the expression
+		for (auto arg : args) delete arg;
+		NEW_EXPR_T(expr, rtype);
+		expr->text = ss.str();
+		return expr;
 	}
 }
 

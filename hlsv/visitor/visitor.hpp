@@ -105,6 +105,18 @@ public:
 	VISIT(VariableDefinition)
 
 	// Expr
+	VISIT(PostfixExpr)
+	VISIT(PrefixExpr)
+	VISIT(FactorExpr)
+	VISIT(NegateExpr)
+	VISIT(MulDivModExpr)
+	VISIT(AddSubExpr)
+	VISIT(BitShiftExpr)
+	VISIT(RelationalExpr)
+	VISIT(EqualityExpr)
+	VISIT(BitLogicExpr)
+	VISIT(BoolLogicExpr)
+	VISIT(TernaryExpr)
 	VISIT(ArrayIndexerAtom)
 	VISIT(SwizzleAtom)
 	VISIT(InitializerList)

@@ -7,8 +7,7 @@ lexer grammar HLSVLexer;
 
 // Boolean literals
 BOOLEAN_LITERAL
-    : 'true'
-    | 'false'
+    : ('true' | 'false')
     ;
 
 // Keywords
@@ -69,15 +68,35 @@ RPAREN      : ')' ;
 LBRACE      : '{' ;
 RBRACE      : '}' ;
 SEMI_COLON  : ';' ;
+COLON       : ':' ;
 COMMA       : ',' ;
 PERIOD      : '.' ;
+Q_MARK      : '?' ;
 
 // Operators
 OP_ASSIGN   : '=' ;
-OP_LT       : '<' ;
-OP_GT       : '>' ;
+OP_INC      : '++' ;
+OP_DEC      : '--' ;
+OP_MUL      : '*' ;
+OP_DIV      : '/' ;
+OP_MOD      : '%' ;
 OP_ADD      : '+' ;
 OP_SUB      : '-' ;
+OP_BANG     : '!' ;
+OP_BITNEG   : '~' ;
+OP_BITAND   : '&' ;
+OP_BITOR    : '|' ;
+OP_BITXOR   : '^' ;
+OP_AND      : '&&' ;
+OP_OR       : '||' ;
+OP_LSHIFT   : '<<' ;
+OP_RSHIFT   : '>>' ;
+OP_LT       : '<' ;
+OP_GT       : '>' ;
+OP_LE       : '<=' ;
+OP_GE       : '>=' ;
+OP_EQ       : '==' ;
+OP_NE       : '!=' ;
 
 // Whitespace and comments (ignore)
 WS

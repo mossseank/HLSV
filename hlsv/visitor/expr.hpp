@@ -29,7 +29,7 @@ public:
 		int32 si;
 		uint32 ui;
 	} literal_value; // This must exactly match the "default_value" union in the SpecConstant type
-	string text;  // The text used to refer to the expression value (for SSA)
+	string text; // The text used to refer to the expression value
 
 public:
 	Expr() : Expr(HLSVType::Error) { }
