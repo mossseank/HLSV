@@ -32,25 +32,88 @@ namespace hlsv
 // ====================================================================================================================
 VISIT_FUNC(PostfixExpr)
 {
-	return nullptr;
+	auto vname = ctx->Expr->getText();
+	auto optxt = ctx->Op->getText();
+
+	// Check for the variable
+	auto vrbl = variables_.find_variable(vname);
+	if (!vrbl)
+		ERROR(ctx, strarg("Variable '%s' does not exist in the current context.", vname.c_str()));
+	if (vrbl->type.is_array || !vrbl->type.is_integer_type() || !vrbl->type.is_scalar_type())
+		ERROR(ctx, strarg("Operator '%s' is only valid for non-array scalar integer variables.", optxt.c_str()));
+	if (!vrbl->can_read(current_stage_) || !vrbl->can_write(current_stage_))
+		ERROR(ctx, strarg("Operator '%s' is invalid for read-only or write-only variables.", optxt.c_str()));
+
+	// Good to go
+	NEW_EXPR_T(expr, vrbl->type.type);
+	expr->text = "(" + Variable::GetOutputName(vrbl->name) + optxt + ')';
+	return expr;
 }
 
 // ====================================================================================================================
 VISIT_FUNC(PrefixExpr)
 {
-	return nullptr;
+	auto vname = ctx->Expr->getText();
+	auto optxt = ctx->Op->getText();
+
+	// Check for the variable
+	auto vrbl = variables_.find_variable(vname);
+	if (!vrbl)
+		ERROR(ctx, strarg("Variable '%s' does not exist in the current context.", vname.c_str()));
+	if (vrbl->type.is_array || !vrbl->type.is_integer_type() || !vrbl->type.is_scalar_type())
+		ERROR(ctx, strarg("Operator '%s' is only valid for non-array scalar integer variables.", optxt.c_str()));
+	if (!vrbl->can_read(current_stage_) || !vrbl->can_write(current_stage_))
+		ERROR(ctx, strarg("Operator '%s' is invalid for read-only or write-only variables.", optxt.c_str()));
+
+	// Good to go
+	NEW_EXPR_T(expr, vrbl->type.type);
+	expr->text = "(" + optxt + Variable::GetOutputName(vrbl->name) + ')';
+	return expr;
 }
 
 // ====================================================================================================================
 VISIT_FUNC(FactorExpr)
 {
-	return nullptr;
+	// Visit the expression
+	auto vexpr = GET_VISIT_SPTR(ctx->Expr);
+	if (vexpr->type.is_array)
+		ERROR(ctx, "Cannot apply factor operators to array type.");
+	if (!vexpr->type.is_value_type())
+		ERROR(ctx, "Cannot apply factor operators to non-value types.");
+	if (vexpr->type.is_boolean_type())
+		ERROR(ctx, "Cannot apply factor operators to boolean types.");
+
+	// Return the value
+	NEW_EXPR_T(expr, vexpr->type);
+	expr->text = "(" + ctx->Op->getText() + vexpr->text + ')';
+	return expr;
 }
 
 // ====================================================================================================================
 VISIT_FUNC(NegateExpr)
 {
-	return nullptr;
+	// Visit the expression
+	auto vexpr = GET_VISIT_SPTR(ctx->Expr);
+	if (vexpr->type.is_array)
+		ERROR(ctx, "Cannot apply negate operators to array type.");
+	if (!vexpr->type.is_value_type())
+		ERROR(ctx, "Cannot apply negate operators to non-value types.");
+	if (!vexpr->type.is_scalar_type())
+		ERROR(ctx, "Cannot apply negate operators to non-scalar types.");
+
+	// Check the operator
+	auto optxt = ctx->Op->getText();
+	NEW_EXPR_T(expr, vexpr->type.type);
+	expr->text = "(" + optxt + vexpr->text + ')';
+	if (optxt[0] == '!') {
+		if (vexpr->type != HLSVType::Bool)
+			ERROR(ctx, "Operator '!' is only valid for boolean expressions.");
+	}
+	else { // == '~'
+		if (!vexpr->type.is_integer_type())
+			ERROR(ctx, "Operator '~' is only valid for integer expressions.");
+	}
+	return expr;
 }
 
 // ====================================================================================================================

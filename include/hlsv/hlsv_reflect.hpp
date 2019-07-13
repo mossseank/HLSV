@@ -161,6 +161,8 @@ public:
 	inline string get_type_str() const { return GetTypeStr(type); }
 	inline uint32 get_slot_size() const { return GetSlotSize(*this); }
 	inline bool is_integer_type() const { return IsIntegerType(type); }
+	inline bool is_floating_point_type() const { return IsFloatingPointType(type); }
+	inline bool is_boolean_type() const { return IsBooleanType(type); }
 	
 	inline static bool IsValueType(enum PrimType t) {
 		return (t >= VECTOR_TYPE_START && t <= VECTOR_TYPE_END) || (t >= MATRIX_TYPE_START && t <= MATRIX_TYPE_END);
@@ -193,6 +195,12 @@ public:
 	static uint32 GetSlotSize(HLSVType type);
 	inline static bool IsIntegerType(enum PrimType t) {
 		return IsValueType(t) && (GetComponentType(t) != Float);
+	}
+	inline static bool IsFloatingPointType(enum PrimType t) {
+		return IsValueType(t) && (GetComponentType(t) == Float);
+	}
+	inline static bool IsBooleanType(enum PrimType t) {
+		return IsValueType(t) && (GetComponentType(t) == Bool);
 	}
 }; // struct HLSVType
 
