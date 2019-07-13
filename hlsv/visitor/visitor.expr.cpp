@@ -280,7 +280,7 @@ VISIT_FUNC(SwizzleAtom)
 	}
 
 	// Build the expression
-	auto nt = (HLSVType::PrimType)(ct + (stxt.length() - 1)); // Only works because of the ordering of the PrimType enum
+	auto nt = HLSVType::MakeVectorType(ct, (uint8)stxt.length());
 	NEW_EXPR_T(expr, nt);
 	expr->text = "(" + val->text + '.' + stxt + ')';
 	return expr;

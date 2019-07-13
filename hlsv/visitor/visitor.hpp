@@ -105,6 +105,7 @@ public:
 	VISIT(VariableDefinition)
 	VISIT(SimpleAssign)
 	VISIT(ComplexAssign)
+	VISIT(Lvalue)
 
 	// Expr
 	VISIT(PostfixExpr)

@@ -96,8 +96,13 @@ variableDefinition
 
 // Assignments
 assignment
-    : Name=IDENTIFIER '=' Value=expression                                                          # SimpleAssign
-    | Name=IDENTIFIER Op=('+='|'-='|'*='|'/='|'%='|'<<='|'>>='|'&='|'|='|'^=') Value=expression     # ComplexAssign
+    : LVal=lvalue '=' Value=expression                                                          # SimpleAssign
+    | LVal=lvalue Op=('+='|'-='|'*='|'/='|'%='|'<<='|'>>='|'&='|'|='|'^=') Value=expression     # ComplexAssign
+    ;
+lvalue
+    : Name=IDENTIFIER
+    | LVal=lvalue '.' SWIZZLE
+    | LVal=lvalue '[' Index=expression ']'
     ;
 
 

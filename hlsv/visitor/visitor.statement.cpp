@@ -9,6 +9,7 @@
 // This file implements the functions of the visitor class that are statements within functions
 
 #include "visitor.hpp"
+#include <cmath>
 
 #ifdef HLSV_COMPILER_MSVC
 	// Incorrect "dereferencing null pointer" warnings
@@ -67,26 +68,21 @@ VISIT_FUNC(VariableDefinition)
 VISIT_FUNC(SimpleAssign)
 {
 	// Get the variable
-	auto vname = ctx->Name->getText();
-	auto vrbl = variables_.find_variable(vname);
-	if (!vrbl)
-		ERROR(ctx->Name, strarg("The variable '%s' does not exist in the current context.", vname.c_str()));
-	if (!vrbl->can_write(current_stage_))
-		ERROR(ctx->Name, strarg("The variable '%s' cannot be written to.", vname.c_str()));
+	auto lval = GET_VISIT_SPTR(ctx->LVal);
 
 	// Visit the value
-	infer_type_ = vrbl->type;
+	infer_type_ = lval->type;
 	auto expr = GET_VISIT_SPTR(ctx->Value);
 	infer_type_ = HLSVType::Error;
 	if (expr->type.is_array)
-		ERROR(ctx->Name, "The value of an assignment cannot be an array.");
-	if (!TypeHelper::CanPromoteTo(expr->type.type, vrbl->type.type)) {
+		ERROR(ctx->Value, "The value of an assignment cannot be an array.");
+	if (!TypeHelper::CanPromoteTo(expr->type.type, lval->type.type)) {
 		ERROR(ctx->Value, strarg("The value type '%s' cannot be promoted to the variable type '%s'.",
-			expr->type.get_type_str().c_str(), vrbl->type.get_type_str().c_str()));
+			expr->type.get_type_str().c_str(), lval->type.get_type_str().c_str()));
 	}
 
 	// Write the assignment
-	gen_.emit_assignment(vrbl->name, "=", *expr.get());
+	gen_.emit_assignment(lval->text, "=", *expr.get());
 
 	return nullptr;
 }
@@ -95,30 +91,108 @@ VISIT_FUNC(SimpleAssign)
 VISIT_FUNC(ComplexAssign)
 {
 	// Get the variable
-	auto vname = ctx->Name->getText();
-	auto vrbl = variables_.find_variable(vname);
-	if (!vrbl)
-		ERROR(ctx->Name, strarg("The variable '%s' does not exist in the current context.", vname.c_str()));
-	if (!vrbl->can_write(current_stage_))
-		ERROR(ctx->Name, strarg("The variable '%s' cannot be written to.", vname.c_str()));
+	auto lval = GET_VISIT_SPTR(ctx->LVal);
 
 	// Visit the value
-	infer_type_ = vrbl->type;
+	infer_type_ = lval->type;
 	auto expr = GET_VISIT_SPTR(ctx->Value);
 	infer_type_ = HLSVType::Error;
 	if (expr->type.is_array)
-		ERROR(ctx->Name, "The value of an assignment cannot be an array.");
+		ERROR(ctx->Value, "The value of an assignment cannot be an array.");
 	string err{};
 	HLSVType rtype{};
-	if (!TypeHelper::CheckBinaryOperator(ctx->Op, vrbl->type, expr->type, rtype, err))
+	if (!TypeHelper::CheckBinaryOperator(ctx->Op, lval->type, expr->type, rtype, err))
 		ERROR(ctx, err);
-	if (rtype != vrbl->type)
+	if (rtype != lval->type)
 		ERROR(ctx->Value, "The result of the operation does not match the variable type.");
 
 	// Write the assignment
-	gen_.emit_assignment(vrbl->name, ctx->Op->getText(), *expr.get());
+	gen_.emit_assignment(lval->text, ctx->Op->getText(), *expr.get());
 
 	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(Lvalue)
+{
+	if (ctx->Name) { // Simply a variable
+		auto vname = ctx->Name->getText();
+		auto vrbl = variables_.find_variable(vname);
+		if (!vrbl)
+			ERROR(ctx->Name, strarg("The variable '%s' does not exist in the current context.", vname.c_str()));
+		if (!vrbl->can_write(current_stage_))
+			ERROR(ctx->Name, strarg("The variable '%s' cannot be modified in the current context.", vname.c_str()));
+
+		// Send the variable upwards unmodified
+		NEW_EXPR_T(expr, vrbl->type);
+		expr->text = Variable::GetOutputName(vrbl->name);
+		return expr;
+	}
+	else if (ctx->SWIZZLE()) { // Swizzle
+		// Get the nested lvalue and check
+		auto lval = GET_VISIT_SPTR(ctx->LVal);
+		if (lval->type.is_array)
+			ERROR(ctx->SWIZZLE(), "Cannot apply swizzle to array type.");
+		if (!lval->type.is_vector_type())
+			ERROR(ctx->SWIZZLE(), "Cannot apply swizzle to non-vector type.");
+		auto ct = lval->type.get_component_type();
+		auto cc = lval->type.get_component_count();
+
+		// Validate the components
+		auto stxt = ctx->SWIZZLE()->getText();
+		for (auto sc : stxt) {
+			auto cidx = (sc == 'x' || sc == 'r' || sc == 's') ? 1u :
+				(sc == 'y' || sc == 'g' || sc == 't') ? 2u :
+				(sc == 'z' || sc == 'b' || sc == 'p') ? 3u :
+				(sc == 'w' || sc == 'a' || sc == 'q') ? 4u : UINT32_MAX;
+			if (cidx > cc) {
+				ERROR(ctx->SWIZZLE(), strarg("The type '%s' does not have the '%c' swizzle component.",
+					lval->type.get_type_str().c_str(), sc));
+			}
+		}
+
+		// Send the variable upwards with the swizzle applied
+		NEW_EXPR_T(expr, HLSVType::MakeVectorType(ct, (uint8)stxt.length()));
+		expr->text = lval->text + '.' + stxt;
+		return expr;
+	}
+	else { // Array indexer
+		// Get the nested lvalue and check
+		auto lval = GET_VISIT_SPTR(ctx->LVal);
+		auto ct = lval->type.get_component_type();
+		auto cc = lval->type.get_component_count();
+
+		// Check the index
+		auto idx = GET_VISIT_SPTR(ctx->Index);
+		if (idx->type.is_array || !idx->type.is_integer_type() || !idx->type.is_scalar_type())
+			ERROR(ctx->Index, "Arrays can only be accessed using scalar non-array integer types.");
+
+		// Generate based on the type
+		HLSVType rtype{};
+		if (lval->type.is_array) {
+			if (idx->is_literal && idx->literal_value.ui >= lval->type.count)
+				ERROR(ctx->Index, "The indexer literal is too large for the given array.");
+			rtype = lval->type.type; // Same type with is_array = false
+		}
+		else if (lval->type.is_vector_type()) {
+			if (idx->is_literal && idx->literal_value.ui >= lval->type.get_component_count())
+				ERROR(ctx->Index, "The indexer literal is too large for the given vector type.");
+			rtype = lval->type.get_component_type();
+		}
+		else if (lval->type.is_matrix_type()) {
+			uint8 side = (uint8)sqrt(cc);
+			if (idx->is_literal && idx->literal_value.ui >= side)
+				ERROR(ctx->Index, "The indexer literal is too large for the given matrix type.");
+			rtype = HLSVType::MakeVectorType(ct, side);
+		}
+		else
+			ERROR(ctx->Index, "An array indexer is not valid for the given type.");
+
+		// Send the variable upwards with the array indexer applied
+		NEW_EXPR_T(expr, rtype);
+		expr->text = lval->text + '[' + idx->text + ']';
+		return expr;
+	}
 }
 
 } // namespace hlsv
