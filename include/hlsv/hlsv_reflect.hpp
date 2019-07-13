@@ -194,7 +194,8 @@ public:
 	static string GetTypeStr(enum PrimType t);
 	static uint32 GetSlotSize(HLSVType type);
 	inline static bool IsIntegerType(enum PrimType t) {
-		return IsValueType(t) && (GetComponentType(t) != Float);
+		auto gc = GetComponentType(t);
+		return IsValueType(t) && (gc != Float) && (gc != Bool);
 	}
 	inline static bool IsFloatingPointType(enum PrimType t) {
 		return IsValueType(t) && (GetComponentType(t) == Float);

@@ -13,6 +13,8 @@
 #include "../config.hpp"
 
 
+namespace antlr4 { class Token;  }
+
 namespace hlsv
 {
 
@@ -36,7 +38,7 @@ public:
 
 	static bool CanPromoteTo(HLSVType::PrimType src, HLSVType::PrimType dst);
 
-	static bool CheckBinaryOperator(size_t op, HLSVType left, HLSVType right, HLSVType& res, string& err);
+	static bool CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVType right, HLSVType& res, string& err);
 };
 
 } // namespace hlsv

@@ -117,6 +117,7 @@ public:
 	VISIT(BitLogicExpr)
 	VISIT(BoolLogicExpr)
 	VISIT(TernaryExpr)
+	VISIT(ParenAtom)
 	VISIT(ArrayIndexerAtom)
 	VISIT(SwizzleAtom)
 	VISIT(InitializerList)

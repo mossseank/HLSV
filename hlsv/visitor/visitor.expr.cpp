@@ -122,7 +122,7 @@ Expr* Visitor::visit_binary_expr(antlr4::RuleContext* ctx, antlr4::Token* op, st
 	// Check the operator validity
 	string err{};
 	HLSVType rtype{};
-	if (!TypeHelper::CheckBinaryOperator(op->getType(), left->type, right->type, rtype, err))
+	if (!TypeHelper::CheckBinaryOperator(op, left->type, right->type, rtype, err))
 		ERROR(ctx, err);
 
 	// Generate expression
@@ -209,6 +209,12 @@ VISIT_FUNC(TernaryExpr)
 	expr->text += (texpr->type != ttype ? ttype.get_type_str() : "") + "( " + texpr->text + " ) : ";
 	expr->text += (fexpr->type != ttype ? ttype.get_type_str() : "") + "( " + fexpr->text + " ))";
 	return expr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(ParenAtom)
+{
+	return visit(ctx->expression());
 }
 
 // ====================================================================================================================

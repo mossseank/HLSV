@@ -70,8 +70,8 @@ public:
 
 	inline uint32 get_slot_count() const { return type.get_slot_size(); }
 
-	inline bool can_read(ShaderStages stage) const { return read & stage; }
-	inline bool can_write(ShaderStages stage) const { return write & stage; }
+	inline bool can_read(ShaderStages stage) const { return (scope == VarScope::Local) || read & stage; }
+	inline bool can_write(ShaderStages stage) const { return (scope == VarScope::Local) || write & stage; }
 
 	inline bool set_const() { write = ShaderStages::None; }
 

@@ -9,6 +9,7 @@
 // This file implements typehelper.hpp
 
 #include "typehelper.hpp"
+#include "../generated/HLSV.h"
 
 #define STR_TO_TYPE(tstr,ttype) if(str==tstr){return HLSVType::ttype;}
 #define ENUM_TO_STR(ttype) if(type==HLSVType::ttype){return #ttype;}
@@ -155,11 +156,19 @@ bool TypeHelper::CanPromoteTo(HLSVType::PrimType src, HLSVType::PrimType dst)
 
 // ====================================================================================================================
 /* static */
-bool TypeHelper::CheckBinaryOperator(size_t op, HLSVType left, HLSVType right, HLSVType& res, string& err)
+bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVType right, HLSVType& res, string& err)
 {
+	// Big ol' chunky function
+	using namespace grammar;
+	auto op = optk->getType();
+	auto optxt = optk->getText();
+
 	// Setup initial error reporting defaults and initial checks
 	res = HLSVType::Error;
-	err = strarg("Invalid operand types '%s' OP '%s'", left.get_type_str().c_str(), right.get_type_str().c_str());
+	err = strarg("Invalid operand types '%s%s' %s '%s%s'", 
+		left.get_type_str().c_str(), left.is_array ? strarg("[%u]", left.count).c_str() : "",
+		optxt.c_str(), 
+		right.get_type_str().c_str(), right.is_array ? strarg("[%u]", right.count).c_str() : "");
 	if (left.is_array || right.is_array) {
 		err += " - operands cannot be arrays.";
 		return false;
@@ -169,8 +178,35 @@ bool TypeHelper::CheckBinaryOperator(size_t op, HLSVType left, HLSVType right, H
 		return false;
 	}
 
-	// Return final status
-	return false;
+	// Check the types based on the operators
+	if (op == HLSV::OP_LSHIFT || op == HLSV::OP_RSHIFT) { // Bit shifting ('<<', '>>')
+		if (!left.is_integer_type() || !left.is_scalar_type() || !right.is_integer_type() || !right.is_scalar_type()) {
+			err += " - bit shifting operations only work with scalar integers.";
+			return false;
+		}
+		res = left;
+	}
+	else if (op == HLSV::OP_BITAND || op == HLSV::OP_BITOR || op == HLSV::OP_BITXOR) { // Bit logic ('&', '|', '^')
+		if (!left.is_integer_type() || !left.is_scalar_type() || left != right) {
+			err += " - bitwise operations only work on scalar integers of the same type.";
+			return false;
+		}
+		res = left;
+	}
+	else if (op == HLSV::OP_AND || op == HLSV::OP_OR) { // Bool logic ('&&', '||')
+		if (left != HLSVType::Bool || right != HLSVType::Bool) {
+			err += " - both operators must be scalar booleans.";
+			return false;
+		}
+		res = HLSVType::Bool;
+	}
+	else { // Unknown (error in the library, not the HLSV source)
+		err += strarg(" - unknown operator '%s'.", optxt.c_str());
+		return false;
+	}
+
+	// Good to go
+	return true;
 }
 
 } // namespace hlsv
