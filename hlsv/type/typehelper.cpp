@@ -10,6 +10,7 @@
 
 #include "typehelper.hpp"
 #include "../generated/HLSV.h"
+#include <cmath>
 
 #define STR_TO_TYPE(tstr,ttype) if(str==tstr){return HLSVType::ttype;}
 #define ENUM_TO_STR(ttype) if(type==HLSVType::ttype){return #ttype;}
@@ -155,6 +156,7 @@ bool TypeHelper::CanPromoteTo(HLSVType::PrimType src, HLSVType::PrimType dst)
 }
 
 // ====================================================================================================================
+// See http://learnwebgl.brown37.net/12_shader_language/glsl_mathematical_operations.html (semi-complete)
 /* static */
 bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVType right, HLSVType& res, string& err)
 {
@@ -179,12 +181,130 @@ bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVTyp
 	}
 
 	// Check the types based on the operators
-	if (op == HLSV::OP_LSHIFT || op == HLSV::OP_RSHIFT) { // Bit shifting ('<<', '>>')
+	if (op == HLSV::OP_MUL) { // Multiplication ('*', probably most complex operator)
+		if (left.is_boolean_type() || right.is_boolean_type()) {
+			err += " - boolean types do not support multiplication.";
+			return false;
+		}
+
+		if (left.is_matrix_type()) {
+			if (right.is_matrix_type()) { // left = matrix, right = matrix
+				if (right.get_component_count() != left.get_component_count()) {
+					err += " - multiplied matrices must be the same size.";
+					return false;
+				}
+			}
+			else if (right.is_vector_type()) { // left = matrix, right = vector
+				uint32 side = (uint32)sqrt(left.get_component_count());
+				if (side != right.get_component_count()) {
+					err += " - the right hand vector is not the correct size for the matrix.";
+					return false;
+				}
+			}
+			res = left; // Do not need to check left = matrix, right = scalar - this always succeeds
+		}
+		else if (left.is_vector_type()) {
+			if (right.is_matrix_type()) { // left = vector, right = matrix
+				err += " - invalid order for matrix/vector multiplication (matrix must come first).";
+				return false;
+			}
+			else if (right.is_vector_type()) { // left = vector, right = matrix
+				if (left.get_component_count() != right.get_component_count()) {
+					err += " - cannot multiple vectors of different lengths.";
+					return false;
+				}
+			}
+			// Same thing as with matrices, multiply by scalar always succeeds
+			res = HLSVType::MakeVectorType(HLSVType::GetMostPromotedType(left.type, right.type), left.get_component_count());
+		}
+		else { // left = scalar (always succeeds)
+			if (right.is_matrix_type())
+				res = right;
+			else
+				res = HLSVType::MakeVectorType(HLSVType::GetMostPromotedType(left.type, right.type), right.get_component_count());
+		}
+	}
+	else if (op == HLSV::OP_DIV) { // Division ('/')
+		if (left.is_boolean_type() || right.is_boolean_type()) {
+			err += " - boolean types do not support division.";
+			return false;
+		}
+
+		if (left.is_scalar_type()) {
+			if (!right.is_scalar_type()) {
+				err += " - scalars can only be divided by other scalars.";
+				return false;
+			}
+			res = HLSVType::GetMostPromotedType(left.type, right.type);
+		}
+		else if (left.is_vector_type()) {
+			if (right.is_matrix_type()) {
+				err += " - cannot divide a vector by a matrix.";
+				return false;
+			}
+			if (right.is_vector_type() && left.get_component_count() != right.get_component_count()) {
+				err += " - can only divide vectors that are the same size.";
+				return false;
+			}
+			res = HLSVType::MakeVectorType(HLSVType::GetMostPromotedType(left.type, right.type), left.get_component_count());
+		}
+		else if (left.is_matrix_type()) {
+			if (!right.is_scalar_type()) {
+				err += " - matrices can only be divided by scalars.";
+				return false;
+			}
+			res = left;
+		}
+	}
+	else if (op == HLSV::OP_MOD) { // Modulo ('%')
+		if (!left.is_scalar_type() || !right.is_scalar_type() || !left.is_integer_type() || !right.is_integer_type()) {
+			err += " - modulus operator requires scalar integer types.";
+			return false;
+		}
+		res = (left == HLSVType::Int || right == HLSVType::Int) ? HLSVType::Int : HLSVType::UInt;
+	}
+	else if (op == HLSV::OP_ADD || op == HLSV::OP_SUB) { // Add/subtract ('+', '-')
+		if (left.is_boolean_type() || right.is_boolean_type()) {
+			err += " - boolean types do not support addition/subtraction.";
+			return false;
+		}
+		if (left.get_component_count() != right.get_component_count()) {
+			err += " - addition/subtraction requires types with the same number of components.";
+			return false;
+		}
+		if (left.is_matrix_type())
+			res = left;
+		else
+			res = HLSVType::MakeVectorType(HLSVType::GetMostPromotedType(left.type, right.type), left.get_component_count());
+	}
+	else if (op == HLSV::OP_LSHIFT || op == HLSV::OP_RSHIFT) { // Bit shifting ('<<', '>>')
 		if (!left.is_integer_type() || !left.is_scalar_type() || !right.is_integer_type() || !right.is_scalar_type()) {
 			err += " - bit shifting operations only work with scalar integers.";
 			return false;
 		}
 		res = left;
+	}
+	else if (op == HLSV::OP_LT || op == HLSV::OP_GT || op == HLSV::OP_LE || op == HLSV::OP_GE) { // Relational ('<', '>', '<=', '>=')
+		if (left.is_boolean_type() || right.is_boolean_type()) {
+			err += " - boolean types do not support relational operators.";
+			return false;
+		}	
+		if (!left.is_scalar_type() || !right.is_scalar_type()) {
+			err += " - relational operators require scalar operands.";
+			return false;
+		}
+		res = HLSVType::Bool;
+	}
+	else if (op == HLSV::OP_EQ || op == HLSV::OP_NE) { // Equality ('==', '!=')
+		if (left.get_component_count() != right.get_component_count()) {
+			err += " - equality operators requires types with the same number of components.";
+			return false;
+		}
+		if (left.is_boolean_type() != right.is_boolean_type()) {
+			err += " - boolean types are only equitable to other boolean types.";
+			return false;
+		}
+		res = HLSVType::Bool;
 	}
 	else if (op == HLSV::OP_BITAND || op == HLSV::OP_BITOR || op == HLSV::OP_BITXOR) { // Bit logic ('&', '|', '^')
 		if (!left.is_integer_type() || !left.is_scalar_type() || left != right) {
@@ -201,7 +321,7 @@ bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVTyp
 		res = HLSVType::Bool;
 	}
 	else { // Unknown (error in the library, not the HLSV source)
-		err += strarg(" - unknown operator '%s'.", optxt.c_str());
+		err += " - unknown operator '" + optxt + "'.";
 		return false;
 	}
 

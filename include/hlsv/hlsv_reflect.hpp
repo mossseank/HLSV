@@ -203,6 +203,14 @@ public:
 	inline static bool IsBooleanType(enum PrimType t) {
 		return IsValueType(t) && (GetComponentType(t) == Bool);
 	}
+	inline static PrimType GetMostPromotedType(enum PrimType l, enum PrimType r) {
+		auto lc = GetComponentType(l);
+		auto rc = GetComponentType(r);
+		return lc > rc ? lc : rc;
+	}
+	inline static PrimType MakeVectorType(enum PrimType comp, uint8 count) {
+		return (PrimType)(comp + (count - 1));
+	}
 }; // struct HLSVType
 
 /* HLSVType Operators */
