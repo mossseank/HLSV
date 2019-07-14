@@ -106,6 +106,7 @@ public:
 	VISIT(SimpleAssign)
 	VISIT(ComplexAssign)
 	VISIT(Lvalue)
+	VISIT(IfStatement)
 
 	// Expr
 	VISIT(PostfixExpr)

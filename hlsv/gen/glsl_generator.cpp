@@ -187,4 +187,22 @@ void GLSLGenerator::emit_assignment(const string& vrbl, const string& op, const 
 	CSTAGE << indent_str_ << vrbl << ' ' << op << ' ' << value.text << ";\n";
 }
 
+// ====================================================================================================================
+void GLSLGenerator::emit_if_statement(const Expr& cond)
+{
+	CSTAGE << indent_str_ << "if (" << cond.text << ") {\n";
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_elif_statement(const Expr& cond)
+{
+	CSTAGE << indent_str_ << "else if (" << cond.text << ") {\n";
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_else_statement()
+{
+	CSTAGE << indent_str_ << "else {\n";
+}
+
 } // namespace hlsv

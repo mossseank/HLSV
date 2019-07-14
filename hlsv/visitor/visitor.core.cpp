@@ -13,6 +13,11 @@
 #include <stdlib.h>
 #include <cmath>
 
+#ifdef HLSV_COMPILER_MSVC
+	// Complaining about not using the return value of 'visit(...)'
+#	pragma warning( disable : 26444 )
+#endif // HLSV_COMPILER_MSVC
+
 #define VISIT_FUNC(vtype) antlrcpp::Any Visitor::visit##vtype(grammar::HLSV::vtype##Context* ctx)
 #define REFL (*reflect_)
 #define OPT (options_)

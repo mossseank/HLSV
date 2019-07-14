@@ -14,6 +14,8 @@
 #ifdef HLSV_COMPILER_MSVC
 	// Incorrect "dereferencing null pointer" warnings
 #	pragma warning( disable : 6011 )
+	// Complaining about not using the return value of 'visit(...)'
+#	pragma warning( disable : 26444 )
 #endif // HLSV_COMPILER_MSVC
 
 #define VISIT_FUNC(vtype) antlrcpp::Any Visitor::visit##vtype(grammar::HLSV::vtype##Context* ctx)
@@ -193,6 +195,69 @@ VISIT_FUNC(Lvalue)
 		expr->text = lval->text + '[' + idx->text + ']';
 		return expr;
 	}
+}
+
+// ====================================================================================================================
+VISIT_FUNC(IfStatement)
+{
+	// Validate the condition
+	auto ifcond = GET_VISIT_SPTR(ctx->Cond);
+	if (ifcond->type.is_array || ifcond->type != HLSVType::Bool)
+		ERROR(ctx->Cond, "If statement conditional expressions must have a scalar boolean type.");
+
+	// Visit the if block
+	variables_.push_block();
+	gen_.emit_if_statement(*ifcond.get());
+	gen_.push_indent();
+	if (ctx->block()) {
+		for (auto st : ctx->block()->statement())
+			visit(st);
+	}
+	else
+		visit(ctx->statement());
+	gen_.pop_indent();
+	gen_.emit_func_block_close();
+	variables_.pop_block();
+
+	// Visit each of the elif statements
+	for (auto elif : ctx->Elifs) {
+		// Validate the condition
+		auto cond = GET_VISIT_SPTR(elif->Cond);
+		if (cond->type.is_array || cond->type != HLSVType::Bool)
+			ERROR(elif->Cond, "Elif statement conditional expressions must have a scalar boolean type.");
+
+		// Visit the if block
+		variables_.push_block();
+		gen_.emit_elif_statement(*cond.get());
+		gen_.push_indent();
+		if (elif->block()) {
+			for (auto st : elif->block()->statement())
+				visit(st);
+		}
+		else
+			visit(elif->statement());
+		gen_.pop_indent();
+		gen_.emit_func_block_close();
+		variables_.pop_block();
+	}
+
+	// Visit the else statement
+	if (ctx->Else) {
+		variables_.push_block();
+		gen_.emit_else_statement();
+		gen_.push_indent();
+		if (ctx->Else->block()) {
+			for (auto st : ctx->Else->block()->statement())
+				visit(st);
+		}
+		else
+			visit(ctx->Else->statement());
+		gen_.pop_indent();
+		gen_.emit_func_block_close();
+		variables_.pop_block();
+	}
+
+	return nullptr;
 }
 
 } // namespace hlsv

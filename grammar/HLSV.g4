@@ -78,6 +78,7 @@ statement
     : variableDefinition ';'
     | variableDeclaration ';'
     | assignment ';'
+    | ifStatement
     ;
 
 // Variable declaration
@@ -103,6 +104,17 @@ lvalue
     : Name=IDENTIFIER
     | LVal=lvalue '.' SWIZZLE
     | LVal=lvalue '[' Index=expression ']'
+    ;
+
+// If statement
+ifStatement
+    : 'if' '(' Cond=expression ')' (statement|block) (Elifs+=elifStatement)* Else=elseStatement?
+    ;
+elifStatement
+    : 'elif' '(' Cond=expression ')' (statement|block)
+    ;
+elseStatement
+    : 'else' (statement|block)
     ;
 
 

@@ -62,6 +62,10 @@ public:
 	void emit_func_block_close();
 	void emit_variable_declaration(const Variable& vrbl, Expr* value);
 	void emit_assignment(const string& vrbl, const string& op, const Expr& value);
+
+	void emit_if_statement(const Expr& cond);
+	void emit_elif_statement(const Expr& cond);
+	void emit_else_statement();
 }; // class GLSLGenerator
 
 } // namespace hlsv
