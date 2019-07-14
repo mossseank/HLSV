@@ -15,6 +15,7 @@ KW_ATTR         : 'attr' ;
 KW_BLOCK        : 'block' ;
 KW_COMPUTE      : 'compute' ;
 KW_CONST        : 'const' ;
+KW_DO           : 'do' ;
 KW_ELIF         : 'elif' ;
 KW_ELSE         : 'else' ;
 KW_FLAT         : 'flat' ;
@@ -25,6 +26,7 @@ KW_LOCAL        : 'local' ;
 KW_PUSH         : 'push' ;
 KW_SHADER       : 'shader' ;
 KW_UNIF         : 'unif' ;
+KW_WHILE        : 'while' ;
 
 // Stage function keywords
 KW_STAGE_VERT   : '@vert' ;

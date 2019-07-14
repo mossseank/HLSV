@@ -44,7 +44,7 @@ VISIT_FUNC(PostfixExpr)
 
 	// Good to go
 	NEW_EXPR_T(expr, vrbl->type.type);
-	expr->text = "(" + Variable::GetOutputName(vrbl->name) + optxt + ')';
+	expr->text = Variable::GetOutputName(vrbl->name) + optxt;
 	return expr;
 }
 
@@ -65,7 +65,7 @@ VISIT_FUNC(PrefixExpr)
 
 	// Good to go
 	NEW_EXPR_T(expr, vrbl->type.type);
-	expr->text = "(" + optxt + Variable::GetOutputName(vrbl->name) + ')';
+	expr->text = optxt + Variable::GetOutputName(vrbl->name);
 	return expr;
 }
 
@@ -83,7 +83,7 @@ VISIT_FUNC(FactorExpr)
 
 	// Return the value
 	NEW_EXPR_T(expr, vexpr->type);
-	expr->text = "(" + ctx->Op->getText() + vexpr->text + ')';
+	expr->text = ctx->Op->getText() + vexpr->text;
 	return expr;
 }
 
@@ -102,7 +102,7 @@ VISIT_FUNC(NegateExpr)
 	// Check the operator
 	auto optxt = ctx->Op->getText();
 	NEW_EXPR_T(expr, vexpr->type.type);
-	expr->text = "(" + optxt + vexpr->text + ')';
+	expr->text = optxt + vexpr->text;
 	if (optxt[0] == '!') {
 		if (vexpr->type != HLSVType::Bool)
 			ERROR(ctx, "Operator '!' is only valid for boolean expressions.");
@@ -125,7 +125,7 @@ Expr* Visitor::visit_binary_expr(antlr4::RuleContext* ctx, antlr4::Token* op, st
 
 	// Generate expression
 	NEW_EXPR_T(expr, rtype);
-	expr->text = "(" + left->text + ") " + op->getText() + " (" + right->text + ')';
+	expr->text = "(" + left->text + ' ' + op->getText() + ' ' + right->text + ')';
 	return expr;
 }
 
@@ -203,16 +203,18 @@ VISIT_FUNC(TernaryExpr)
 		ERROR(ctx->FExpr, strarg("The ternary false expression type '%s' cannot be promoted to the %s type '%s'.",
 			fexpr->type.get_type_str().c_str(), tstr, ttype.get_type_str().c_str()));
 	}
-	expr->text = "(( " + cond->text + " ) ? ";
-	expr->text += (texpr->type != ttype ? ttype.get_type_str() : "") + "( " + texpr->text + " ) : ";
-	expr->text += (fexpr->type != ttype ? ttype.get_type_str() : "") + "( " + fexpr->text + " ))";
+	expr->text = "( " + cond->text + " ? ";
+	expr->text += ((texpr->type != ttype) ? strarg("%s( %s )", ttype.get_type_str().c_str(), texpr->text) : texpr->text);
+	expr->text += ((fexpr->type != ttype) ? strarg("%s( %s )", ttype.get_type_str().c_str(), fexpr->text) : fexpr->text);
 	return expr;
 }
 
 // ====================================================================================================================
 VISIT_FUNC(ParenAtom)
 {
-	return visit(ctx->expression());
+	auto ch = visit(ctx->expression()).as<Expr*>();
+	ch->text = "(" + ch->text + ')';
+	return ch;
 }
 
 // ====================================================================================================================
@@ -248,7 +250,7 @@ VISIT_FUNC(ArrayIndexerAtom)
 
 	// Build the expression
 	NEW_EXPR_T(expr, etype);
-	expr->text = "(" + val->text + '[' + idx->text + "])";
+	expr->text = val->text + '[' + idx->text + ']';
 	return expr;
 }
 
@@ -282,7 +284,7 @@ VISIT_FUNC(SwizzleAtom)
 	// Build the expression
 	auto nt = HLSVType::MakeVectorType(ct, (uint8)stxt.length());
 	NEW_EXPR_T(expr, nt);
-	expr->text = "(" + val->text + '.' + stxt + ')';
+	expr->text = val->text + '.' + stxt;
 	return expr;
 }
 

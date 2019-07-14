@@ -66,6 +66,9 @@ public:
 	void emit_if_statement(const Expr& cond);
 	void emit_elif_statement(const Expr& cond);
 	void emit_else_statement();
+	void emit_while_loop(const Expr& cond);
+	void emit_do_loop();
+	void emit_do_loop_close(const Expr& cond);
 }; // class GLSLGenerator
 
 } // namespace hlsv

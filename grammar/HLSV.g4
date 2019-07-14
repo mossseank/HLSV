@@ -79,6 +79,8 @@ statement
     | variableDeclaration ';'
     | assignment ';'
     | ifStatement
+    | whileLoop
+    | doLoop
     ;
 
 // Variable declaration
@@ -115,6 +117,14 @@ elifStatement
     ;
 elseStatement
     : 'else' (statement|block)
+    ;
+
+// While/do-while
+whileLoop
+    : 'while' '(' Cond=expression ')' (statement|block)
+    ;
+doLoop
+    : 'do' (statement|block) 'while' '(' Cond=expression ')' ';'
     ;
 
 

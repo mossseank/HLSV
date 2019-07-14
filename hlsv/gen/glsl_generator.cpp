@@ -205,4 +205,22 @@ void GLSLGenerator::emit_else_statement()
 	CSTAGE << indent_str_ << "else {\n";
 }
 
+// ====================================================================================================================
+void GLSLGenerator::emit_while_loop(const Expr& cond)
+{
+	CSTAGE << indent_str_ << "while (" << cond.text << ") {\n";
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_do_loop()
+{
+	CSTAGE << indent_str_ << "do {\n";
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_do_loop_close(const Expr& cond)
+{
+	CSTAGE << indent_str_ << "} while (" << cond.text << ");\n";
+}
+
 } // namespace hlsv

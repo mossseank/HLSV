@@ -260,4 +260,54 @@ VISIT_FUNC(IfStatement)
 	return nullptr;
 }
 
+// ====================================================================================================================
+VISIT_FUNC(WhileLoop)
+{
+	// Check the condition
+	auto cond = GET_VISIT_SPTR(ctx->Cond);
+	if (cond->type.is_array || cond->type != HLSVType::Bool)
+		ERROR(ctx->Cond, "While loop requires a scalar boolean type for its condition expression.");
+
+	// Visit the block or statement
+	variables_.push_block();
+	gen_.emit_while_loop(*cond.get());
+	gen_.push_indent();
+	if (ctx->block()) {
+		for (auto st : ctx->block()->statement())
+			visit(st);
+	}
+	else
+		visit(ctx->statement());
+	gen_.pop_indent();
+	gen_.emit_func_block_close();
+	variables_.pop_block();
+
+	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(DoLoop)
+{
+	// Check the condition
+	auto cond = GET_VISIT_SPTR(ctx->Cond);
+	if (cond->type.is_array || cond->type != HLSVType::Bool)
+		ERROR(ctx->Cond, "While loop requires a scalar boolean type for its condition expression.");
+
+	// Visit the block or statement
+	variables_.push_block();
+	gen_.emit_do_loop();
+	gen_.push_indent();
+	if (ctx->block()) {
+		for (auto st : ctx->block()->statement())
+			visit(st);
+	}
+	else
+		visit(ctx->statement());
+	gen_.pop_indent();
+	gen_.emit_do_loop_close(*cond.get());
+	variables_.pop_block();
+
+	return nullptr;
+}
+
 } // namespace hlsv
