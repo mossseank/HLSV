@@ -19,6 +19,7 @@ KW_DO           : 'do' ;
 KW_ELIF         : 'elif' ;
 KW_ELSE         : 'else' ;
 KW_FLAT         : 'flat' ;
+KW_FOR          : 'for' ;
 KW_FRAG         : 'frag' ;
 KW_GRAPHICS     : 'graphics' ;
 KW_IF           : 'if' ;

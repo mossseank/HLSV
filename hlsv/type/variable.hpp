@@ -66,12 +66,12 @@ public:
 	inline bool is_uniform() const { return scope == VarScope::Uniform; }
 	inline bool is_push_constant() const { return scope == VarScope::PushConstant; }
 	inline bool is_constant() const { return scope == VarScope::Constant; }
-	inline bool is_block() const { return scope == VarScope::Local; }
+	inline bool is_block() const { return scope == VarScope::Block; }
 
 	inline uint32 get_slot_count() const { return type.get_slot_size(); }
 
-	inline bool can_read(ShaderStages stage) const { return (scope == VarScope::Local) || read & stage; }
-	inline bool can_write(ShaderStages stage) const { return (scope == VarScope::Local) || write & stage; }
+	inline bool can_read(ShaderStages stage) const { return (scope == VarScope::Block) || read & stage; }
+	inline bool can_write(ShaderStages stage) const { return (scope == VarScope::Block) || write & stage; }
 
 	inline bool set_const() { write = ShaderStages::None; }
 

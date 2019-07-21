@@ -310,4 +310,41 @@ VISIT_FUNC(DoLoop)
 	return nullptr;
 }
 
+// ====================================================================================================================
+VISIT_FUNC(ForLoop)
+{
+	// Check the type
+	auto tstr = ctx->Type->getText();
+	auto type = (tstr == "int") ? HLSVType::Int : (tstr == "float") ? HLSVType::Float : (tstr == "uint") ? HLSVType::UInt : 
+		HLSVType::Error;
+	if (type == HLSVType::Error)
+		ERROR(ctx->Type, strarg("Invalid loop counter type '%s', must be 'int', 'uint', or 'float'.", tstr.c_str()));
+
+	// Check the name and variable
+	auto name = ctx->Name->getText();
+	if (name[0] == '$')
+		ERROR(ctx->Name, "Cannot start user variables with the '$' character.");
+	if (variables_.find_variable(name))
+		ERROR(ctx->Name, strarg("A variable with the name '%s' already exists in the current context.", name.c_str()));
+	Variable vrbl{ name, type, VarScope::Block };
+	variables_.add_variable(vrbl);
+
+	// Check the start value
+	auto start = GET_VISIT_SPTR(ctx->Start);
+	if (!TypeHelper::CanPromoteTo(start->type.type, type))
+		ERROR(ctx->Start, "The for loop start value must be promotable to the counter type.");
+
+	// Check the end value
+	auto end = GET_VISIT_SPTR(ctx->End);
+	if (!TypeHelper::CanPromoteTo(end->type.type, type))
+		ERROR(ctx->End, "The for loop end value must be promotable to the counter type.");
+
+	// Check the step value
+	auto step = ctx->Step ? GET_VISIT_SPTR(ctx->Step) : nullptr;
+	if (step && !TypeHelper::CanPromoteTo(step->type.type, type))
+		ERROR(ctx->Step, "The for loop end value must be promotable to the counter type.");
+
+	return nullptr;
+}
+
 } // namespace hlsv

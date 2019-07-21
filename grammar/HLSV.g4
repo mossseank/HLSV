@@ -127,6 +127,12 @@ doLoop
     : 'do' (statement|block) 'while' '(' Cond=expression ')' ';'
     ;
 
+// For loop
+forLoop
+    : 'for' '(' Type=IDENTIFIER Name=IDENTIFIER '=' Start=expression ':' End=expression (':' Step=expression)? ')'
+        (statement|block)
+    ;
+
 
 // Expressions (anything that can evaluate to a typed value) (enforce order of operation)
 // See https://www.khronos.org/files/opengl45-quick-reference-card.pdf (page 9) for GLSL Order of Operations
