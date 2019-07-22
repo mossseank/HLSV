@@ -327,7 +327,7 @@ VISIT_FUNC(ForLoop)
 		updates.push_back(visit(up).as<string>());
 
 	// Emit the header and start the new block
-	//gen_.emit_for_loop(vrbl, *init.get(), *cond.get(), *lval.get(), ctx->Update->Op->getText(), *uexpr.get());
+	gen_.emit_for_loop(vrbl, *init.get(), *cond.get(), updates);
 	gen_.push_indent();
 
 	// Visit the block, then close it

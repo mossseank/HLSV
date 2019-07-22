@@ -11,6 +11,7 @@
 #include "glsl_generator.hpp"
 #include "../type/typehelper.hpp"
 #include "../visitor/visitor.hpp"
+#include <numeric>
 
 #define CSTAGE (*stage_funcs_.at(vis_->current_stage_))
 
@@ -221,6 +222,19 @@ void GLSLGenerator::emit_do_loop()
 void GLSLGenerator::emit_do_loop_close(const Expr& cond)
 {
 	CSTAGE << indent_str_ << "} while (" << cond.text << ");\n";
+}
+
+// ====================================================================================================================
+void GLSLGenerator::emit_for_loop(const Variable& var, const Expr& init, const Expr& cond, const std::vector<string>& updates)
+{
+	auto itxt = strarg("%s %s = (%s)", TypeHelper::GetGLSLStr(var.type.type).c_str(), var.name.c_str(), init.text.c_str());
+	string utxt = "";
+	if (updates.size() > 0) {
+		utxt = std::accumulate(updates.begin() + 1, updates.end(), updates[0], [](const string& acc, const string& str) {
+			return acc + ", " + str;
+		});
+	}
+	CSTAGE << indent_str_ << "for (" << itxt << "; " << cond.text << "; " << utxt << ") {\n";
 }
 
 } // namespace hlsv
