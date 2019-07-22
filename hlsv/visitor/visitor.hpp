@@ -103,8 +103,7 @@ public:
 	// Statement
 	VISIT(VariableDeclaration)
 	VISIT(VariableDefinition)
-	VISIT(SimpleAssign)
-	VISIT(ComplexAssign)
+	VISIT(Assignment)
 	VISIT(Lvalue)
 	VISIT(IfStatement)
 	VISIT(WhileLoop)

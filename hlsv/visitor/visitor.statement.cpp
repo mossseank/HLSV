@@ -67,7 +67,7 @@ VISIT_FUNC(VariableDefinition)
 }
 
 // ====================================================================================================================
-VISIT_FUNC(SimpleAssign)
+VISIT_FUNC(Assignment)
 {
 	// Get the variable
 	auto lval = GET_VISIT_SPTR(ctx->LVal);
@@ -78,35 +78,20 @@ VISIT_FUNC(SimpleAssign)
 	infer_type_ = HLSVType::Error;
 	if (expr->type.is_array)
 		ERROR(ctx->Value, "The value of an assignment cannot be an array.");
-	if (!TypeHelper::CanPromoteTo(expr->type.type, lval->type.type)) {
-		ERROR(ctx->Value, strarg("The value type '%s' cannot be promoted to the variable type '%s'.",
-			expr->type.get_type_str().c_str(), lval->type.get_type_str().c_str()));
+	if (ctx->Op->getText() == "=") { // Simple Assignment 
+		if (!TypeHelper::CanPromoteTo(expr->type.type, lval->type.type)) {
+			ERROR(ctx->Value, strarg("The value type '%s' cannot be promoted to the variable type '%s'.",
+				expr->type.get_type_str().c_str(), lval->type.get_type_str().c_str()));
+		}
 	}
-
-	// Write the assignment
-	gen_.emit_assignment(lval->text, "=", *expr.get());
-
-	return nullptr;
-}
-
-// ====================================================================================================================
-VISIT_FUNC(ComplexAssign)
-{
-	// Get the variable
-	auto lval = GET_VISIT_SPTR(ctx->LVal);
-
-	// Visit the value
-	infer_type_ = lval->type;
-	auto expr = GET_VISIT_SPTR(ctx->Value);
-	infer_type_ = HLSVType::Error;
-	if (expr->type.is_array)
-		ERROR(ctx->Value, "The value of an assignment cannot be an array.");
-	string err{};
-	HLSVType rtype{};
-	if (!TypeHelper::CheckBinaryOperator(ctx->Op, lval->type, expr->type, rtype, err))
-		ERROR(ctx, err);
-	if (rtype != lval->type)
-		ERROR(ctx->Value, "The result of the operation does not match the variable type.");
+	else { // Complex Assignment
+		string err{};
+		HLSVType rtype{};
+		if (!TypeHelper::CheckBinaryOperator(ctx->Op, lval->type, expr->type, rtype, err))
+			ERROR(ctx, err);
+		if (rtype != lval->type)
+			ERROR(ctx->Value, "The result of the operation does not match the variable type.");
+	}
 
 	// Write the assignment
 	gen_.emit_assignment(lval->text, ctx->Op->getText(), *expr.get());
@@ -313,36 +298,48 @@ VISIT_FUNC(DoLoop)
 // ====================================================================================================================
 VISIT_FUNC(ForLoop)
 {
-	// Check the type
-	auto tstr = ctx->Type->getText();
-	auto type = (tstr == "int") ? HLSVType::Int : (tstr == "float") ? HLSVType::Float : (tstr == "uint") ? HLSVType::UInt : 
-		HLSVType::Error;
-	if (type == HLSVType::Error)
-		ERROR(ctx->Type, strarg("Invalid loop counter type '%s', must be 'int', 'uint', or 'float'.", tstr.c_str()));
+	// Create the loop variable
+	auto vrbl = parse_variable(ctx->Init->variableDeclaration(), VarScope::Block);
+	if (vrbl.type.is_array)
+		ERROR(ctx->Init, "Loop counter variables cannot be arrays.");
+	if ((!vrbl.type.is_vector_type() && !vrbl.type.is_scalar_type()) || vrbl.type.get_component_type() == HLSVType::Bool)
+		ERROR(ctx->Init, "Counter variables must be non-boolean scalar or vector types.");
 
-	// Check the name and variable
-	auto name = ctx->Name->getText();
-	if (name[0] == '$')
-		ERROR(ctx->Name, "Cannot start user variables with the '$' character.");
-	if (variables_.find_variable(name))
-		ERROR(ctx->Name, strarg("A variable with the name '%s' already exists in the current context.", name.c_str()));
-	Variable vrbl{ name, type, VarScope::Block };
-	variables_.add_variable(vrbl);
+	// Check the initial value
+	auto init = GET_VISIT_SPTR(ctx->Init->Value);
+	if (init->type.is_array)
+		ERROR(ctx->Init->Value, "Cannot initialize a counter variable with an array type.");
+	if (!TypeHelper::CanPromoteTo(init->type.type, vrbl.type.type))
+		ERROR(ctx->Init->Value, "The initial counter value is not a valid type.");
 
-	// Check the start value
-	auto start = GET_VISIT_SPTR(ctx->Start);
-	if (!TypeHelper::CanPromoteTo(start->type.type, type))
-		ERROR(ctx->Start, "The for loop start value must be promotable to the counter type.");
+	// Check the condition
+	auto cond = GET_VISIT_SPTR(ctx->Cond);
+	if (cond->type.is_array)
+		ERROR(ctx->Cond, "Loop condition cannot be an array type.");
+	if (cond->type.type != HLSVType::Bool)
+		ERROR(ctx->Cond, "Loop condition must be a scalar boolean type.");
 
-	// Check the end value
-	auto end = GET_VISIT_SPTR(ctx->End);
-	if (!TypeHelper::CanPromoteTo(end->type.type, type))
-		ERROR(ctx->End, "The for loop end value must be promotable to the counter type.");
-
-	// Check the step value
-	auto step = ctx->Step ? GET_VISIT_SPTR(ctx->Step) : nullptr;
-	if (step && !TypeHelper::CanPromoteTo(step->type.type, type))
-		ERROR(ctx->Step, "The for loop end value must be promotable to the counter type.");
+	// Check the update
+	auto lval = GET_VISIT_SPTR(ctx->Update->LVal);
+	auto uexpr = GET_VISIT_SPTR(ctx->Update->Value);
+	if (lval->type.is_array)
+		ERROR(ctx->Update->LVal, "Cannot assign to an array value.");
+	if (uexpr->type.is_array)
+		ERROR(ctx->Update->Value, "Cannot have an array value on the right side of an assignment.");
+	if (ctx->Update->Op->getText() == "=") { // Simple assignment
+		if (!TypeHelper::CanPromoteTo(uexpr->type.type, lval->type.type)) {
+			ERROR(ctx->Update->Value, strarg("The value type '%s' cannot be promoted to the variable type '%s'.",
+				uexpr->type.get_type_str().c_str(), lval->type.get_type_str().c_str()));
+		}
+	}
+	else { // Complex assignment
+		string err{};
+		HLSVType rtype{};
+		if (!TypeHelper::CheckBinaryOperator(ctx->Update->Op, lval->type, uexpr->type, rtype, err))
+			ERROR(ctx, err);
+		if (rtype != lval->type)
+			ERROR(ctx->Update->Value, "The result of the operation does not match the variable type.");
+	}
 
 	return nullptr;
 }

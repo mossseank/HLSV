@@ -81,6 +81,7 @@ statement
     | ifStatement
     | whileLoop
     | doLoop
+    | forLoop
     ;
 
 // Variable declaration
@@ -99,8 +100,7 @@ variableDefinition
 
 // Assignments
 assignment
-    : LVal=lvalue '=' Value=expression                                                          # SimpleAssign
-    | LVal=lvalue Op=('+='|'-='|'*='|'/='|'%='|'<<='|'>>='|'&='|'|='|'^=') Value=expression     # ComplexAssign
+    : LVal=lvalue Op=('='|'+='|'-='|'*='|'/='|'%='|'<<='|'>>='|'&='|'|='|'^=') Value=expression
     ;
 lvalue
     : Name=IDENTIFIER
@@ -129,7 +129,7 @@ doLoop
 
 // For loop
 forLoop
-    : 'for' '(' Type=IDENTIFIER Name=IDENTIFIER '=' Start=expression ':' End=expression (':' Step=expression)? ')'
+    : 'for' '(' Init=variableDefinition ';' Cond=expression ';' Update=assignment ')'
         (statement|block)
     ;
 
