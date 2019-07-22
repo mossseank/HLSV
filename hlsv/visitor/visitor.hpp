@@ -109,6 +109,7 @@ public:
 	VISIT(WhileLoop)
 	VISIT(DoLoop)
 	VISIT(ForLoop)
+	VISIT(ForLoopUpdate)
 
 	// Expr
 	VISIT(PostfixExpr)

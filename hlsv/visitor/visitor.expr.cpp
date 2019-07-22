@@ -30,42 +30,32 @@ namespace hlsv
 // ====================================================================================================================
 VISIT_FUNC(PostfixExpr)
 {
-	auto vname = ctx->Expr->getText();
+	auto lval = GET_VISIT_SPTR(ctx->LVal);
 	auto optxt = ctx->Op->getText();
 
 	// Check for the variable
-	auto vrbl = variables_.find_variable(vname);
-	if (!vrbl)
-		ERROR(ctx, strarg("Variable '%s' does not exist in the current context.", vname.c_str()));
-	if (vrbl->type.is_array || !vrbl->type.is_integer_type() || !vrbl->type.is_scalar_type())
+	if (lval->type.is_array || !lval->type.is_integer_type() || !lval->type.is_scalar_type())
 		ERROR(ctx, strarg("Operator '%s' is only valid for non-array scalar integer variables.", optxt.c_str()));
-	if (!vrbl->can_read(current_stage_) || !vrbl->can_write(current_stage_))
-		ERROR(ctx, strarg("Operator '%s' is invalid for read-only or write-only variables.", optxt.c_str()));
 
 	// Good to go
-	NEW_EXPR_T(expr, vrbl->type.type);
-	expr->text = Variable::GetOutputName(vrbl->name) + optxt;
+	NEW_EXPR_T(expr, lval->type.type);
+	expr->text = lval->text + optxt;
 	return expr;
 }
 
 // ====================================================================================================================
 VISIT_FUNC(PrefixExpr)
 {
-	auto vname = ctx->Expr->getText();
+	auto lval = GET_VISIT_SPTR(ctx->LVal);
 	auto optxt = ctx->Op->getText();
 
 	// Check for the variable
-	auto vrbl = variables_.find_variable(vname);
-	if (!vrbl)
-		ERROR(ctx, strarg("Variable '%s' does not exist in the current context.", vname.c_str()));
-	if (vrbl->type.is_array || !vrbl->type.is_integer_type() || !vrbl->type.is_scalar_type())
+	if (lval->type.is_array || !lval->type.is_integer_type() || !lval->type.is_scalar_type())
 		ERROR(ctx, strarg("Operator '%s' is only valid for non-array scalar integer variables.", optxt.c_str()));
-	if (!vrbl->can_read(current_stage_) || !vrbl->can_write(current_stage_))
-		ERROR(ctx, strarg("Operator '%s' is invalid for read-only or write-only variables.", optxt.c_str()));
 
 	// Good to go
-	NEW_EXPR_T(expr, vrbl->type.type);
-	expr->text = optxt + Variable::GetOutputName(vrbl->name);
+	NEW_EXPR_T(expr, lval->type.type);
+	expr->text = optxt + lval->text;
 	return expr;
 }
 

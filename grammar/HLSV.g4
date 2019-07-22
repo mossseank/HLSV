@@ -129,8 +129,12 @@ doLoop
 
 // For loop
 forLoop
-    : 'for' '(' Init=variableDefinition ';' Cond=expression ';' Update=assignment ')'
+    : 'for' '(' Init=variableDefinition ';' Cond=expression ';' Updates+=forLoopUpdate (',' Updates+=forLoopUpdate)* ')'
         (statement|block)
+    ;
+forLoopUpdate
+    : Assign=assignment
+    | LVal=lvalue Op=('--'|'++')
     ;
 
 
@@ -139,8 +143,8 @@ forLoop
 expression
     : atom  # AtomExpr
     // Unary operators
-    | Expr=IDENTIFIER Op=('--'|'++')    # PostfixExpr
-    | Op=('--'|'++') Expr=IDENTIFIER    # PrefixExpr
+    | LVal=lvalue Op=('--'|'++')        # PostfixExpr
+    | Op=('--'|'++') LVal=lvalue        # PrefixExpr
     | Op=('+'|'-') Expr=expression      # FactorExpr
     | Op=('!'|'~') Expr=expression      # NegateExpr
     // Binary Operators

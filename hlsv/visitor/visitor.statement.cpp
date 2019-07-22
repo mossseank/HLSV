@@ -107,7 +107,7 @@ VISIT_FUNC(Lvalue)
 		auto vrbl = variables_.find_variable(vname);
 		if (!vrbl)
 			ERROR(ctx->Name, strarg("The variable '%s' does not exist in the current context.", vname.c_str()));
-		if (!vrbl->can_write(current_stage_))
+		if (!vrbl->can_write(current_stage_) || !vrbl->can_read(current_stage_))
 			ERROR(ctx->Name, strarg("The variable '%s' cannot be modified in the current context.", vname.c_str()));
 
 		// Send the variable upwards unmodified
@@ -304,6 +304,8 @@ VISIT_FUNC(ForLoop)
 		ERROR(ctx->Init, "Loop counter variables cannot be arrays.");
 	if ((!vrbl.type.is_vector_type() && !vrbl.type.is_scalar_type()) || vrbl.type.get_component_type() == HLSVType::Bool)
 		ERROR(ctx->Init, "Counter variables must be non-boolean scalar or vector types.");
+	variables_.push_block();
+	variables_.add_variable(vrbl);
 
 	// Check the initial value
 	auto init = GET_VISIT_SPTR(ctx->Init->Value);
@@ -319,29 +321,61 @@ VISIT_FUNC(ForLoop)
 	if (cond->type.type != HLSVType::Bool)
 		ERROR(ctx->Cond, "Loop condition must be a scalar boolean type.");
 
-	// Check the update
-	auto lval = GET_VISIT_SPTR(ctx->Update->LVal);
-	auto uexpr = GET_VISIT_SPTR(ctx->Update->Value);
-	if (lval->type.is_array)
-		ERROR(ctx->Update->LVal, "Cannot assign to an array value.");
-	if (uexpr->type.is_array)
-		ERROR(ctx->Update->Value, "Cannot have an array value on the right side of an assignment.");
-	if (ctx->Update->Op->getText() == "=") { // Simple assignment
-		if (!TypeHelper::CanPromoteTo(uexpr->type.type, lval->type.type)) {
-			ERROR(ctx->Update->Value, strarg("The value type '%s' cannot be promoted to the variable type '%s'.",
-				uexpr->type.get_type_str().c_str(), lval->type.get_type_str().c_str()));
-		}
+	// Check the update(s)
+	std::vector<string> updates{};
+	for (auto up : ctx->Updates)
+		updates.push_back(visit(up).as<string>());
+
+	// Emit the header and start the new block
+	//gen_.emit_for_loop(vrbl, *init.get(), *cond.get(), *lval.get(), ctx->Update->Op->getText(), *uexpr.get());
+	gen_.push_indent();
+
+	// Visit the block, then close it
+	if (ctx->block()) {
+		for (auto st : ctx->block()->statement())
+			visit(st);
 	}
-	else { // Complex assignment
-		string err{};
-		HLSVType rtype{};
-		if (!TypeHelper::CheckBinaryOperator(ctx->Update->Op, lval->type, uexpr->type, rtype, err))
-			ERROR(ctx, err);
-		if (rtype != lval->type)
-			ERROR(ctx->Update->Value, "The result of the operation does not match the variable type.");
-	}
+	else
+		visit(ctx->statement());
+	variables_.pop_block();
+	gen_.pop_indent();
+	gen_.emit_func_block_close();
 
 	return nullptr;
+}
+
+// ====================================================================================================================
+VISIT_FUNC(ForLoopUpdate)
+{
+	if (ctx->Assign) { // Assignment
+		auto lval = GET_VISIT_SPTR(ctx->Assign->LVal);
+		auto uexpr = GET_VISIT_SPTR(ctx->Assign->Value);
+		if (lval->type.is_array)
+			ERROR(ctx->Assign->LVal, "Cannot assign to an array value.");
+		if (uexpr->type.is_array)
+			ERROR(ctx->Assign->Value, "Cannot have an array value on the right side of an assignment.");
+		if (ctx->Assign->Op->getText() == "=") { // Simple assignment
+			if (!TypeHelper::CanPromoteTo(uexpr->type.type, lval->type.type)) {
+				ERROR(ctx->Assign->Value, strarg("The value type '%s' cannot be promoted to the variable type '%s'.",
+					uexpr->type.get_type_str().c_str(), lval->type.get_type_str().c_str()));
+			}
+		}
+		else { // Complex assignment
+			string err{};
+			HLSVType rtype{};
+			if (!TypeHelper::CheckBinaryOperator(ctx->Assign->Op, lval->type, uexpr->type, rtype, err))
+				ERROR(ctx, err);
+			if (rtype != lval->type)
+				ERROR(ctx->Assign->Value, "The result of the operation does not match the variable type.");
+		}
+		return strarg("%s %s (%s)", lval->text.c_str(), ctx->Assign->Op->getText().c_str(), uexpr->text.c_str());
+	}
+	else { // Unary operator
+		auto lval = GET_VISIT_SPTR(ctx->LVal);
+		if (lval->type.is_array || !lval->type.is_integer_type() || !lval->type.is_scalar_type())
+			ERROR(ctx, strarg("Operator '%s' is only valid for non-array scalar integer variables.", ctx->Op->getText().c_str()));
+		return lval->text + ctx->Op->getText();
+	}
 }
 
 } // namespace hlsv
