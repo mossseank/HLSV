@@ -45,9 +45,16 @@ bool FunctionEntry::matches(const std::vector<HLSVType>& args, HLSVType& rtype) 
 		return false;
 
 	// Check the types one at a time
+	uint32 ccount = 0;
 	for (uint32 i = 0; i < args.size(); ++i) {
 		if (!params[i].matches(args[i]))
 			return false;
+		if (params[i].gen_type) { // Functions with multiple genType arguments must have the same component count for all genTypes
+			if (ccount == 0)
+				ccount = args[i].get_component_count();
+			if (ccount != args[i].get_component_count())
+				return false;
+		}
 	}
 
 	// Calculate the return type
@@ -225,19 +232,6 @@ bool FunctionRegistry::CheckConstructor(HLSVType::PrimType type, const std::vect
 		}
 		return true;
 	}
-}
-
-// ====================================================================================================================
-/* static */
-void FunctionRegistry::Populate()
-{
-	Functions_.insert({
-		{ "thing", {
-			
-		}}
-	});
-
-	Populated_ = true;
 }
 
 } // namespace hlsv
