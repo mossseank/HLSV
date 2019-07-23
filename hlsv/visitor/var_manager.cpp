@@ -105,10 +105,16 @@ uint32 VariableManager::get_local_slot_count()
 // ====================================================================================================================
 const std::map<std::pair<ShaderType, ShaderStages>, std::vector<Variable>> VariableManager::Builtins_ = {
 	{{ ShaderType::Graphics, ShaderStages::Vertex }, {
-			
+		{ "$VertexIndex", HLSVType::Int, VarScope::Builtin, ShaderStages::Vertex, ShaderStages::None },
+		{ "$InstanceIndex", HLSVType::Int, VarScope::Builtin, ShaderStages::Vertex, ShaderStages::None },
+		{ "$Position", HLSVType::Float4, VarScope::Builtin, ShaderStages::None, ShaderStages::Vertex },
+		{ "$PointSize", HLSVType::Float, VarScope::Builtin, ShaderStages::None, ShaderStages::Vertex }
 	}},
 	{{ ShaderType::Graphics, ShaderStages::Fragment }, {
-
+		{ "$FragCoord", HLSVType::Float4, VarScope::Builtin, ShaderStages::Fragment, ShaderStages::None },
+		{ "$FrontFacing", HLSVType::Bool, VarScope::Builtin, ShaderStages::Fragment, ShaderStages::None },
+		{ "$PointCoord", HLSVType::Float2, VarScope::Builtin, ShaderStages::Fragment, ShaderStages::None },
+		{ "$FragDepth", HLSVType::Float, VarScope::Builtin, ShaderStages::Fragment, ShaderStages::Fragment }
 	}}
 };
 

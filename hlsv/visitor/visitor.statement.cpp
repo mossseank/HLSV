@@ -107,7 +107,7 @@ VISIT_FUNC(Lvalue)
 		auto vrbl = variables_.find_variable(vname);
 		if (!vrbl)
 			ERROR(ctx->Name, strarg("The variable '%s' does not exist in the current context.", vname.c_str()));
-		if (!vrbl->can_write(current_stage_) || !vrbl->can_read(current_stage_))
+		if (!vrbl->can_write(current_stage_))
 			ERROR(ctx->Name, strarg("The variable '%s' cannot be modified in the current context.", vname.c_str()));
 
 		// Send the variable upwards unmodified

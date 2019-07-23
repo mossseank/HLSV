@@ -31,6 +31,18 @@ Variable::Variable(const string& name, HLSVType type, VarScope scope) :
 }
 
 // ====================================================================================================================
+Variable::Variable(const string& name, HLSVType type, VarScope scope, ShaderStages read, ShaderStages write)	:
+	name{ name },
+	type{ type },
+	scope{ scope },
+	constant{ false, 0 },
+	read{ read },
+	write{ write }
+{
+
+}
+
+// ====================================================================================================================
 /* static */
 ShaderStages Variable::GetDefaultReadStages(VarScope scope)
 {
@@ -73,7 +85,14 @@ void Variable::LoadNames(ShaderType type)
 
 	if (type == ShaderType::Graphics) {
 		BuiltinNames_.insert({
-			
+			{ "VertexIndex", "gl_VertexIndex" },
+			{ "InstanceIndex", "gl_InstanceIndex" },
+			{ "Position", "gl_Position" },
+			{ "PointSize", "gl_PointSize" },
+			{ "FragCoord", "gl_FragCoord" },
+			{ "FrontFacing", "gl_FrontFacing" },
+			{ "PointCoord", "gl_PointCoord" },
+			{ "FragDepth", "gl_FragDepth" }
 		});
 	}
 }
