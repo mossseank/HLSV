@@ -42,7 +42,7 @@ bool FunctionEntry::matches(const std::vector<HLSVType>& args) const
 
 // ====================================================================================================================
 /* static */
-bool FunctionRegistry::CheckFunction(const string& name, const std::vector<HLSVType>& args, string& err, HLSVType& ret)
+bool FunctionRegistry::CheckFunction(const string& name, const std::vector<HLSVType>& args, string& err, HLSVType& ret, string& outname)
 {
 	if (!Populated_)
 		Populate();
@@ -52,6 +52,7 @@ bool FunctionRegistry::CheckFunction(const string& name, const std::vector<HLSVT
 		for (const auto& e : ents) {
 			if (e.matches(args)) {
 				ret = e.return_type;
+				outname = e.out_name;
 				return true;
 			}
 		}
@@ -66,7 +67,7 @@ bool FunctionRegistry::CheckFunction(const string& name, const std::vector<HLSVT
 
 // ====================================================================================================================
 /* static */
-bool FunctionRegistry::CheckFunction(const string& name, const std::vector<Expr*>& args, string& err, HLSVType& ret)
+bool FunctionRegistry::CheckFunction(const string& name, const std::vector<Expr*>& args, string& err, HLSVType& ret, string& outname)
 {
 	if (!Populated_)
 		Populate();
@@ -76,6 +77,7 @@ bool FunctionRegistry::CheckFunction(const string& name, const std::vector<Expr*
 		for (const auto& e : ents) {
 			if (e.matches(args)) {
 				ret = e.return_type;
+				outname = e.out_name;
 				return true;
 			}
 		}
@@ -213,6 +215,12 @@ bool FunctionRegistry::CheckConstructor(HLSVType::PrimType type, const std::vect
 /* static */
 void FunctionRegistry::Populate()
 {
+	Functions_.insert({
+		{ "thing", {
+			
+		}}
+	});
+
 	Populated_ = true;
 }
 

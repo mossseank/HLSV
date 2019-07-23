@@ -193,6 +193,7 @@ bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVTyp
 					err += " - multiplied matrices must be the same size.";
 					return false;
 				}
+				res = left;
 			}
 			else if (right.is_vector_type()) { // left = matrix, right = vector
 				uint32 side = (uint32)sqrt(left.get_component_count());
@@ -200,8 +201,10 @@ bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVTyp
 					err += " - the right hand vector is not the correct size for the matrix.";
 					return false;
 				}
+				res = HLSVType::MakeVectorType(HLSVType::GetMostPromotedType(left.type, right.type), right.get_component_count());
 			}
-			res = left; // Do not need to check left = matrix, right = scalar - this always succeeds
+			else
+				res = left; // Do not need to check left = matrix, right = scalar - this always succeeds
 		}
 		else if (left.is_vector_type()) {
 			if (right.is_matrix_type()) { // left = vector, right = matrix
@@ -213,9 +216,10 @@ bool TypeHelper::CheckBinaryOperator(antlr4::Token* optk, HLSVType left, HLSVTyp
 					err += " - cannot multiple vectors of different lengths.";
 					return false;
 				}
+				res = HLSVType::MakeVectorType(HLSVType::GetMostPromotedType(left.type, right.type), right.get_component_count());
 			}
-			// Same thing as with matrices, multiply by scalar always succeeds
-			res = HLSVType::MakeVectorType(HLSVType::GetMostPromotedType(left.type, right.type), left.get_component_count());
+			else // Same thing as with matrices, multiply by scalar always succeeds
+				res = HLSVType::MakeVectorType(HLSVType::GetMostPromotedType(left.type, right.type), left.get_component_count());
 		}
 		else { // left = scalar (always succeeds)
 			if (right.is_matrix_type())

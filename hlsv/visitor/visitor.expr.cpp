@@ -395,7 +395,7 @@ VISIT_FUNC(FunctionCall)
 		// Visit all of the arguments and build the init text
 		auto save_type = infer_type_;
 		std::vector<Expr*> args{};
-		std::stringstream ss{}; ss << fname << "( ";
+		std::stringstream ss{}; ss << "( ";
 		infer_type_ = HLSVType::Error;
 		for (auto a : ctx->Args) {
 			auto aexpr = visit(a).as<Expr*>();
@@ -409,13 +409,14 @@ VISIT_FUNC(FunctionCall)
 		// Check the arguments
 		string err{ "" };
 		HLSVType rtype{};
-		if (!FunctionRegistry::CheckFunction(fname, args, err, rtype))
+		string outname{};
+		if (!FunctionRegistry::CheckFunction(fname, args, err, rtype, outname))
 			ERROR(ctx, err);
 
 		// Return the expression
 		for (auto arg : args) delete arg;
 		NEW_EXPR_T(expr, rtype);
-		expr->text = ss.str();
+		expr->text = outname + ss.str();
 		return expr;
 	}
 }
