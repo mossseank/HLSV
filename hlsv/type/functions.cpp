@@ -34,8 +34,12 @@ bool FunctionParam::matches(HLSVType typ) const
 		else
 			return TypeHelper::CanPromoteTo(typ.type, HLSVType::MakeVectorType(type.get_component_type(), typ.get_component_count()));
 	}
-	else
-		return TypeHelper::CanPromoteTo(typ.type, type.type);
+	else {
+		if (exact)
+			return typ == type;
+		else
+			return TypeHelper::CanPromoteTo(typ.type, type.type);
+	}
 }
 
 // ====================================================================================================================
@@ -60,7 +64,8 @@ bool FunctionEntry::matches(const std::vector<HLSVType>& args, HLSVType& rtype) 
 	// Calculate the return type
 	rtype = (gen_idx == UINT32_MAX)
 		? return_type
-		: params[gen_idx].as_return_type(args[gen_idx]);
+		: HLSVType::MakeVectorType((return_type == HLSVType::Error) ? params[gen_idx].type.get_component_type() :
+			return_type.get_component_type(), args[gen_idx].get_component_count());
 
 	return true;
 }

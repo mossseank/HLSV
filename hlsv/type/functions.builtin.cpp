@@ -134,6 +134,140 @@ void FunctionRegistry::Populate()
 			{ "max", 0, { HLSVType::UInt, HLSVType::UInt } },
 			{ "max", 0, { HLSVType::Float, { HLSVType::Float, false } } },
 			{ "max", 0, { HLSVType::Float, HLSVType::Float } }
+		}},
+		{ "clamp", {
+			{ "clamp", 0, { HLSVType::Int, HLSVType::Int, HLSVType::Int } },
+			{ "clamp", 0, { HLSVType::Int, { HLSVType::Int, false }, { HLSVType::Int, false } } },
+			{ "clamp", 0, { HLSVType::UInt, HLSVType::UInt, HLSVType::UInt } },
+			{ "clamp", 0, { HLSVType::UInt, { HLSVType::UInt, false }, { HLSVType::UInt, false } } },
+			{ "clamp", 0, { HLSVType::Float, HLSVType::Float, HLSVType::Float } },
+			{ "clamp", 0, { HLSVType::Float, { HLSVType::Float, false }, { HLSVType::Float, false } } }
+		}},
+		{ "mix", {
+			{ "mix", 0, { HLSVType::Float, HLSVType::Float, HLSVType::Float } },
+			{ "mix", 0, { HLSVType::Float, HLSVType::Float, { HLSVType::Float, false } } }
+		}},
+		{ "select", {
+			{ "mix", 0, { HLSVType::Int, HLSVType::Int, HLSVType::Bool } },
+			{ "mix", 0, { HLSVType::UInt, HLSVType::UInt, HLSVType::Bool } },
+			{ "mix", 0, { HLSVType::Float, HLSVType::Float, HLSVType::Bool } },
+			{ "mix", 0, { HLSVType::Bool, HLSVType::Bool, HLSVType::Bool } }
+		}},
+		{ "step", {
+			{ "step", 0, { HLSVType::Float, HLSVType::Float } },
+			{ "step", 1, { { HLSVType::Float, false }, HLSVType::Float } }
+		}},
+		{ "sstep", {
+			{ "smoothstep", 0, { HLSVType::Float, HLSVType::Float, HLSVType::Float } },
+			{ "smoothstep", 2, { { HLSVType::Float, false }, { HLSVType::Float, false }, HLSVType::Float } }
+		}},
+		{ "isnan", {
+			{ "isnan", HLSVType::Bool, { { HLSVType::Float, true, true } } },
+			{ "isnan", HLSVType::Bool2, { { HLSVType::Float2, true, true } } },
+			{ "isnan", HLSVType::Bool3, { { HLSVType::Float3, true, true } } },
+			{ "isnan", HLSVType::Bool4, { { HLSVType::Float4, true, true } } }
+		}},
+		{ "isinf", {
+			{ "isinf", HLSVType::Bool, { { HLSVType::Float, true, true } } },
+			{ "isinf", HLSVType::Bool2, { { HLSVType::Float2, true, true } } },
+			{ "isinf", HLSVType::Bool3, { { HLSVType::Float3, true, true } } },
+			{ "isinf", HLSVType::Bool4, { { HLSVType::Float4, true, true } } }
+		}},
+		{ "ldexp", {
+			{ "ldexp", 0, { HLSVType::Float, { HLSVType::Int, true, true } } }
+		}},
+		// Geometric functions
+		{ "len", {
+			{ "length", HLSVType::Float, { HLSVType::Float } }
+		}},
+		{ "dist", {
+			{ "distance", HLSVType::Float, { HLSVType::Float, HLSVType::Float } }
+		}},
+		{ "dot", {
+			{ "dot", HLSVType::Float, { HLSVType::Float, HLSVType::Float } }
+		}},
+		{ "cross", {
+			{ "cross", HLSVType::Float3, { { HLSVType::Float3, false }, { HLSVType::Float3, false } } }
+		}},
+		{ "norm", {
+			{ "normalize", 0, { HLSVType::Float } }
+		}},
+		{ "forward", {
+			{ "faceForward", 0, { HLSVType::Float, HLSVType::Float, HLSVType::Float } }
+		}},
+		{ "reflect", {
+			{ "reflect", 0, { HLSVType::Float, HLSVType::Float } }
+		}},
+		{ "refract", {
+			{ "refract", 0, { HLSVType::Float, HLSVType::Float, { HLSVType::Float, false } } }
+		}},
+		// Matrix functions
+		{ "matCompMul", {
+			{ "matrixCompMult", HLSVType::Mat2, { { HLSVType::Mat2, false }, { HLSVType::Mat2, false } } },
+			{ "matrixCompMult", HLSVType::Mat3, { { HLSVType::Mat3, false }, { HLSVType::Mat3, false } } },
+			{ "matrixCompMult", HLSVType::Mat4, { { HLSVType::Mat4, false }, { HLSVType::Mat4, false } } }
+		}},
+		{ "outerProd", {
+			{ "outerProduct", HLSVType::Mat2, { { HLSVType::Float2, false }, { HLSVType::Float2, false } } },
+			{ "outerProduct", HLSVType::Mat3, { { HLSVType::Float3, false }, { HLSVType::Float3, false } } },
+			{ "outerProduct", HLSVType::Mat4, { { HLSVType::Float4, false }, { HLSVType::Float4, false } } }
+		}},
+		{ "trans", {
+			{ "transpose", HLSVType::Mat2, { { HLSVType::Mat2, false } } },
+			{ "transpose", HLSVType::Mat3, { { HLSVType::Mat3, false } } },
+			{ "transpose", HLSVType::Mat4, { { HLSVType::Mat4, false } } }
+		}},
+		{ "det", {
+			{ "determinant", HLSVType::Float, { { HLSVType::Mat2, false } } },
+			{ "determinant", HLSVType::Float, { { HLSVType::Mat3, false } } },
+			{ "determinant", HLSVType::Float, { { HLSVType::Mat4, false } } }
+		}},
+		{ "inv", {
+			{ "inverse", HLSVType::Mat2, { { HLSVType::Mat2, false } } },
+			{ "inverse", HLSVType::Mat3, { { HLSVType::Mat3, false } } },
+			{ "inverse", HLSVType::Mat4, { { HLSVType::Mat4, false } } }
+		}},
+		// Vector relational functions
+		{ "vecLT", {
+			{ "lessThan", 0, { HLSVType::Int, HLSVType::Int }, HLSVType::Bool },
+			{ "lessThan", 0, { HLSVType::UInt, HLSVType::UInt }, HLSVType::Bool },
+			{ "lessThan", 0, { HLSVType::Float, HLSVType::Float }, HLSVType::Bool }
+		}},
+		{ "vecLTE", {
+			{ "lessThanEqual", 0, { HLSVType::Int, HLSVType::Int }, HLSVType::Bool },
+			{ "lessThanEqual", 0, { HLSVType::UInt, HLSVType::UInt }, HLSVType::Bool },
+			{ "lessThanEqual", 0, { HLSVType::Float, HLSVType::Float }, HLSVType::Bool }
+		}},
+		{ "vecGT", {
+			{ "greaterThan", 0, { HLSVType::Int, HLSVType::Int }, HLSVType::Bool },
+			{ "greaterThan", 0, { HLSVType::UInt, HLSVType::UInt }, HLSVType::Bool },
+			{ "greaterThan", 0, { HLSVType::Float, HLSVType::Float }, HLSVType::Bool }
+		}},
+		{ "vecGTE", {
+			{ "greaterThanEqual", 0, { HLSVType::Int, HLSVType::Int }, HLSVType::Bool },
+			{ "greaterThanEqual", 0, { HLSVType::UInt, HLSVType::UInt }, HLSVType::Bool },
+			{ "greaterThanEqual", 0, { HLSVType::Float, HLSVType::Float }, HLSVType::Bool }
+		}},
+		{ "vecEQ", {
+			{ "equal", 0, { HLSVType::Int, HLSVType::Int }, HLSVType::Bool },
+			{ "equal", 0, { HLSVType::UInt, HLSVType::UInt }, HLSVType::Bool },
+			{ "equal", 0, { HLSVType::Float, HLSVType::Float }, HLSVType::Bool },
+			{ "equal", 0, { HLSVType::Bool, HLSVType::Bool }, HLSVType::Bool }
+		}},
+		{ "vecNE", {
+			{ "notEqual", 0, { HLSVType::Int, HLSVType::Int }, HLSVType::Bool },
+			{ "notEqual", 0, { HLSVType::UInt, HLSVType::UInt }, HLSVType::Bool },
+			{ "notEqual", 0, { HLSVType::Float, HLSVType::Float }, HLSVType::Bool },
+			{ "notEqual", 0, { HLSVType::Bool, HLSVType::Bool }, HLSVType::Bool }
+		}},
+		{ "any", {
+			{ "any", HLSVType::Bool, { HLSVType::Bool } }
+		}},
+		{ "all", {
+			{ "all", HLSVType::Bool, { HLSVType::Bool } }
+		}},
+		{ "not", {
+			{ "not", 0, { HLSVType::Bool } }
 		}}
 	});
 

@@ -39,9 +39,6 @@ public:
 	{ }
 
 	bool matches(HLSVType typ) const;
-	inline HLSVType as_return_type(HLSVType typ) const {
-		return HLSVType::MakeVectorType(type.type, typ.get_component_count());
-	}
 };
 
 // Contains a single set of arguments that are valid for a function, and a way to check a given set against them
@@ -59,6 +56,9 @@ public:
 	{ }
 	FunctionEntry(const string& name, uint32 genidx, const std::initializer_list<FunctionParam>& pars, uint32 v = 100) :
 		version{ v }, out_name{ name }, return_type{ HLSVType::Error }, params{ pars }, gen_idx{ genidx }
+	{ }
+	FunctionEntry(const string& name, uint32 genidx, const std::initializer_list<FunctionParam>& pars, HLSVType rt, uint32 v = 100) :
+		version{ v }, out_name{ name }, return_type{ rt }, params{ pars }, gen_idx{ genidx }
 	{ }
 	FunctionEntry(const string& name, HLSVType rt, const std::initializer_list<FunctionParam>& pars, uint32 v = 100) :
 		version{ v }, out_name{ name }, return_type{ rt }, params{ pars }, gen_idx{ UINT32_MAX }
