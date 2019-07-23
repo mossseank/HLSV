@@ -21,21 +21,39 @@ bool FunctionRegistry::Populated_ = false;
 std::map<string, std::vector<FunctionEntry>> FunctionRegistry::Functions_{ };
 
 // ====================================================================================================================
-bool FunctionEntry::matches(const std::vector<HLSVType>& args) const
+bool FunctionParam::matches(HLSVType typ) const
 {
-	if (args.size() != types.size())
+	if (type.is_array != typ.is_array || type.count != typ.count)
+		return false;
+	if (type.is_array && (type.type != typ.type))
+		return false;
+	
+	if (gen_type) {
+		if (exact)
+			return typ.get_component_type() == type.get_component_type();
+		else
+			return TypeHelper::CanPromoteTo(typ.type, HLSVType::MakeVectorType(type.get_component_type(), typ.get_component_count()));
+	}
+	else
+		return TypeHelper::CanPromoteTo(typ.type, type.type);
+}
+
+// ====================================================================================================================
+bool FunctionEntry::matches(const std::vector<HLSVType>& args, HLSVType& rtype) const
+{
+	if (args.size() != params.size())
 		return false;
 
 	// Check the types one at a time
 	for (uint32 i = 0; i < args.size(); ++i) {
-		auto at = args[i], tt = types[i];
-		if (at.is_array != tt.is_array || at.count != tt.count) // Mismatch between array sizes
-			return false;
-		if (tt.is_array && at.type != tt.type) // Both are arrays, but have different member types
-			return false;
-		if (!TypeHelper::CanPromoteTo(at.type, tt.type)) // Both are not arrays, but cannot be promoted
+		if (!params[i].matches(args[i]))
 			return false;
 	}
+
+	// Calculate the return type
+	rtype = (gen_idx == UINT32_MAX)
+		? return_type
+		: params[gen_idx].as_return_type(args[gen_idx]);
 
 	return true;
 }
@@ -50,8 +68,7 @@ bool FunctionRegistry::CheckFunction(const string& name, const std::vector<HLSVT
 	try {
 		const auto& ents = Functions_.at(name);
 		for (const auto& e : ents) {
-			if (e.matches(args)) {
-				ret = e.return_type;
+			if (e.matches(args, ret)) {
 				outname = e.out_name;
 				return true;
 			}
@@ -75,8 +92,7 @@ bool FunctionRegistry::CheckFunction(const string& name, const std::vector<Expr*
 	try {
 		const auto& ents = Functions_.at(name);
 		for (const auto& e : ents) {
-			if (e.matches(args)) {
-				ret = e.return_type;
+			if (e.matches(args, ret)) {
 				outname = e.out_name;
 				return true;
 			}

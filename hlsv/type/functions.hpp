@@ -20,6 +20,30 @@
 namespace hlsv
 {
 
+// Information about a function parameter, supports "genType" concept from specification
+struct FunctionParam final
+{
+public:
+	HLSVType type;
+	bool gen_type;
+	bool exact;
+
+	FunctionParam() :
+		type{ HLSVType::Error }, gen_type{ false }, exact{ false }
+	{ }
+	FunctionParam(HLSVType type, bool gt = true, bool exact = false) :
+		type{ type }, gen_type{ gt }, exact{ exact }
+	{ }
+	FunctionParam(HLSVType::PrimType type, bool gt = true, bool exact = false) :
+		type{ type }, gen_type{ gt }, exact{ exact }
+	{ }
+
+	bool matches(HLSVType typ) const;
+	inline HLSVType as_return_type(HLSVType typ) const {
+		return HLSVType::MakeVectorType(type.type, typ.get_component_count());
+	}
+};
+
 // Contains a single set of arguments that are valid for a function, and a way to check a given set against them
 struct FunctionEntry final
 {
@@ -27,23 +51,24 @@ public:
 	uint32 version;         // The minimum shader version that the function is available in
 	string out_name;
 	HLSVType return_type;
-	std::vector<HLSVType> types;
+	std::vector<FunctionParam> params;
+	uint32 gen_idx; // Deduces the return type from the gen_type param at this index
 
 	FunctionEntry() : 
-		version{ 0 }, out_name{ "" }, return_type{ HLSVType::Error }, types{ }
+		version{ 0 }, out_name{ "" }, return_type{ HLSVType::Error }, params{ }, gen_idx{ 0 }
 	{ }
-	FunctionEntry(uint32 v, const string& name, HLSVType rt, const std::initializer_list<HLSVType>& typ) :
-		version{ v }, out_name{ name }, return_type{ rt }, types{ typ }
+	FunctionEntry(const string& name, uint32 genidx, const std::initializer_list<FunctionParam>& pars, uint32 v = 100) :
+		version{ v }, out_name{ name }, return_type{ HLSVType::Error }, params{ pars }, gen_idx{ genidx }
 	{ }
-	FunctionEntry(uint32 v, const string& name, HLSVType rt, const std::initializer_list<HLSVType::PrimType>& typ) :
-		version{ v }, out_name{ name }, return_type{ rt }, types{ typ.begin(), typ.end() }
+	FunctionEntry(const string& name, HLSVType rt, const std::initializer_list<FunctionParam>& pars, uint32 v = 100) :
+		version{ v }, out_name{ name }, return_type{ rt }, params{ pars }, gen_idx{ UINT32_MAX }
 	{ }
 
-	bool matches(const std::vector<HLSVType>& args) const;
-	inline bool matches(const std::vector<Expr*>& args) const {
+	bool matches(const std::vector<HLSVType>& args, HLSVType& rtype) const;
+	inline bool matches(const std::vector<Expr*>& args, HLSVType& rtype) const {
 		std::vector<HLSVType> atyp{ args.size(), HLSVType::Error };
 		std::transform(args.begin(), args.end(), atyp.data(), [](Expr* e) { return e->type; });
-		return matches(atyp);
+		return matches(atyp, rtype);
 	}
 }; // struct FunctionEntry
 
