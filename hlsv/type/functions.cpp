@@ -37,8 +37,12 @@ bool FunctionParam::matches(HLSVType typ) const
 	else {
 		if (exact)
 			return typ == type;
-		else
-			return TypeHelper::CanPromoteTo(typ.type, type.type);
+		else {
+			if (type.is_image_type())
+				return (typ.type == type.type); // Only care if they are the same image type, and not the texel format
+			else
+				return TypeHelper::CanPromoteTo(typ.type, type.type);
+		}
 	}
 }
 

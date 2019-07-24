@@ -32,10 +32,10 @@ public:
 		type{ HLSVType::Error }, gen_type{ false }, exact{ false }
 	{ }
 	FunctionParam(HLSVType type, bool gt = true, bool exact = false) :
-		type{ type }, gen_type{ gt }, exact{ exact }
+		type{ type }, gen_type{ gt && (type.is_value_type() || type.is_image_type()) }, exact{ exact }
 	{ }
 	FunctionParam(HLSVType::PrimType type, bool gt = true, bool exact = false) :
-		type{ type }, gen_type{ gt }, exact{ exact }
+		type{ type }, gen_type{ gt && (HLSVType::IsValueType(type) || HLSVType::IsImageType(type)) }, exact{ exact }
 	{ }
 
 	bool matches(HLSVType typ) const;

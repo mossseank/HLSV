@@ -140,6 +140,9 @@ public:
 	HLSVType(enum PrimType type, uint8 array_size) :
 		type{ type }, is_array{ true }, count{ array_size }, extra{ 0 }
 	{ }
+	HLSVType(enum PrimType type, enum PrimType fmt) :
+		type{ type }, is_array{ false }, count{ 1 }, extra{ fmt }
+	{ }
 	HLSVType& operator = (enum PrimType type) {
 		this->type = type;
 		is_array = false;
