@@ -32,13 +32,14 @@ public:
 		type{ HLSVType::Error }, gen_type{ false }, exact{ false }
 	{ }
 	FunctionParam(HLSVType type, bool gt = true, bool exact = false) :
-		type{ type }, gen_type{ gt && (type.is_value_type() || type.is_image_type()) }, exact{ exact }
+		type{ type }, gen_type{ gt && (type.is_scalar_type() || type.is_image_type()) }, exact{ exact }
 	{ }
 	FunctionParam(HLSVType::PrimType type, bool gt = true, bool exact = false) :
-		type{ type }, gen_type{ gt && (HLSVType::IsValueType(type) || HLSVType::IsImageType(type)) }, exact{ exact }
+		type{ type }, gen_type{ gt && (HLSVType::IsScalarType(type) || HLSVType::IsImageType(type)) }, exact{ exact }
 	{ }
 
 	bool matches(HLSVType typ) const;
+	HLSVType as_return_type(HLSVType rtype, HLSVType atype) const;
 };
 
 // Contains a single set of arguments that are valid for a function, and a way to check a given set against them

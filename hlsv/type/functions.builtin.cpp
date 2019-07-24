@@ -162,16 +162,16 @@ void FunctionRegistry::Populate()
 			{ "smoothstep", 2, { { HLSVType::Float, false }, { HLSVType::Float, false }, HLSVType::Float } }
 		}},
 		{ "isnan", {
-			{ "isnan", HLSVType::Bool, { { HLSVType::Float, true, true } } },
-			{ "isnan", HLSVType::Bool2, { { HLSVType::Float2, true, true } } },
-			{ "isnan", HLSVType::Bool3, { { HLSVType::Float3, true, true } } },
-			{ "isnan", HLSVType::Bool4, { { HLSVType::Float4, true, true } } }
+			{ "isnan", HLSVType::Bool, { { HLSVType::Float, false, true } } },
+			{ "isnan", HLSVType::Bool2, { { HLSVType::Float2, false, true } } },
+			{ "isnan", HLSVType::Bool3, { { HLSVType::Float3, false, true } } },
+			{ "isnan", HLSVType::Bool4, { { HLSVType::Float4, false, true } } }
 		}},
 		{ "isinf", {
-			{ "isinf", HLSVType::Bool, { { HLSVType::Float, true, true } } },
-			{ "isinf", HLSVType::Bool2, { { HLSVType::Float2, true, true } } },
-			{ "isinf", HLSVType::Bool3, { { HLSVType::Float3, true, true } } },
-			{ "isinf", HLSVType::Bool4, { { HLSVType::Float4, true, true } } }
+			{ "isinf", HLSVType::Bool, { { HLSVType::Float, false, true } } },
+			{ "isinf", HLSVType::Bool2, { { HLSVType::Float2, false, true } } },
+			{ "isinf", HLSVType::Bool3, { { HLSVType::Float3, false, true } } },
+			{ "isinf", HLSVType::Bool4, { { HLSVType::Float4, false, true } } }
 		}},
 		{ "ldexp", {
 			{ "ldexp", 0, { HLSVType::Float, { HLSVType::Int, true, true } } }
@@ -187,7 +187,7 @@ void FunctionRegistry::Populate()
 			{ "dot", HLSVType::Float, { HLSVType::Float, HLSVType::Float } }
 		}},
 		{ "cross", {
-			{ "cross", HLSVType::Float3, { { HLSVType::Float3, false }, { HLSVType::Float3, false } } }
+			{ "cross", HLSVType::Float3, { HLSVType::Float3, HLSVType::Float3 } }
 		}},
 		{ "norm", {
 			{ "normalize", 0, { HLSVType::Float } }
@@ -203,29 +203,29 @@ void FunctionRegistry::Populate()
 		}},
 		// Matrix functions
 		{ "matCompMul", {
-			{ "matrixCompMult", HLSVType::Mat2, { { HLSVType::Mat2, false }, { HLSVType::Mat2, false } } },
-			{ "matrixCompMult", HLSVType::Mat3, { { HLSVType::Mat3, false }, { HLSVType::Mat3, false } } },
-			{ "matrixCompMult", HLSVType::Mat4, { { HLSVType::Mat4, false }, { HLSVType::Mat4, false } } }
+			{ "matrixCompMult", HLSVType::Mat2, { HLSVType::Mat2, HLSVType::Mat2 } },
+			{ "matrixCompMult", HLSVType::Mat3, { HLSVType::Mat3, HLSVType::Mat3 } },
+			{ "matrixCompMult", HLSVType::Mat4, { HLSVType::Mat4, HLSVType::Mat4 } }
 		}},
 		{ "outerProd", {
-			{ "outerProduct", HLSVType::Mat2, { { HLSVType::Float2, false }, { HLSVType::Float2, false } } },
-			{ "outerProduct", HLSVType::Mat3, { { HLSVType::Float3, false }, { HLSVType::Float3, false } } },
-			{ "outerProduct", HLSVType::Mat4, { { HLSVType::Float4, false }, { HLSVType::Float4, false } } }
+			{ "outerProduct", HLSVType::Mat2, { HLSVType::Float2, HLSVType::Float2 } },
+			{ "outerProduct", HLSVType::Mat3, { HLSVType::Float3, HLSVType::Float3 } },
+			{ "outerProduct", HLSVType::Mat4, { HLSVType::Float4, HLSVType::Float4 } }
 		}},
 		{ "trans", {
-			{ "transpose", HLSVType::Mat2, { { HLSVType::Mat2, false } } },
-			{ "transpose", HLSVType::Mat3, { { HLSVType::Mat3, false } } },
-			{ "transpose", HLSVType::Mat4, { { HLSVType::Mat4, false } } }
+			{ "transpose", HLSVType::Mat2, { HLSVType::Mat2 } },
+			{ "transpose", HLSVType::Mat3, { HLSVType::Mat3 } },
+			{ "transpose", HLSVType::Mat4, { HLSVType::Mat4 } }
 		}},
 		{ "det", {
-			{ "determinant", HLSVType::Float, { { HLSVType::Mat2, false } } },
-			{ "determinant", HLSVType::Float, { { HLSVType::Mat3, false } } },
-			{ "determinant", HLSVType::Float, { { HLSVType::Mat4, false } } }
+			{ "determinant", HLSVType::Float, { HLSVType::Mat2 } },
+			{ "determinant", HLSVType::Float, { HLSVType::Mat3 } },
+			{ "determinant", HLSVType::Float, { HLSVType::Mat4 } }
 		}},
 		{ "inv", {
-			{ "inverse", HLSVType::Mat2, { { HLSVType::Mat2, false } } },
-			{ "inverse", HLSVType::Mat3, { { HLSVType::Mat3, false } } },
-			{ "inverse", HLSVType::Mat4, { { HLSVType::Mat4, false } } }
+			{ "inverse", HLSVType::Mat2, { HLSVType::Mat2 } },
+			{ "inverse", HLSVType::Mat3, { HLSVType::Mat3 } },
+			{ "inverse", HLSVType::Mat4, { HLSVType::Mat4 } }
 		}},
 		// Vector relational functions
 		{ "vecLT", {
@@ -294,32 +294,37 @@ void FunctionRegistry::Populate()
 		// Texture lookups and stores
 		{ "load", {
 			{ "texture", HLSVType::Float4, { HLSVType::Tex1D, { HLSVType::Float, false } } }, // Normal texture lookups
-			{ "texture", HLSVType::Float4, { HLSVType::Tex2D, { HLSVType::Float2, false } } },
-			{ "texture", HLSVType::Float4, { HLSVType::Tex3D, { HLSVType::Float3, false } } },
-			{ "texture", HLSVType::Float4, { HLSVType::TexCube, { HLSVType::Float3, false } } },
-			{ "texture", HLSVType::Float4, { HLSVType::Tex1DArray, { HLSVType::Float2, false } } },
-			{ "texture", HLSVType::Float4, { HLSVType::Tex2DArray, { HLSVType::Float3, false } } },
+			{ "texture", HLSVType::Float4, { HLSVType::Tex2D, HLSVType::Float2 } },
+			{ "texture", HLSVType::Float4, { HLSVType::Tex3D, HLSVType::Float3 } },
+			{ "texture", HLSVType::Float4, { HLSVType::TexCube, HLSVType::Float3 } },
+			{ "texture", HLSVType::Float4, { HLSVType::Tex1DArray, HLSVType::Float2 } },
+			{ "texture", HLSVType::Float4, { HLSVType::Tex2DArray, HLSVType::Float3 } },
 			{ "texture", HLSVType::Float4, { HLSVType::Tex1D, { HLSVType::Float, false }, { HLSVType::Float, false } } }, // Biased texture lookups
-			{ "texture", HLSVType::Float4, { HLSVType::Tex2D, { HLSVType::Float2, false }, { HLSVType::Float, false } } },
-			{ "texture", HLSVType::Float4, { HLSVType::Tex3D, { HLSVType::Float3, false }, { HLSVType::Float, false } } },
-			{ "texture", HLSVType::Float4, { HLSVType::TexCube, { HLSVType::Float3, false }, { HLSVType::Float, false } } },
-			{ "texture", HLSVType::Float4, { HLSVType::Tex1DArray, { HLSVType::Float2, false }, { HLSVType::Float, false } } },
-			{ "texture", HLSVType::Float4, { HLSVType::Tex2DArray, { HLSVType::Float3, false }, { HLSVType::Float, false } } }
+			{ "texture", HLSVType::Float4, { HLSVType::Tex2D, HLSVType::Float2, { HLSVType::Float, false } } },
+			{ "texture", HLSVType::Float4, { HLSVType::Tex3D, HLSVType::Float3, { HLSVType::Float, false } } },
+			{ "texture", HLSVType::Float4, { HLSVType::TexCube, HLSVType::Float3, { HLSVType::Float, false } } },
+			{ "texture", HLSVType::Float4, { HLSVType::Tex1DArray, HLSVType::Float2, { HLSVType::Float, false } } },
+			{ "texture", HLSVType::Float4, { HLSVType::Tex2DArray, HLSVType::Float3, { HLSVType::Float, false } } },
+			{ "imageLoad", 0, { HLSVType::Image1D, { HLSVType::Int, false } } },
+			{ "imageLoad", 0, { HLSVType::Image2D, { HLSVType::Int2, false } } },
+			{ "imageLoad", 0, { HLSVType::Image3D, { HLSVType::Int3, false } } },
+			{ "imageLoad", 0, { HLSVType::Image1DArray, { HLSVType::Int2, false } } },
+			{ "imageLoad", 0, { HLSVType::Image2DArray, { HLSVType::Int3, false } } }
 		}},
 		{ "loadLod", {
 			{ "textureLod", HLSVType::Float4, { HLSVType::Tex1D, { HLSVType::Float, false }, { HLSVType::Float, false } } },
-			{ "textureLod", HLSVType::Float4, { HLSVType::Tex2D, { HLSVType::Float2, false }, { HLSVType::Float, false } } },
-			{ "textureLod", HLSVType::Float4, { HLSVType::Tex3D, { HLSVType::Float3, false }, { HLSVType::Float, false } } },
-			{ "textureLod", HLSVType::Float4, { HLSVType::TexCube, { HLSVType::Float3, false }, { HLSVType::Float, false } } },
-			{ "textureLod", HLSVType::Float4, { HLSVType::Tex1DArray, { HLSVType::Float2, false }, { HLSVType::Float, false } } },
-			{ "textureLod", HLSVType::Float4, { HLSVType::Tex2DArray, { HLSVType::Float3, false }, { HLSVType::Float, false } } }
+			{ "textureLod", HLSVType::Float4, { HLSVType::Tex2D, HLSVType::Float2, { HLSVType::Float, false } } },
+			{ "textureLod", HLSVType::Float4, { HLSVType::Tex3D, HLSVType::Float3, { HLSVType::Float, false } } },
+			{ "textureLod", HLSVType::Float4, { HLSVType::TexCube, HLSVType::Float3, { HLSVType::Float, false } } },
+			{ "textureLod", HLSVType::Float4, { HLSVType::Tex1DArray, HLSVType::Float2, { HLSVType::Float, false } } },
+			{ "textureLod", HLSVType::Float4, { HLSVType::Tex2DArray, HLSVType::Float3, { HLSVType::Float, false } } }
 		}},
 		{ "fetch", { // Cannot fetch on TexCube per GLSL spec
 			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex1D, { HLSVType::Int, false }, { HLSVType::Int, false } } },
-			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex2D, { HLSVType::Int2, false }, { HLSVType::Int, false } } },
-			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex3D, { HLSVType::Int3, false }, { HLSVType::Int, false } } },
-			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex1DArray, { HLSVType::Int2, false }, { HLSVType::Int, false } } },
-			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex2DArray, { HLSVType::Int3, false }, { HLSVType::Int, false } } }
+			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex2D, HLSVType::Int2, { HLSVType::Int, false } } },
+			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex3D, HLSVType::Int3, { HLSVType::Int, false } } },
+			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex1DArray, HLSVType::Int2, { HLSVType::Int, false } } },
+			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex2DArray, HLSVType::Int3, { HLSVType::Int, false } } }
 		}}
 	});
 

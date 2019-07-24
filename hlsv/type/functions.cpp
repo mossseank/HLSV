@@ -30,20 +30,31 @@ bool FunctionParam::matches(HLSVType typ) const
 	
 	if (gen_type) {
 		if (exact)
-			return typ.get_component_type() == type.get_component_type();
-		else
-			return TypeHelper::CanPromoteTo(typ.type, HLSVType::MakeVectorType(type.get_component_type(), typ.get_component_count()));
-	}
-	else {
-		if (exact)
-			return typ == type;
+			return type.is_scalar_type() ? typ.get_component_type() == type : typ == type;
 		else {
 			if (type.is_image_type())
-				return (typ.type == type.type); // Only care if they are the same image type, and not the texel format
+				return type.type == typ.type; // Only care if they are the same image type, and not the texel format
 			else
-				return TypeHelper::CanPromoteTo(typ.type, type.type);
+				return TypeHelper::CanPromoteTo(typ.type, HLSVType::MakeVectorType(type.type, typ.get_component_count()));
 		}
 	}
+	else {
+		if (exact || type.is_image_type())
+			return typ == type;
+		else
+			return TypeHelper::CanPromoteTo(typ.type, type.type);
+	}
+}
+
+// ====================================================================================================================
+HLSVType FunctionParam::as_return_type(HLSVType rtype, HLSVType atype) const
+{
+	if (type.is_scalar_type()) {
+		return HLSVType::MakeVectorType((rtype == HLSVType::Error) ? type.get_component_type() :
+			rtype.get_component_type(), type.get_component_count());
+	}
+	else // Image
+		return atype.extra.image_format;
 }
 
 // ====================================================================================================================
@@ -66,10 +77,7 @@ bool FunctionEntry::matches(const std::vector<HLSVType>& args, HLSVType& rtype) 
 	}
 
 	// Calculate the return type
-	rtype = (gen_idx == UINT32_MAX)
-		? return_type
-		: HLSVType::MakeVectorType((return_type == HLSVType::Error) ? params[gen_idx].type.get_component_type() :
-			return_type.get_component_type(), args[gen_idx].get_component_count());
+	rtype = (gen_idx == UINT32_MAX) ? return_type : params[gen_idx].as_return_type(return_type, args[gen_idx].type);
 
 	return true;
 }
