@@ -10,6 +10,8 @@
 
 #include "functions.hpp"
 
+#define IM_STR(it, tt, ct) { "imageStore", HLSVType::Void, { HLSVType(HLSVType::it, HLSVType::tt), { HLSVType::ct, false }, { HLSVType::tt, false } } }
+
 
 namespace hlsv
 {
@@ -269,7 +271,7 @@ void FunctionRegistry::Populate()
 		{ "not", {
 			{ "not", 0, { HLSVType::Bool } }
 		}},
-		// Texture Info
+		// Texture info
 		{ "sizeof", {
 			{ "textureSize", HLSVType::Int, { HLSVType::Tex1D, { HLSVType::Int, false } } },
 			{ "textureSize", HLSVType::Int2, { HLSVType::Tex2D, { HLSVType::Int, false } } },
@@ -291,7 +293,7 @@ void FunctionRegistry::Populate()
 			{ "textureQueryLevels", HLSVType::Int, { HLSVType::Tex1DArray } },
 			{ "textureQueryLevels", HLSVType::Int, { HLSVType::Tex2DArray } }
 		}},
-		// Texture lookups and stores
+		// Texture/image lookups and stores
 		{ "load", {
 			{ "texture", HLSVType::Float4, { HLSVType::Tex1D, { HLSVType::Float, false } } }, // Normal texture lookups
 			{ "texture", HLSVType::Float4, { HLSVType::Tex2D, HLSVType::Float2 } },
@@ -309,7 +311,8 @@ void FunctionRegistry::Populate()
 			{ "imageLoad", 0, { HLSVType::Image2D, { HLSVType::Int2, false } } },
 			{ "imageLoad", 0, { HLSVType::Image3D, { HLSVType::Int3, false } } },
 			{ "imageLoad", 0, { HLSVType::Image1DArray, { HLSVType::Int2, false } } },
-			{ "imageLoad", 0, { HLSVType::Image2DArray, { HLSVType::Int3, false } } }
+			{ "imageLoad", 0, { HLSVType::Image2DArray, { HLSVType::Int3, false } } },
+			{ "subpassLoad", HLSVType::Float4, { HLSVType::SubpassInput } }
 		}},
 		{ "loadLod", {
 			{ "textureLod", HLSVType::Float4, { HLSVType::Tex1D, { HLSVType::Float, false }, { HLSVType::Float, false } } },
@@ -325,6 +328,27 @@ void FunctionRegistry::Populate()
 			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex3D, HLSVType::Int3, { HLSVType::Int, false } } },
 			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex1DArray, HLSVType::Int2, { HLSVType::Int, false } } },
 			{ "texelFetch", HLSVType::Float4, { HLSVType::Tex2DArray, HLSVType::Int3, { HLSVType::Int, false } } }
+		}},
+		{ "store", {
+			IM_STR(Image1D, Int, Int), IM_STR(Image1D, Int2, Int), IM_STR(Image1D, Int4, Int),
+			IM_STR(Image1D, UInt, Int), IM_STR(Image1D, UInt2, Int), IM_STR(Image1D, UInt4, Int),
+			IM_STR(Image1D, Float, Int), IM_STR(Image1D, Float2, Int), IM_STR(Image1D, Float4, Int),
+
+			IM_STR(Image2D, Int, Int2), IM_STR(Image2D, Int2, Int2), IM_STR(Image2D, Int4, Int2),
+			IM_STR(Image2D, UInt, Int2), IM_STR(Image2D, UInt2, Int2), IM_STR(Image2D, UInt4, Int2),
+			IM_STR(Image2D, Float, Int2), IM_STR(Image2D, Float2, Int2), IM_STR(Image2D, Float4, Int2),
+
+			IM_STR(Image3D, Int, Int3), IM_STR(Image3D, Int2, Int3), IM_STR(Image3D, Int4, Int3),
+			IM_STR(Image3D, UInt, Int3), IM_STR(Image3D, UInt2, Int3), IM_STR(Image3D, UInt4, Int3),
+			IM_STR(Image3D, Float, Int3), IM_STR(Image3D, Float2, Int3), IM_STR(Image3D, Float4, Int3),
+
+			IM_STR(Image1DArray, Int, Int2), IM_STR(Image1DArray, Int2, Int2), IM_STR(Image1DArray, Int4, Int2),
+			IM_STR(Image1DArray, UInt, Int2), IM_STR(Image1DArray, UInt2, Int2), IM_STR(Image1DArray, UInt4, Int2),
+			IM_STR(Image1DArray, Float, Int2), IM_STR(Image1DArray, Float2, Int2), IM_STR(Image1DArray, Float4, Int2),
+
+			IM_STR(Image2DArray, Int, Int3), IM_STR(Image2DArray, Int2, Int3), IM_STR(Image2DArray, Int4, Int3),
+			IM_STR(Image2DArray, UInt, Int3), IM_STR(Image2DArray, UInt2, Int3), IM_STR(Image2DArray, UInt4, Int3),
+			IM_STR(Image2DArray, Float, Int3), IM_STR(Image2DArray, Float2, Int3), IM_STR(Image2DArray, Float4, Int3)
 		}}
 	});
 
