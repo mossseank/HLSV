@@ -53,7 +53,7 @@ public:
 	uint32 gen_idx; // Deduces the return type from the gen_type param at this index
 
 	FunctionEntry() : 
-		version{ 0 }, out_name{ "" }, return_type{ HLSVType::Error }, params{ }, gen_idx{ 0 }
+		version{ 0 }, out_name{ "" }, return_type{ HLSVType::Error }, params{ }, gen_idx{ UINT32_MAX }
 	{ }
 	FunctionEntry(const string& name, uint32 genidx, const std::initializer_list<FunctionParam>& pars, uint32 v = 100) :
 		version{ v }, out_name{ name }, return_type{ HLSVType::Error }, params{ pars }, gen_idx{ genidx }
@@ -61,7 +61,13 @@ public:
 	FunctionEntry(const string& name, uint32 genidx, const std::initializer_list<FunctionParam>& pars, HLSVType rt, uint32 v = 100) :
 		version{ v }, out_name{ name }, return_type{ rt }, params{ pars }, gen_idx{ genidx }
 	{ }
+	FunctionEntry(const string& name, uint32 genidx, const std::initializer_list<FunctionParam>& pars, HLSVType::PrimType rt, uint32 v = 100) :
+		version{ v }, out_name{ name }, return_type{ rt }, params{ pars }, gen_idx{ genidx }
+	{ }
 	FunctionEntry(const string& name, HLSVType rt, const std::initializer_list<FunctionParam>& pars, uint32 v = 100) :
+		version{ v }, out_name{ name }, return_type{ rt }, params{ pars }, gen_idx{ UINT32_MAX }
+	{ }
+	FunctionEntry(const string& name, HLSVType::PrimType rt, const std::initializer_list<FunctionParam>& pars, uint32 v = 100) :
 		version{ v }, out_name{ name }, return_type{ rt }, params{ pars }, gen_idx{ UINT32_MAX }
 	{ }
 

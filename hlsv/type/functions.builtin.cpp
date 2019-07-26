@@ -262,13 +262,13 @@ void FunctionRegistry::Populate()
 			{ "notEqual", 0, { HLSVType::Float, HLSVType::Float }, HLSVType::Bool },
 			{ "notEqual", 0, { HLSVType::Bool, HLSVType::Bool }, HLSVType::Bool }
 		}},
-		{ "any", {
+		{ "vecAny", {
 			{ "any", HLSVType::Bool, { HLSVType::Bool } }
 		}},
-		{ "all", {
+		{ "vecAll", {
 			{ "all", HLSVType::Bool, { HLSVType::Bool } }
 		}},
-		{ "not", {
+		{ "vecNot", {
 			{ "not", 0, { HLSVType::Bool } }
 		}},
 		// Texture info
@@ -308,10 +308,10 @@ void FunctionRegistry::Populate()
 			{ "texture", HLSVType::Float4, { HLSVType::Tex1DArray, HLSVType::Float2, { HLSVType::Float, false } } },
 			{ "texture", HLSVType::Float4, { HLSVType::Tex2DArray, HLSVType::Float3, { HLSVType::Float, false } } },
 			{ "imageLoad", 0, { HLSVType::Image1D, { HLSVType::Int, false } } },
-			{ "imageLoad", 0, { HLSVType::Image2D, { HLSVType::Int2, false } } },
-			{ "imageLoad", 0, { HLSVType::Image3D, { HLSVType::Int3, false } } },
-			{ "imageLoad", 0, { HLSVType::Image1DArray, { HLSVType::Int2, false } } },
-			{ "imageLoad", 0, { HLSVType::Image2DArray, { HLSVType::Int3, false } } },
+			{ "imageLoad", 0, { HLSVType::Image2D, HLSVType::Int2 } },
+			{ "imageLoad", 0, { HLSVType::Image3D, HLSVType::Int3 } },
+			{ "imageLoad", 0, { HLSVType::Image1DArray, HLSVType::Int2 } },
+			{ "imageLoad", 0, { HLSVType::Image2DArray, HLSVType::Int3 } },
 			{ "subpassLoad", HLSVType::Float4, { HLSVType::SubpassInput } }
 		}},
 		{ "loadLod", {

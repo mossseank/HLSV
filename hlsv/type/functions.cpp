@@ -51,7 +51,7 @@ HLSVType FunctionParam::as_return_type(HLSVType rtype, HLSVType atype) const
 {
 	if (type.is_scalar_type()) {
 		return HLSVType::MakeVectorType((rtype == HLSVType::Error) ? type.get_component_type() :
-			rtype.get_component_type(), type.get_component_count());
+			rtype.get_component_type(), atype.get_component_count());
 	}
 	else // Image
 		return atype.extra.image_format;

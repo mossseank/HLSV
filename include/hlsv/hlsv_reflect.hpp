@@ -134,16 +134,16 @@ public:
 	HLSVType() :
 		type{ Void }, is_array{ false }, count{ 1 }, extra{ 0 }
 	{ }
-	HLSVType(enum PrimType type) :
+	HLSVType(PrimType type) :
 		type{ type }, is_array{ false }, count{ 1 }, extra{ 0 }
 	{ }
-	HLSVType(enum PrimType type, uint8 array_size) :
+	HLSVType(PrimType type, uint8 array_size) :
 		type{ type }, is_array{ true }, count{ array_size }, extra{ 0 }
 	{ }
-	HLSVType(enum PrimType type, enum PrimType fmt) :
+	HLSVType(PrimType type, PrimType fmt) :
 		type{ type }, is_array{ false }, count{ 1 }, extra{ fmt }
 	{ }
-	HLSVType& operator = (enum PrimType type) {
+	HLSVType& operator = (PrimType type) {
 		this->type = type;
 		is_array = false;
 		count = 1;
