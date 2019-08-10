@@ -70,9 +70,29 @@ void VariableManager::add_variable(const Variable& var)
 }
 
 // ====================================================================================================================
-void VariableManager::push_block()
+void VariableManager::push_block(BlockType typ)
 {
-	blocks_.push_back(new VarBlock);
+	blocks_.push_back(new VarBlock((uint8)(blocks_.size() + 1u), typ));
+}
+
+// ====================================================================================================================
+bool VariableManager::in_func_block()
+{
+	for (auto it = blocks_.rbegin(); it != blocks_.rend(); ++it) {
+		if ((*it)->type == VariableManager::BT_Func)
+			return true;
+	}
+	return false;
+}
+
+// ====================================================================================================================
+bool VariableManager::in_loop_block()
+{
+	for (auto it = blocks_.rbegin(); it != blocks_.rend(); ++it) {
+		if ((*it)->type == VariableManager::BT_Loop)
+			return true;
+	}
+	return false;
 }
 
 // ====================================================================================================================

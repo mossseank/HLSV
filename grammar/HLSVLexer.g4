@@ -13,8 +13,10 @@ BOOLEAN_LITERAL
 // Keywords
 KW_ATTR         : 'attr' ;
 KW_BLOCK        : 'block' ;
+KW_BREAK        : 'break' ;
 KW_COMPUTE      : 'compute' ;
 KW_CONST        : 'const' ;
+KW_CONTINUE     : 'continue' ;
 KW_DO           : 'do' ;
 KW_ELIF         : 'elif' ;
 KW_ELSE         : 'else' ;

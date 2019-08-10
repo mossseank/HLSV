@@ -520,7 +520,7 @@ VISIT_FUNC(VertFunction)
 	current_stage_ = ShaderStages::Vertex;
 	gen_.push_indent();
 
-	variables_.push_block();
+	variables_.push_block(VariableManager::BT_Func);
 	variables_.push_stage_variables(ShaderType::Graphics, ShaderStages::Vertex);
 	visit(ctx->block());
 	variables_.pop_block();
@@ -540,7 +540,7 @@ VISIT_FUNC(FragFunction)
 	current_stage_ = ShaderStages::Fragment;
 	gen_.push_indent();
 
-	variables_.push_block();
+	variables_.push_block(VariableManager::BT_Func);
 	variables_.push_stage_variables(ShaderType::Graphics, ShaderStages::Fragment);
 	visit(ctx->block());
 	variables_.pop_block();

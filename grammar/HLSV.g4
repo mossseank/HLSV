@@ -82,6 +82,7 @@ statement
     | whileLoop
     | doLoop
     | forLoop
+    | controlStatement
     ;
 
 // Variable declaration
@@ -135,6 +136,12 @@ forLoop
 forLoopUpdate
     : Assign=assignment
     | LVal=lvalue Op=('--'|'++')
+    ;
+
+// Statements that affect the flow of the program
+controlStatement
+    : 'break' ';'
+    | 'continue' ';'
     ;
 
 

@@ -25,12 +25,24 @@ class VariableManager final
 {
 	using varvec = std::vector<Variable>;
 
+public:
+	enum BlockType : uint8
+	{
+		BT_None = 0,
+		BT_Func = 1,
+		BT_Loop = 2,
+		BT_Cond = 3
+	}; // enum BlockType
+
 	class VarBlock final
 	{
 	public:
 		varvec vars;
+		BlockType type;
+		uint8 depth;
 
-		VarBlock() : vars{ } { }
+		VarBlock() : vars{ }, type{ BT_None }, depth{ 0 } { }
+		explicit VarBlock(uint8 depth, BlockType typ) : vars{ }, type{ typ }, depth{ depth } { }
 
 		Variable* find(const string& name);
 	}; // class VarBlock
@@ -49,7 +61,9 @@ public:
 	void add_global(const Variable& var); // Does not check if a variable with the name already exists
 	void add_variable(const Variable& var); // Same
 
-	void push_block();
+	void push_block(BlockType typ);
+	bool in_func_block();
+	bool in_loop_block();
 	void pop_block();
 
 	void push_stage_variables(ShaderType type, ShaderStages stage);

@@ -191,7 +191,7 @@ VISIT_FUNC(IfStatement)
 		ERROR(ctx->Cond, "If statement conditional expressions must have a scalar boolean type.");
 
 	// Visit the if block
-	variables_.push_block();
+	variables_.push_block(VariableManager::BT_Cond);
 	gen_.emit_if_statement(*ifcond.get());
 	gen_.push_indent();
 	if (ctx->block()) {
@@ -212,7 +212,7 @@ VISIT_FUNC(IfStatement)
 			ERROR(elif->Cond, "Elif statement conditional expressions must have a scalar boolean type.");
 
 		// Visit the if block
-		variables_.push_block();
+		variables_.push_block(VariableManager::BT_Cond);
 		gen_.emit_elif_statement(*cond.get());
 		gen_.push_indent();
 		if (elif->block()) {
@@ -228,7 +228,7 @@ VISIT_FUNC(IfStatement)
 
 	// Visit the else statement
 	if (ctx->Else) {
-		variables_.push_block();
+		variables_.push_block(VariableManager::BT_Cond);
 		gen_.emit_else_statement();
 		gen_.push_indent();
 		if (ctx->Else->block()) {
@@ -254,7 +254,7 @@ VISIT_FUNC(WhileLoop)
 		ERROR(ctx->Cond, "While loop requires a scalar boolean type for its condition expression.");
 
 	// Visit the block or statement
-	variables_.push_block();
+	variables_.push_block(VariableManager::BT_Loop);
 	gen_.emit_while_loop(*cond.get());
 	gen_.push_indent();
 	if (ctx->block()) {
@@ -279,7 +279,7 @@ VISIT_FUNC(DoLoop)
 		ERROR(ctx->Cond, "While loop requires a scalar boolean type for its condition expression.");
 
 	// Visit the block or statement
-	variables_.push_block();
+	variables_.push_block(VariableManager::BT_Loop);
 	gen_.emit_do_loop();
 	gen_.push_indent();
 	if (ctx->block()) {
@@ -304,7 +304,7 @@ VISIT_FUNC(ForLoop)
 		ERROR(ctx->Init, "Loop counter variables cannot be arrays.");
 	if ((!vrbl.type.is_vector_type() && !vrbl.type.is_scalar_type()) || vrbl.type.get_component_type() == HLSVType::Bool)
 		ERROR(ctx->Init, "Counter variables must be non-boolean scalar or vector types.");
-	variables_.push_block();
+	variables_.push_block(VariableManager::BT_Loop);
 	variables_.add_variable(vrbl);
 
 	// Check the initial value
@@ -376,6 +376,23 @@ VISIT_FUNC(ForLoopUpdate)
 			ERROR(ctx, strarg("Operator '%s' is only valid for non-array scalar integer variables.", ctx->Op->getText().c_str()));
 		return lval->text + ctx->Op->getText();
 	}
+}
+
+// ====================================================================================================================
+VISIT_FUNC(ControlStatement)
+{
+	if (ctx->KW_BREAK()) { // 'break'
+		if (!variables_.in_loop_block())
+			ERROR(ctx, "'break' statement cannot be used outside of a loop block.");
+		// TODO: emit
+	}
+	else { // 'continue'
+		if (!variables_.in_loop_block())
+			ERROR(ctx, "'continue' statement cannot be used outside of a loop block.");
+		// TODO: emit
+	}
+
+	return nullptr;
 }
 
 } // namespace hlsv

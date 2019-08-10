@@ -110,6 +110,7 @@ public:
 	VISIT(DoLoop)
 	VISIT(ForLoop)
 	VISIT(ForLoopUpdate)
+	VISIT(ControlStatement)
 
 	// Expr
 	VISIT(PostfixExpr)
