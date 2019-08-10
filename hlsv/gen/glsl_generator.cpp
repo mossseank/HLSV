@@ -237,4 +237,10 @@ void GLSLGenerator::emit_for_loop(const Variable& var, const Expr& init, const E
 	CSTAGE << indent_str_ << "for (" << itxt << "; " << cond.text << "; " << utxt << ") {\n";
 }
 
+// ====================================================================================================================
+void GLSLGenerator::emit_control_statement(const string& stat)
+{
+	CSTAGE << indent_str_ << stat << ";\n";
+}
+
 } // namespace hlsv

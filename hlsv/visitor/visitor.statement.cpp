@@ -384,12 +384,17 @@ VISIT_FUNC(ControlStatement)
 	if (ctx->KW_BREAK()) { // 'break'
 		if (!variables_.in_loop_block())
 			ERROR(ctx, "'break' statement cannot be used outside of a loop block.");
-		// TODO: emit
+		gen_.emit_control_statement("break");
 	}
-	else { // 'continue'
+	else if (ctx->KW_CONTINUE()) { // 'continue'
 		if (!variables_.in_loop_block())
 			ERROR(ctx, "'continue' statement cannot be used outside of a loop block.");
-		// TODO: emit
+		gen_.emit_control_statement("continue");
+	}
+	else { // 'discard'
+		if (REFL->shader_type != ShaderType::Graphics || current_stage_ != ShaderStages::Fragment)
+			ERROR(ctx, "'discard' statement can only be used inside of fragment shader functions.");
+		gen_.emit_control_statement("discard");
 	}
 
 	return nullptr;

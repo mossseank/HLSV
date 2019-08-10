@@ -142,6 +142,7 @@ forLoopUpdate
 controlStatement
     : 'break' ';'
     | 'continue' ';'
+    | 'discard' ';'
     ;
 
 

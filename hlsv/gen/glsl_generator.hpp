@@ -70,6 +70,7 @@ public:
 	void emit_do_loop();
 	void emit_do_loop_close(const Expr& cond);
 	void emit_for_loop(const Variable& var, const Expr& init, const Expr& cond, const std::vector<string>& updates);
+	void emit_control_statement(const string& stat);
 }; // class GLSLGenerator
 
 } // namespace hlsv
