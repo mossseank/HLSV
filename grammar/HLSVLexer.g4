@@ -1,7 +1,10 @@
+// MIT License - Copyright (c) 2019-2020 Sean Moss [moss.seank@gmail.com]
+// This file is subject to the terms and conditions of the MIT License, the text of which can be found in the 'LICENSE'
+// file at the root of this repository, or online at <https://opensource.org/licenses/MIT>.
+
 // This is the lexer grammar for the HLSV shader language, used by Antlr to generate a lexer for
 //    the language definition.
-// This file is licensed under the MIT license.
-// Copyright (c) Sean Moss 2019
+
 
 lexer grammar HLSVLexer;
 

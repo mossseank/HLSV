@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-# The HLSV project and all associated files and assets, including this file, are licensed under the MIT license, the
-#    text of which can be found in the LICENSE file at the root of this project, and is available online at
-#    (https://opensource.org/licenses/MIT). In the event of redistribution of this code, this header, or the text of
-#    the license itself, must not be removed from the source files or assets in which they appear.
-# Copyright (c) 2019 Sean Moss [moss.seank@gmail.com]
+# MIT License - Copyright (c) 2019-2020 Sean Moss [moss.seank@gmail.com]
+# This file is subject to the terms and conditions of the MIT License, the text of which can be found in the 'LICENSE'
+# file at the root of this repository, or online at <https://opensource.org/licenses/MIT>.
 
 # This is the Unix script for generating the build solutions for the HLSV project.
 
@@ -14,10 +12,10 @@ if [ "$(uname)" = "Darwin" ]; then
 elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
 	IsLinux=1
 elif [ "$(expr substr $(uname -s) 1 5)" = "MINGW" ]; then
-	echo "ERROR: MinGW is not a supported build system for Volu"
+	echo "ERROR: MinGW is not a supported build system for HLSV"
 	exit 1
 elif [ "$(expr substr $(uname -s) 1 6)" = "CYGWIN" ]; then
-	echo "ERROR: Cygwin is not a supported build system for Volu"
+	echo "ERROR: Cygwin is not a supported build system for HLSV"
 	exit 1
 else
 	echo "ERROR: Build platform not understood: $(uname)"

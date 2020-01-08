@@ -1,5 +1,5 @@
 language: cpp
-dist: xenial
+dist: bionic
 sudo: true
 compiler: gcc
 addons:
@@ -15,7 +15,5 @@ script:
   - cd ../premake && chmod +x premake5_l
   - cd .. && chmod +x generate_project.sh && ./generate_project.sh
   - cd ./build
-  - make -j2 config=debstatic_x64 all
-  - make -j2 config=debshared_x64 all
-  - make -j2 config=relstatic_x64 all
-  - make -j2 config=relshared_x64 all
+  - make -j2 config=static_x64 all
+  - make -j2 config=shared_x64 all
