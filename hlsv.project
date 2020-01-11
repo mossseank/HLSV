@@ -99,11 +99,11 @@ project "hlsvc"
 	targetname "hlsvc"
 	kind "ConsoleApp"
 	dependson { "hlsv" }
-	links { "hlsv" }
 
 	-- Required for static linking
 	filter { "configurations:Static" }
 		defines { "HLSV_STATIC" }
+		links { "hlsv" }
 	filter {}
 
 	-- Project files
