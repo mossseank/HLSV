@@ -110,6 +110,12 @@ class CompilerOptions;
 class Compiler;
 class ShaderType;
 class ReflectionInfo;
+struct Attribute;
+struct Fragment;
+struct Uniform;
+struct UniformBlock;
+struct PushConstant;
+struct SpecConstant;
 
 
 // ====================================================================================================================
@@ -253,11 +259,217 @@ private:
 // Extra shader features (redeclare)
 using ShaderFeatures = CompilerOptions::Features;
 
-// Contains type information about an object for value in HLSV
-class _EXPORT ShaderType final
+// The types of shader pipeline (acts as a bitset)
+enum class PipelineType : uint8
 {
+	Graphics = 0, // Standard graphics pipeline
+	Compute  = 1, // Compute pipeline
+}; // enum class PipelineType
 
-}; // class ShaderType
+// A bitmask enumeration of pipeline stages, containing flags for all pipeline types
+enum class PipelineStages : uint8
+{
+	None        = 0x00, // A bitmask of no stages
+	// Graphics Stages
+	Vertex      = 0x01, // The vertex stage for graphics pipelines
+	TessControl = 0x02, // The tesselation control stage for graphics pipelines
+	TessEval    = 0x04, // The tesselation evaluation stage for graphics pipelines
+	Geometry    = 0x08, // The geometry stage for graphics pipelines
+	Fragment    = 0x10, // The fragment stage for graphics pipelines
+	MinGraphics = 0x11, // A bitmask of the minimum set of required graphics stages (Vertex and Fragment)
+	AllGraphics = 0x1F, // A bitmask of all graphics pipeline stages
+	// Compute Stages
+	Kernel      = 0x01, // The kernel execution stage for compute pipelines
+	AllCompute  = 0x01, // A bitmask of all compute pipeline stages
+}; // enum class PipelineStages
+
+// PipelineStages operators
+inline PipelineStages operator | (PipelineStages l, PipelineStages r) { 
+	return (PipelineStages)((uint8)l | (uint8)r);
+}
+inline PipelineStages operator & (PipelineStages l, PipelineStages r) {
+	return (PipelineStages)((uint8)l & (uint8)r);
+}
+inline PipelineStages operator ^ (PipelineStages l, PipelineStages r) {
+	return (PipelineStages)((uint8)l & ~(uint8)r);
+}
+
+// Contains type information about an object or value in HLSV
+struct _EXPORT SVType final
+{
+public:
+	enum class PrimType : uint8
+	{
+		Void = 0, // Special "nothing" type
+
+		/// Value types
+		Bool    = 1, // Boolean (bool, bvec2, bvec3, bvec4)
+		Short   = 2, // Signed 16-bit integer (short, svec2, svec3, svec4)
+		UShort  = 3, // Unsigned 16-bit integer (ushort, usvec2, usvec3, usvec4)
+		Int     = 4, // Signed 32-bit integer (int, ivec2, ivec3, ivec4)
+		UInt    = 5, // Unsigned 32-bit integer (uint, uivec2, uivec3, uivec4)
+		Long    = 6, // Signed 64-bit integer (long, lvec2, lvec3, lvec4)
+		ULong   = 7, // Unsigned 64-bit integer (ulong, ulvec2, ulvec3, ulvec4)
+		Float   = 8, // 32-bit float (float, fvec2, fvec3, fvec4, fmat*)
+		Double  = 9, // 64-bit float (double, dvec2, dvec3, dvec4, dmat*)
+
+		/// Handle Types
+		Tex1D         = 128, // Dim-1 combined image/sampler (tex1D)
+		Tex2D         = 129, // Dim-2 combined image/sampler (tex2D)
+		Tex3D         = 130, // Dim-3 combined image/sampler (tex3D)
+		TexCube       = 131, // Cube-mapped combined image/sampler (texCube)
+		Tex1DArray    = 132, // Array of dim-1 combined image/samplers (tex1DArray)
+		Tex2DArray    = 133, // Array of dim-2 combined image/samplers (tex2DArray)
+		Img1D         = 134, // Dim-1 storage image (img1D)
+		Img2D         = 135, // Dim-2 storage image (img2D)
+		Img3D         = 136, // Dim-3 storage image (img3D)
+		Img1DArray    = 137, // Array of dim-1 storage images (img1DArray)
+		Img2DArray    = 138, // Array of dim-2 storage images (img2DArray)
+		SubpassBuffer = 139, // Vulkan subpass input texture resource (spBuffer)
+	}; // enum PrimType
+
+public:
+	PrimType prim;     // The primitive backing type
+	uint8 dims[2];     // The dimensions of the backing type (value types only)
+	union
+	{
+		uint16 spi_index; // The subpass input index of the type (if prim == SubpassBuffer)
+		struct
+		{
+			PrimType prim;
+			uint8 count;
+		} format;         // The format of the storage image (if prim == Img*)
+	} extra;		   // Type-specific extra information (must stay at 2 bytes large)
+	uint16 array_size; // The size of the array, or 0 if not an array type
+
+	constexpr SVType() :
+		prim{ PrimType::Void }, dims{ 0, 0 }, array_size{ 0 }, extra{ 0 }
+	{ }
+	constexpr SVType(PrimType type) :
+		prim{ type }, dims{ 1, 1 }, array_size{ 0 }, extra{ 0 }
+	{ }
+	constexpr SVType(PrimType type, uint8 dim1, uint8 dim2, uint16 arr) :
+		prim{ type }, dims{ dim1, dim2 }, array_size{ arr }, extra{ 0 }
+	{ }
+
+	constexpr inline bool operator == (const SVType& o) const {
+		return (prim == o.prim) && (dims[0] == o.dims[0]) && (dims[1] == o.dims[1]) &&
+			   (array_size == o.array_size) && (extra.spi_index == o.extra.spi_index);
+	}
+	constexpr inline bool operator != (const SVType& o) const {
+		return (prim != o.prim) || (dims[0] != o.dims[0]) || (dims[1] != o.dims[1]) ||
+			   (array_size != o.array_size) || (extra.spi_index != o.extra.spi_index);
+	}
+
+	inline bool is_void() const { return prim == PrimType::Void; }
+	inline bool is_value() const { return prim >= PrimType::Bool && prim <= PrimType::Double; }
+	inline bool is_handle() const { return prim >= PrimType::Tex1D && prim <= PrimType::SubpassBuffer; }
+	inline bool is_scalar() const { return is_value() && dims[0] == 1 && dims[1] == 1; }
+	inline bool is_vector() const { return is_value() && dims[0] > 1 && dims[1] == 1; }
+	inline bool is_matrix() const { return is_value() && dims[0] > 1 && dims[1] > 1; }
+	inline bool is_texture() const { return prim >= PrimType::Tex1D && prim <= PrimType::Tex2DArray; }
+	inline bool is_image() const { return prim >= PrimType::Img1D && prim <= PrimType::Img2DArray; }
+	inline bool is_subpass_buffer() const { return prim == PrimType::SubpassBuffer; }
+	inline bool is_integer() const { return prim >= PrimType::Short && prim <= PrimType::ULong; }
+	inline bool is_fpoint() const { return prim == PrimType::Float || prim == PrimType::Double; }
+	inline bool is_boolean() const { return prim == PrimType::Bool; }
+	inline bool is_array() const { return array_size > 0; }
+
+	inline uint8 get_primitive_size() const {
+		return (prim == PrimType::Short || prim == PrimType::UShort) ? 2 :
+			   (prim == PrimType::Long || prim == PrimType::ULong || prim == PrimType::Double) ? 8 : 4;
+	}
+	inline uint8 get_row_size() const { return (uint8)(dims[0] * get_primitive_size()); }
+	inline uint8 get_component_count() const { return (uint8)(dims[0] * dims[1]); }
+	inline uint16 get_slot_count() const { return (uint16)(dims[1] * ((get_row_size() > 16) ? 2 : 1) * ((array_size == 0) ? 1 : array_size)); }
+
+	string str() const;
+}; // struct SVType
+
+// Contains information about a vertex attribute in a shader
+struct _EXPORT Attribute final
+{
+	string name;      // The attribute name
+	SVType type;      // The attribute type information
+	uint8 location;   // The binding location of the attribute
+
+	Attribute(const string& name, SVType type, uint8 l) :
+		name{ name }, type{ type }, location{ l }
+	{ }
+}; // struct Attribute
+
+// Contains information about a fragment output in a shader
+struct _EXPORT Fragment final
+{
+	string name;    // The output name
+	SVType type;    // The output type information
+	uint8 location; // The binding slot for the output
+
+	Fragment(const string& name, SVType type, uint8 l) :
+		name{ name }, type{ type }, location{ l }
+	{ }
+}; // struct Fragment
+
+// Contains information about a shader uniform
+struct _EXPORT Uniform final
+{
+	string name;
+	SVType type;
+	uint8 set;
+	uint8 binding;
+	struct
+	{
+		uint8 index;   // The index of the uniform block that this uniform belongs to, if applicable
+		uint16 offset; // The offset of the uniform within its block, in bytes
+	} block; // Contains block information, only valid for value-type uniforms inside of blocks
+
+	Uniform(const string& name, SVType type, uint8 s, uint8 b, uint8 bl, uint16 o) :
+		name{ name }, type{ type }, set{ s }, binding{ b }, block{ bl, o }
+	{ }
+}; // struct Uniform
+
+// Contains information about a shader uniform block
+struct _EXPORT UniformBlock final
+{
+	uint8 set;
+	uint8 binding;
+	uint16 size;				// Total size of the block in bytes
+	bool packed;				// If the members in the block are tightly packed
+
+	UniformBlock(uint8 s, uint8 b) :
+		set{ s }, binding{ b }, size{ 0 }, packed{ false }
+	{ }
+}; // struct UniformBlock
+
+// Contains information about a push constant
+struct _EXPORT PushConstant final
+{
+	string name;
+	SVType type;
+	uint16 offset;
+
+	PushConstant(const string& name, SVType type, uint16 o) :
+		name{ name }, type{ type }, offset{ o }
+	{ }
+}; // struct PushConstant
+
+// Contains information about a specialization constant
+struct _EXPORT SpecConstant final
+{
+	string name;
+	SVType type;
+	uint8 index;
+	union
+	{
+		double f;   // The default floating point value
+		int64 si;   // The default signed integer value
+		uint64 ui;  // The default unsigned integer value
+	} default_value; // The default value for the spec constant
+
+	SpecConstant(const string& name, SVType type, uint8 i) :
+		name{ name }, type{ type }, index{ i }, default_value{ 0ull }
+	{ }
+}; // struct SpecConstant
 
 // Contains reflection information about a shader program
 class _EXPORT ReflectionInfo final

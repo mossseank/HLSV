@@ -72,4 +72,7 @@ inline string varstr(const char* const fmt, Args&&... args)
 	return string(buf, size_t(sz));
 }
 
+// Type size checking
+static_assert(sizeof(SVType::extra) == 2, "Invalid size for SVType::extra.");
+
 } // namespace hlsv
