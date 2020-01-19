@@ -85,6 +85,10 @@
 namespace hlsv
 {
 
+// ====================================================================================================================
+// == TYPE DECLARATIONS ==
+// ====================================================================================================================
+
 /* Integer Types */
 using uint8  = std::uint8_t;
 using uint16 = std::uint16_t;
@@ -98,6 +102,19 @@ using size_t = std::size_t;
 
 /* String */
 using string = std::string;
+
+// Forward declarations
+enum class CompilerStage;
+class CompilerError;
+class CompilerOptions;
+class Compiler;
+class ShaderType;
+class ReflectionInfo;
+
+
+// ====================================================================================================================
+// == Compiler Types ==
+// ====================================================================================================================
 
 // Represents a stage in the compiler pipeline
 enum class CompilerStage
@@ -138,12 +155,12 @@ public:
 	~CompilerError() { }
 }; // class CompilerError
 
-// Passes compilation options to the compile to control the compilation process
+// Passes compilation options to the compiler to control the compilation process
 class _EXPORT CompilerOptions final
 {
 public:
 	// Shader resource count and size limit information
-	struct Limits
+	struct Limits final
 	{
 		uint32 vertex_attrib_slots; // Max slots available for vertex attributes (default 16)
 		uint32 fragment_outputs;    // Max fragment output attachments (default 4)
@@ -153,27 +170,39 @@ public:
 		uint32 uniform_block_size;  // Maximum size in bytes of any uniform block (default 1024)
 		uint32 push_block_size;     // Maximum size in bytes of the push block (default 128)
 	};
-
-	// The default resource limits
-	static constexpr Limits DefaultLimits = { 16, 4, 8, 4, 8, 1024, 128 };
+	// Shader features
+	struct Features final
+	{
+		bool int16;   // Support 16-bit integers (default true)
+		bool int64;   // Support 64-bit integers (default true)
+		bool float64; // Support 64-bit floats (default true)
+	}; // struct Features
 
 public:
+	// The default resource limits
+	static constexpr Limits DefaultLimits { 16, 4, 8, 4, 8, 1024, 128 };
+	// The default shader features
+	static constexpr Features DefaultFeatures { true, true, true };
+	
 	bool generate_reflection; // If a reflection file should be generated
 	bool binary_reflection;   // If the generated reflection should use the binary format
 	bool keep_intermediate;   // If the intermediate GLSL files should be kept
+	string output_path;       // The override path for the spirv bytecode file
+	string reflection_path;   // The override path for the shader reflection file
 	Limits limits;            // The shader resource limits
+	Features features;  // The allowed shader features
 
 	CompilerOptions() :
 		generate_reflection{ false },
 		binary_reflection{ false },
 		keep_intermediate{ false },
-		limits{ DefaultLimits }
+		output_path{ "" },
+		reflection_path{ "" },
+		limits{ DefaultLimits },
+		features{ DefaultFeatures }
 	{ }
 	~CompilerOptions() { }
 }; // class CompilerOptions
-
-// Forward declaration
-class ReflectionInfo;
 
 // Core type for programmatically compiling HLSV shaders
 class _EXPORT Compiler final
@@ -209,7 +238,34 @@ private:
 		string reflection_path;
 		string output_path;
 	} paths_;
+
+	bool prepare_paths(const string& path, const CompilerOptions& options);
+
+	bool ERROR(CompilerStage stage, const string& msg, const string& path);
+	bool ERROR(CompilerStage stage, const string& msg, const string& bad, uint32 line, uint32 cpos);
 }; // class Compiler
+
+
+// ====================================================================================================================
+// == Reflection Types ==
+// ====================================================================================================================
+
+// Extra shader features (redeclare)
+using ShaderFeatures = CompilerOptions::Features;
+
+// Contains type information about an object for value in HLSV
+class _EXPORT ShaderType final
+{
+
+}; // class ShaderType
+
+// Contains reflection information about a shader program
+class _EXPORT ReflectionInfo final
+{
+public:
+	ReflectionInfo();
+	~ReflectionInfo();
+}; // class ReflectionInfo
 
 } // namespace hlsv
 
