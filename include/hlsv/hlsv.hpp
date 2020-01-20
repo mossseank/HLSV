@@ -159,6 +159,15 @@ public:
 		source{ "", 0, 0 }
 	{ }
 	~CompilerError() { }
+
+	CompilerError(const CompilerError& o) :
+		stage{ o.stage }, message{ o.message }, source{ o.source }
+	{ }
+	CompilerError& operator = (const CompilerError& o)
+	{
+		stage = o.stage; message = o.message; source = o.source;
+		return *this;
+	}
 }; // class CompilerError
 
 // Passes compilation options to the compiler to control the compilation process
@@ -192,7 +201,6 @@ public:
 	
 	bool generate_reflection; // If a reflection file should be generated
 	bool binary_reflection;   // If the generated reflection should use the binary format
-	bool keep_intermediate;   // If the intermediate GLSL files should be kept
 	string output_path;       // The override path for the spirv bytecode file
 	string reflection_path;   // The override path for the shader reflection file
 	Limits limits;            // The shader resource limits
@@ -201,7 +209,6 @@ public:
 	CompilerOptions() :
 		generate_reflection{ false },
 		binary_reflection{ false },
-		keep_intermediate{ false },
 		output_path{ "" },
 		reflection_path{ "" },
 		limits{ DefaultLimits },

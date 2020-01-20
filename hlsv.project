@@ -72,7 +72,7 @@ project "hlsv"
 			"cd %{cfg.buildtarget.directory} && "..
 			"mkdir tmp && cd tmp && "..
 			"mv ../libhlsv.a . && ar -x libhlsv.a && "..
-			"cp ../../../../../libs/%{cfg.system}/libantlr4-runtime-static.a . && "..
+			"cp ../../../../libs/%{cfg.system}/libantlr4-runtime-static.a . && "..
 			"ar -x libantlr4-runtime-static.a && ar -rcs ../libhlsv.a *.o && "..
 			"cd .. && rm -rf tmp/"
 		}

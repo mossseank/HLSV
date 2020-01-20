@@ -9,9 +9,25 @@
  */
 
 #include "hlsv-priv.hpp"
+#include "visitor/error_listener.hpp"
+#include "visitor/visitor.hpp"
+#include <antlr/ANTLRInputStream.h>
+#include <antlr/CommonTokenStream.h>
+#include "../generated/HLSV.h"
+#include "../generated/HLSVLexer.h"
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 
 namespace fs = std::filesystem;
+namespace a4 = antlr4;
+
+#ifdef HLSV_MSVC
+	// It never sees reflect_ change, so it complains about dereferencing a null pointer that isnt actually null
+#	pragma warning( disable : 6011 )
+#endif // HLSV_MSVC
+
+#define SET_ERR(stage,...) last_error_.reset(new CompilerError(CompilerStage::stage, ##__VA_ARGS__));
 
 
 namespace hlsv
@@ -43,6 +59,55 @@ bool Compiler::compile_file(const string& path, const CompilerOptions& options)
 	// Setup filepaths
 	if (!prepare_paths(path, options)) return false;
 
+	// Read in the contents of the sourcefile
+	const string source = ([](const string& path) -> string {
+		std::ifstream file{ path, std::ios::in };
+		if (!file.is_open()) {
+			return "<ERROR>";
+		}
+		std::stringstream ss;
+		ss << file.rdbuf();
+		return ss.str();
+	})(paths_.input_path);
+	if (source == "<ERROR>") {
+		SET_ERR(FileRead, "Input file could not be opened.");
+		return false;
+	}
+
+	// Base ANTLR parse objects
+	a4::ANTLRInputStream inputStream{ source };
+	grammar::HLSVLexer lexer{ &inputStream };
+	a4::CommonTokenStream tokens{ &lexer };
+	grammar::HLSV parser{ &tokens };
+
+	// Custom listener registration
+	ErrorListener listener{};
+	lexer.removeErrorListeners();
+	parser.removeErrorListeners();
+	lexer.addErrorListener(&listener);
+	parser.addErrorListener(&listener);
+
+	// Perform lexing and parsing
+	auto fileCtx = parser.file();
+	if (listener.has_error()) {
+		last_error_ = std::move(listener.last_error);
+		return false;
+	}
+
+	// Visit the source tree
+	reflection_.reset();
+	Visitor visitor{ &options, &reflection_, &tokens };
+	try {
+		auto res = visitor.visit(fileCtx);
+	}
+	catch (const VisitError& ve) {
+		last_error_.reset(new CompilerError{ ve.error });
+		reflection_.reset();
+		return false;
+	}
+
+	// No errors
+	last_error_.reset();
 	return true;
 }
 
