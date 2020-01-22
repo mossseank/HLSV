@@ -15,7 +15,10 @@ namespace hlsv
 {
 
 // ====================================================================================================================
-ReflectionInfo::ReflectionInfo()
+ReflectionInfo::ReflectionInfo(PipelineType type, uint32 tv, uint32 sv) :
+	type{ type },
+	tool_version{ tv },
+	shader_version{ sv }
 {
 
 }

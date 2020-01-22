@@ -266,7 +266,7 @@ private:
 // Extra shader features (redeclare)
 using ShaderFeatures = CompilerOptions::Features;
 
-// The types of shader pipeline (acts as a bitset)
+// The types of shader pipeline
 enum class PipelineType : uint8
 {
 	Graphics = 0, // Standard graphics pipeline
@@ -482,7 +482,11 @@ struct _EXPORT SpecConstant final
 class _EXPORT ReflectionInfo final
 {
 public:
-	ReflectionInfo();
+	PipelineType type;
+	uint32 tool_version;
+	uint32 shader_version;
+
+	ReflectionInfo(PipelineType type, uint32 tv, uint32 sv);
 	~ReflectionInfo();
 }; // class ReflectionInfo
 

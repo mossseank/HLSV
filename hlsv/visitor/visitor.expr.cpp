@@ -5,110 +5,130 @@
  */
 
 /*
- * Implements the general class members and file-level visit functions for the visitor.
+ * Implements the expression-type syntax nodes in the Visitor.
  */
 
 #include "visitor.hpp"
 
 #ifdef HLSV_MSVC
-	// Ignoring the return value of visit(...)
+ // Ignoring the return value of visit(...)
 #	pragma warning( disable : 26444 )
 #endif // HLSV_MSVC
-
 
 
 namespace hlsv
 {
 
 // ====================================================================================================================
-Visitor::Visitor(const CompilerOptions* opt, std::unique_ptr<ReflectionInfo>* refl, antlr4::CommonTokenStream* ts) :
-	options_{ opt },
-	reflect_{ refl },
-	scopes_{ new ScopeTree },
-	tokens_{ ts }
-{
-
-}
-
-// ====================================================================================================================
-Visitor::~Visitor()
-{
-
-}
-
-// ====================================================================================================================
-VISIT_DEF(File)
-{
-	// Shader statement must be first
-	visit(ctx->shaderVersionStatement());
-
-	return nullptr;
-}
-
-// ====================================================================================================================
-VISIT_DEF(ShaderVersionStatement)
-{
-	// Extract version
-	uint32 ver = std::atoi(ctx->VERSION_LITERAL()->getText().c_str());
-	if (ver > HLSV_VERSION) {
-		ERROR(ctx, varstr("Current tool version (%u) cannot compile shader version %u.", HLSV_VERSION, ver));
-	}
-
-	// Check type
-	if (ctx->KW_COMPUTE()) {
-		ERROR(ctx, "Compute shaders are not yet supported.");
-	}
-
-	// Create reflection info
-	reflect_->reset(new ReflectionInfo(PipelineType::Graphics, HLSV_VERSION, ver));
-
-	return nullptr;
-}
-
-// ====================================================================================================================
-VISIT_DEF(VertexAttributeStatement)
+VISIT_DEF(PostfixExpr)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(FragmentOutputStatement)
+VISIT_DEF(PrefixExpr)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(LocalStatement)
+VISIT_DEF(FactorExpr)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(UniformStatement)
+VISIT_DEF(NegateExpr)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(PushConstantsStatement)
+VISIT_DEF(MulDivModExpr)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(ConstantStatement)
+VISIT_DEF(AddSubExpr)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(VertFunction)
+VISIT_DEF(BitShiftExpr)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(FragFunction)
+VISIT_DEF(RelationalExpr)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(EqualityExpr)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(BitLogicExpr)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(BoolLogicExpr)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(TernaryExpr)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(ParenAtom)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(ArrayIndexerAtom)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(SwizzleAtom)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(InitializerList)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(FunctionCall)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(VariableAtom)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(ScalarLiteral)
 {
 	return new Expr(SVType::PrimType::Void);
 }

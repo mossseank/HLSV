@@ -63,6 +63,51 @@ public:
 		auto tk = tokens_->get(node->getSourceInterval().a);
 		throw VisitError(CompilerStage::Parse, msg, (uint32)tk->getLine(), (uint32)tk->getCharPositionInLine(), node->getText());
 	}
+
+	// File-Level
+	VISIT_DECL(File)
+	VISIT_DECL(ShaderVersionStatement)
+	VISIT_DECL(VertexAttributeStatement)
+	VISIT_DECL(FragmentOutputStatement)
+	VISIT_DECL(LocalStatement)
+	VISIT_DECL(UniformStatement)
+	VISIT_DECL(PushConstantsStatement)
+	VISIT_DECL(ConstantStatement)
+	VISIT_DECL(VertFunction)
+	VISIT_DECL(FragFunction)
+
+	// Statements
+	VISIT_DECL(VariableDeclaration)
+	VISIT_DECL(VariableDefinition)
+	VISIT_DECL(Assignment)
+	VISIT_DECL(Lvalue)
+	VISIT_DECL(IfStatement)
+	VISIT_DECL(WhileLoop)
+	VISIT_DECL(DoLoop)
+	VISIT_DECL(ForLoop)
+	VISIT_DECL(ForLoopUpdate)
+	VISIT_DECL(ControlStatement)
+
+	// Expressions
+	VISIT_DECL(PostfixExpr)
+	VISIT_DECL(PrefixExpr)
+	VISIT_DECL(FactorExpr)
+	VISIT_DECL(NegateExpr)
+	VISIT_DECL(MulDivModExpr)
+	VISIT_DECL(AddSubExpr)
+	VISIT_DECL(BitShiftExpr)
+	VISIT_DECL(RelationalExpr)
+	VISIT_DECL(EqualityExpr)
+	VISIT_DECL(BitLogicExpr)
+	VISIT_DECL(BoolLogicExpr)
+	VISIT_DECL(TernaryExpr)
+	VISIT_DECL(ParenAtom)
+	VISIT_DECL(ArrayIndexerAtom)
+	VISIT_DECL(SwizzleAtom)
+	VISIT_DECL(InitializerList)
+	VISIT_DECL(FunctionCall)
+	VISIT_DECL(VariableAtom)
+	VISIT_DECL(ScalarLiteral)
 };
 
 } // namespace hlsv

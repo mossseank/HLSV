@@ -5,110 +5,76 @@
  */
 
 /*
- * Implements the general class members and file-level visit functions for the visitor.
+ * Implements the statement-type syntax nodes in the Visitor.
  */
 
 #include "visitor.hpp"
 
 #ifdef HLSV_MSVC
-	// Ignoring the return value of visit(...)
+ // Ignoring the return value of visit(...)
 #	pragma warning( disable : 26444 )
 #endif // HLSV_MSVC
-
 
 
 namespace hlsv
 {
 
 // ====================================================================================================================
-Visitor::Visitor(const CompilerOptions* opt, std::unique_ptr<ReflectionInfo>* refl, antlr4::CommonTokenStream* ts) :
-	options_{ opt },
-	reflect_{ refl },
-	scopes_{ new ScopeTree },
-	tokens_{ ts }
-{
-
-}
-
-// ====================================================================================================================
-Visitor::~Visitor()
-{
-
-}
-
-// ====================================================================================================================
-VISIT_DEF(File)
-{
-	// Shader statement must be first
-	visit(ctx->shaderVersionStatement());
-
-	return nullptr;
-}
-
-// ====================================================================================================================
-VISIT_DEF(ShaderVersionStatement)
-{
-	// Extract version
-	uint32 ver = std::atoi(ctx->VERSION_LITERAL()->getText().c_str());
-	if (ver > HLSV_VERSION) {
-		ERROR(ctx, varstr("Current tool version (%u) cannot compile shader version %u.", HLSV_VERSION, ver));
-	}
-
-	// Check type
-	if (ctx->KW_COMPUTE()) {
-		ERROR(ctx, "Compute shaders are not yet supported.");
-	}
-
-	// Create reflection info
-	reflect_->reset(new ReflectionInfo(PipelineType::Graphics, HLSV_VERSION, ver));
-
-	return nullptr;
-}
-
-// ====================================================================================================================
-VISIT_DEF(VertexAttributeStatement)
+VISIT_DEF(VariableDeclaration)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(FragmentOutputStatement)
+VISIT_DEF(VariableDefinition)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(LocalStatement)
+VISIT_DEF(Assignment)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(UniformStatement)
+VISIT_DEF(Lvalue)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(PushConstantsStatement)
+VISIT_DEF(IfStatement)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(ConstantStatement)
+VISIT_DEF(WhileLoop)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(VertFunction)
+VISIT_DEF(DoLoop)
 {
 	return new Expr(SVType::PrimType::Void);
 }
 
 // ====================================================================================================================
-VISIT_DEF(FragFunction)
+VISIT_DEF(ForLoop)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(ForLoopUpdate)
+{
+	return new Expr(SVType::PrimType::Void);
+}
+
+// ====================================================================================================================
+VISIT_DEF(ControlStatement)
 {
 	return new Expr(SVType::PrimType::Void);
 }
