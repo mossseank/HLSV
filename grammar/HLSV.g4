@@ -11,6 +11,12 @@ options {
     tokenVocab=HLSVLexer;
 }
 
+@header {
+    #ifdef _MSC_VER
+    #   pragma warning( disable : 4996 ) // Disable deprecation warnings for ANTLR generated code
+    #endif // _MSC_VER
+}
+
 // Top-level file unit
 file
     : shaderVersionStatement topLevelStatement* EOF

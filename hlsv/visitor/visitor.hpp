@@ -12,9 +12,12 @@
 
 #include "../hlsv-priv.hpp"
 #include "expr.hpp"
+#include <stdexcept>
+
+#include "../pre-antlr.hpp"
 #include "../../generated/HLSVBaseVisitor.h"
 #include <antlr/CommonTokenStream.h>
-#include <stdexcept>
+#include "../post-antlr.hpp"
 
 #define VISIT_DECL(vtype) antlrcpp::Any visit##vtype(grammar::HLSV::vtype##Context* ctx) override;
 

@@ -8,6 +8,12 @@
 
 lexer grammar HLSVLexer;
 
+@header {
+    #ifdef _MSC_VER
+    #   pragma warning( disable : 4996 ) // Disable deprecation warnings for ANTLR generated code
+    #endif // _MSC_VER
+}
+
 // Boolean literals
 BOOLEAN_LITERAL
     : ('true' | 'false')

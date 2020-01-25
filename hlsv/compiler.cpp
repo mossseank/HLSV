@@ -11,21 +11,19 @@
 #include "hlsv-priv.hpp"
 #include "visitor/error_listener.hpp"
 #include "visitor/visitor.hpp"
-#include <antlr/ANTLRInputStream.h>
-#include <antlr/CommonTokenStream.h>
-#include "../generated/HLSV.h"
-#include "../generated/HLSVLexer.h"
 #include <filesystem>
 #include <fstream>
 #include <sstream>
 
+#include "pre-antlr.hpp"
+#include <antlr/ANTLRInputStream.h>
+#include <antlr/CommonTokenStream.h>
+#include "../generated/HLSV.h"
+#include "../generated/HLSVLexer.h"
+#include "post-antlr.hpp"
+
 namespace fs = std::filesystem;
 namespace a4 = antlr4;
-
-#ifdef HLSV_MSVC
-	// It never sees reflect_ change, so it complains about dereferencing a null pointer that isnt actually null
-#	pragma warning( disable : 6011 )
-#endif // HLSV_MSVC
 
 #define SET_ERR(stage,...) last_error_.reset(new CompilerError(CompilerStage::stage, ##__VA_ARGS__));
 

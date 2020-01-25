@@ -325,14 +325,14 @@ public:
 		Tex2D         = 129, // Dim-2 combined image/sampler (tex2D)
 		Tex3D         = 130, // Dim-3 combined image/sampler (tex3D)
 		TexCube       = 131, // Cube-mapped combined image/sampler (texCube)
-		Tex1DArray    = 132, // Array of dim-1 combined image/samplers (tex1DArray)
-		Tex2DArray    = 133, // Array of dim-2 combined image/samplers (tex2DArray)
+		Tex1DArray    = 132, // Array of dim-1 combined image/samplers (tex1DA)
+		Tex2DArray    = 133, // Array of dim-2 combined image/samplers (tex2DA)
 		Img1D         = 134, // Dim-1 storage image (img1D)
 		Img2D         = 135, // Dim-2 storage image (img2D)
 		Img3D         = 136, // Dim-3 storage image (img3D)
-		Img1DArray    = 137, // Array of dim-1 storage images (img1DArray)
-		Img2DArray    = 138, // Array of dim-2 storage images (img2DArray)
-		SubpassBuffer = 139, // Vulkan subpass input texture resource (spBuffer)
+		Img1DArray    = 137, // Array of dim-1 storage images (img1DA)
+		Img2DArray    = 138, // Array of dim-2 storage images (img2DA)
+		SubpassFrame  = 139, // Vulkan subpass input texture resource (frame)
 	}; // enum PrimType
 
 public:
@@ -340,7 +340,7 @@ public:
 	uint8 dims[2];     // The dimensions of the backing type (value types only)
 	union
 	{
-		uint16 spi_index; // The subpass input index of the type (if prim == SubpassBuffer)
+		uint16 spf_index; // The subpass input index of the type (if prim == SubpassFrame)
 		struct
 		{
 			PrimType prim;
@@ -361,22 +361,22 @@ public:
 
 	constexpr inline bool operator == (const SVType& o) const {
 		return (prim == o.prim) && (dims[0] == o.dims[0]) && (dims[1] == o.dims[1]) &&
-			   (array_size == o.array_size) && (extra.spi_index == o.extra.spi_index);
+			   (array_size == o.array_size) && (extra.spf_index == o.extra.spf_index);
 	}
 	constexpr inline bool operator != (const SVType& o) const {
 		return (prim != o.prim) || (dims[0] != o.dims[0]) || (dims[1] != o.dims[1]) ||
-			   (array_size != o.array_size) || (extra.spi_index != o.extra.spi_index);
+			   (array_size != o.array_size) || (extra.spf_index != o.extra.spf_index);
 	}
 
 	inline bool is_void() const { return prim == PrimType::Void; }
 	inline bool is_value() const { return prim >= PrimType::Bool && prim <= PrimType::Double; }
-	inline bool is_handle() const { return prim >= PrimType::Tex1D && prim <= PrimType::SubpassBuffer; }
+	inline bool is_handle() const { return prim >= PrimType::Tex1D && prim <= PrimType::SubpassFrame; }
 	inline bool is_scalar() const { return is_value() && dims[0] == 1 && dims[1] == 1; }
 	inline bool is_vector() const { return is_value() && dims[0] > 1 && dims[1] == 1; }
 	inline bool is_matrix() const { return is_value() && dims[0] > 1 && dims[1] > 1; }
 	inline bool is_texture() const { return prim >= PrimType::Tex1D && prim <= PrimType::Tex2DArray; }
 	inline bool is_image() const { return prim >= PrimType::Img1D && prim <= PrimType::Img2DArray; }
-	inline bool is_subpass_buffer() const { return prim == PrimType::SubpassBuffer; }
+	inline bool is_subpass_frame() const { return prim == PrimType::SubpassFrame; }
 	inline bool is_integer() const { return prim >= PrimType::Short && prim <= PrimType::ULong; }
 	inline bool is_fpoint() const { return prim == PrimType::Float || prim == PrimType::Double; }
 	inline bool is_boolean() const { return prim == PrimType::Bool; }
@@ -390,8 +390,84 @@ public:
 	inline uint8 get_component_count() const { return (uint8)(dims[0] * dims[1]); }
 	inline uint16 get_slot_count() const { return (uint16)(dims[1] * ((get_row_size() > 16) ? 2 : 1) * ((array_size == 0) ? 1 : array_size)); }
 
-	string str() const;
+	inline SVType as_array(uint16 size) const { return SVType{ prim, dims[0], dims[1], size }; }
+	inline SVType with_spf_index(uint16 index) const { auto copy = *this; copy.extra.spf_index = index; return copy; }
+	inline SVType with_format(PrimType prim, uint8 count) const { auto copy = *this; copy.extra.format = { prim, count }; return copy; }
 }; // struct SVType
+
+// Contains the set of core, non-array SVTypes. Note that StorageImage and SPFrame types are incomplete.
+class _EXPORT SVTypes final
+{
+public:
+	static constexpr SVType Void    { SVType::PrimType::Void, 0, 0, 0 };
+	static constexpr SVType Bool    { SVType::PrimType::Bool, 1, 1, 0 };
+	static constexpr SVType Bool2   { SVType::PrimType::Bool, 2, 1, 0 };
+	static constexpr SVType Bool3   { SVType::PrimType::Bool, 3, 1, 0 };
+	static constexpr SVType Bool4   { SVType::PrimType::Bool, 4, 1, 0 };
+	static constexpr SVType Short   { SVType::PrimType::Short, 1, 1, 0 };
+	static constexpr SVType Short2  { SVType::PrimType::Short, 2, 1, 0 };
+	static constexpr SVType Short3  { SVType::PrimType::Short, 3, 1, 0 };
+	static constexpr SVType Short4  { SVType::PrimType::Short, 4, 1, 0 };
+	static constexpr SVType UShort  { SVType::PrimType::UShort, 1, 1, 0 };
+	static constexpr SVType UShort2 { SVType::PrimType::UShort, 2, 1, 0 };
+	static constexpr SVType UShort3 { SVType::PrimType::UShort, 3, 1, 0 };
+	static constexpr SVType UShort4 { SVType::PrimType::UShort, 4, 1, 0 };
+	static constexpr SVType Int     { SVType::PrimType::Int, 1, 1, 0 };
+	static constexpr SVType Int2    { SVType::PrimType::Int, 2, 1, 0 };
+	static constexpr SVType Int3    { SVType::PrimType::Int, 3, 1, 0 };
+	static constexpr SVType Int4    { SVType::PrimType::Int, 4, 1, 0 };
+	static constexpr SVType UInt    { SVType::PrimType::UInt, 1, 1, 0 };
+	static constexpr SVType UInt2   { SVType::PrimType::UInt, 2, 1, 0 };
+	static constexpr SVType UInt3   { SVType::PrimType::UInt, 3, 1, 0 };
+	static constexpr SVType UInt4   { SVType::PrimType::UInt, 4, 1, 0 };
+	static constexpr SVType Long    { SVType::PrimType::Long, 1, 1, 0 };
+	static constexpr SVType Long2   { SVType::PrimType::Long, 2, 1, 0 };
+	static constexpr SVType Long3   { SVType::PrimType::Long, 3, 1, 0 };
+	static constexpr SVType Long4   { SVType::PrimType::Long, 4, 1, 0 };
+	static constexpr SVType ULong   { SVType::PrimType::ULong, 1, 1, 0 };
+	static constexpr SVType ULong2  { SVType::PrimType::ULong, 2, 1, 0 };
+	static constexpr SVType ULong3  { SVType::PrimType::ULong, 3, 1, 0 };
+	static constexpr SVType ULong4  { SVType::PrimType::ULong, 4, 1, 0 };
+	static constexpr SVType Float   { SVType::PrimType::Float, 1, 1, 0 };
+	static constexpr SVType Float2  { SVType::PrimType::Float, 2, 1, 0 };
+	static constexpr SVType Float3  { SVType::PrimType::Float, 3, 1, 0 };
+	static constexpr SVType Float4  { SVType::PrimType::Float, 4, 1, 0 };
+	static constexpr SVType Double  { SVType::PrimType::Double, 1, 1, 0 };
+	static constexpr SVType Double2 { SVType::PrimType::Double, 2, 1, 0 };
+	static constexpr SVType Double3 { SVType::PrimType::Double, 3, 1, 0 };
+	static constexpr SVType Double4 { SVType::PrimType::Double, 4, 1, 0 };
+	static constexpr SVType FMat2x2 { SVType::PrimType::Float, 2, 2, 0 };
+	static constexpr SVType FMat2x3 { SVType::PrimType::Float, 2, 3, 0 };
+	static constexpr SVType FMat2x4 { SVType::PrimType::Float, 2, 4, 0 };
+	static constexpr SVType FMat3x2 { SVType::PrimType::Float, 3, 2, 0 };
+	static constexpr SVType FMat3x3 { SVType::PrimType::Float, 3, 3, 0 };
+	static constexpr SVType FMat3x4 { SVType::PrimType::Float, 3, 4, 0 };
+	static constexpr SVType FMat4x2 { SVType::PrimType::Float, 4, 2, 0 };
+	static constexpr SVType FMat4x3 { SVType::PrimType::Float, 4, 3, 0 };
+	static constexpr SVType FMat4x4 { SVType::PrimType::Float, 4, 4, 0 };
+	static constexpr SVType DMat2x2 { SVType::PrimType::Double, 2, 2, 0 };
+	static constexpr SVType DMat2x3 { SVType::PrimType::Double, 2, 3, 0 };
+	static constexpr SVType DMat2x4 { SVType::PrimType::Double, 2, 4, 0 };
+	static constexpr SVType DMat3x2 { SVType::PrimType::Double, 3, 2, 0 };
+	static constexpr SVType DMat3x3 { SVType::PrimType::Double, 3, 3, 0 };
+	static constexpr SVType DMat3x4 { SVType::PrimType::Double, 3, 4, 0 };
+	static constexpr SVType DMat4x2 { SVType::PrimType::Double, 4, 2, 0 };
+	static constexpr SVType DMat4x3 { SVType::PrimType::Double, 4, 3, 0 };
+	static constexpr SVType DMat4x4 { SVType::PrimType::Double, 4, 4, 0 };
+
+	static constexpr SVType Tex1D        { SVType::PrimType::Tex1D };
+	static constexpr SVType Tex2D        { SVType::PrimType::Tex2D };
+	static constexpr SVType Tex3D        { SVType::PrimType::Tex3D };
+	static constexpr SVType TexCube      { SVType::PrimType::TexCube };
+	static constexpr SVType Tex1DArray   { SVType::PrimType::Tex1DArray };
+	static constexpr SVType Tex2DArray   { SVType::PrimType::Tex2DArray };
+	static constexpr SVType Img1D        { SVType::PrimType::Img1D };
+	static constexpr SVType Img2D        { SVType::PrimType::Img2D };
+	static constexpr SVType Img3D        { SVType::PrimType::Img3D };
+	static constexpr SVType Img1DArray   { SVType::PrimType::Img1DArray };
+	static constexpr SVType Img2DArray   { SVType::PrimType::Img2DArray };
+	static constexpr SVType SubpassFrame { SVType::PrimType::SubpassFrame };
+}; // class SVTypes
 
 // Contains information about a vertex attribute in a shader
 struct _EXPORT Attribute final

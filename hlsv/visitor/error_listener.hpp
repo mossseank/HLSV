@@ -11,7 +11,10 @@
 #pragma once
 
 #include "../hlsv-priv.hpp"
+
+#include "../pre-antlr.hpp"
 #include <antlr/BaseErrorListener.h>
+#include "../post-antlr.hpp"
 
 
 namespace hlsv
