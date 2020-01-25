@@ -62,6 +62,9 @@ VISIT_DEF(ShaderVersionStatement)
 	// Create reflection info
 	reflect_->reset(new ReflectionInfo(PipelineType::Graphics, HLSV_VERSION, ver));
 
+	// Setup builtins
+	scopes_->populateBuiltins(PipelineType::Graphics);
+
 	return nullptr;
 }
 

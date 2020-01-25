@@ -393,6 +393,9 @@ public:
 	inline SVType as_array(uint16 size) const { return SVType{ prim, dims[0], dims[1], size }; }
 	inline SVType with_spf_index(uint16 index) const { auto copy = *this; copy.extra.spf_index = index; return copy; }
 	inline SVType with_format(PrimType prim, uint8 count) const { auto copy = *this; copy.extra.format = { prim, count }; return copy; }
+
+	string hlsv_str() const; // HLSV string describing the type
+	string glsl_str() const; // GLSL string describing the type
 }; // struct SVType
 
 // Contains the set of core, non-array SVTypes. Note that StorageImage and SPFrame types are incomplete.

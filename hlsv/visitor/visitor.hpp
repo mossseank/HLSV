@@ -12,6 +12,7 @@
 
 #include "../hlsv-priv.hpp"
 #include "expr.hpp"
+#include "scope/scope_tree.hpp"
 #include <stdexcept>
 
 #include "../pre-antlr.hpp"
@@ -49,6 +50,7 @@ class Visitor final :
 private:
 	const CompilerOptions* options_;
 	std::unique_ptr<ReflectionInfo>* reflect_;
+	std::unique_ptr<ScopeTree> scopes_;
 	antlr4::CommonTokenStream* tokens_;
 
 public:
